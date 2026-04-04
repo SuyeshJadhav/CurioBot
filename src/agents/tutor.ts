@@ -1,8 +1,8 @@
-import { getModel } from "../lib/gemini";
-import { AgentState } from "../types";
+import { ai } from "../lib/gemini";
+import { AgentStateType } from "../types";
 
 export async function tutorAgent(
-  state: AgentState,
+  state: AgentStateType,
   question: string,
 ): Promise<string> {
   const systemInstruction = `You are an expert tutor who just taught the user about "${state.currentTopic?.title}".
@@ -18,15 +18,21 @@ export async function tutorAgent(
 	- Keep responses conversational, not lecture-y
 	`;
 
-  const model = getModel(systemInstruction);
+  // const model = getModel(systemInstruction);
 
-  const chat = model.startChat({
+  const chat = ai.chats.create({
+    model: "gemini-3.1-flash-lite-preview",
+    config: {
+      systemInstruction: systemInstruction,
+    },
     history: state.conversationHistory.map((msg) => ({
       role: msg.role === "assistant" ? "model" : "user",
       parts: [{ text: msg.content }],
     })),
   });
 
-  const result = await chat.sendMessage(question);
-  return result.response.text();
+  const result = await chat.sendMessage({
+    message: question,
+  })
+  return result.text || "";
 }

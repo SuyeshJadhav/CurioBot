@@ -1,3 +1,12 @@
+import { Annotation } from '@langchain/langgraph'
+
+export interface SearchResult {
+  title: string;
+  url: string;
+  content: string;
+  score: number;
+}
+
 export interface Topic {
   id: string;
   title: string;
@@ -12,10 +21,22 @@ export interface Message {
   content: string;
 }
 
-export interface AgentState {
-  interests: string[];
-  seenTopics: string[];
-  currentTopic?: Topic | null;
-  article?: string;
-  conversationHistory: Message[];
-}
+export const AgentState = Annotation.Root({
+  interests: Annotation<string[]>(),
+  seenTopics: Annotation<string[]>({
+    reducer: (currentState, incomingState) => currentState.concat(incomingState),
+    default: () => []
+  }),
+  currentTopic: Annotation<Topic | undefined>(),
+  research: Annotation<SearchResult[]>({
+    reducer: (currentState, incomingState) => currentState.concat(incomingState),
+    default: () => []
+  }),
+  article: Annotation<string | undefined>(),
+  conversationHistory: Annotation<Message[]>({
+    reducer: (currentState, incomingState) => currentState.concat(incomingState),
+    default: () => []
+  })
+})
+
+export type AgentStateType = typeof AgentState.State

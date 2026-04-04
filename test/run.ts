@@ -1,10 +1,9 @@
 import * as readline from "readline";
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env" });
+import "dotenv/config";
 
-import { supervisorAgent } from "../src/agents/supervisor";
 import { tutorAgent } from "../src/agents/tutor";
 import { defaultInterests } from "../src/data/interests";
+import { supervisorAgent } from "../src/agents/supervisor";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,9 +14,9 @@ const ask = (prompt: string): Promise<string> =>
   new Promise((resolve) => rl.question(prompt, resolve));
 
 async function main() {
-  console.log("\n╔══════════════════════════════════════╗");
+  console.log("\n╔═══════════════════════════════════════╗");
   console.log("║     🧠 CurioBot — Curiosity Engine    ║");
-  console.log("╚══════════════════════════════════════╝");
+  console.log("╚═══════════════════════════════════════╝");
 
   const state = await supervisorAgent(defaultInterests);
   const topic = state.currentTopic!;
