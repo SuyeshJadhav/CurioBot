@@ -66,7 +66,7 @@ Start searching now.`;
 		const candidate = response.candidates?.[0];
 		if (!candidate || !candidate.content) break;
 
-		conversationHistory.push({ role: "model", parts: candidate.content.parts });
+		conversationHistory.push(candidate.content);
 
 		const parts = candidate.content.parts;
 		const toolCallPart = parts?.find((p: any) => p.functionCall);

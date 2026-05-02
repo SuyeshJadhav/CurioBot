@@ -32,6 +32,10 @@ export const AgentState = Annotation.Root({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),
     default: () => []
   }),
+  wikiResearch: Annotation<string[]>({
+    reducer: (currentState, incomingState) => currentState.concat(incomingState),
+    default: () => []
+  }),
   article: Annotation<string | undefined>(),
   conversationHistory: Annotation<Message[]>({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),

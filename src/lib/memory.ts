@@ -26,7 +26,7 @@ export async function getInterests(): Promise<{ interest: string }[]> {
 export async function addSeenTopic(title: string, summary: string) {
 	const vector = await generateEmbedding(`${title}\n${summary}`);
 	const { error } = await supabase.from('seen_topics').insert({
-		title,
+		topic: title,
 		embedding: vector
 	});
 
