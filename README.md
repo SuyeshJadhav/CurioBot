@@ -12,7 +12,7 @@
 
   <br />
   <br />
-  <img src="assets/demo.png" alt="CurioBot Interface" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+  <img src="assets/image.png" alt="CurioBot Interface" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
 </div>
 
 ---
