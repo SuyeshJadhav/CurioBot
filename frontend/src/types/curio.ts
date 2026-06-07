@@ -78,6 +78,8 @@ export interface CurioState {
   user: User | null;
   token: string | null;
   activeTab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings';
+  isTutorOpen: boolean;
+  isMenuOpen: boolean;
 
   // ── Content State ──────────────────────────────────────────
   currentTopic: string | null;
@@ -119,6 +121,8 @@ export interface CurioContextType extends CurioState {
   register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
   changeTab: (tab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings') => void;
+  setTutorOpen: (open: boolean) => void;
+  setMenuOpen: (open: boolean) => void;
   
   sendMessage: (content: string) => Promise<void>;
   igniteQuest: (topic?: string, hint?: string) => Promise<void>;

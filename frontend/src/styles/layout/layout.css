@@ -42,7 +42,7 @@
 
 /* ---- Responsive: hide sidebars on mobile ---- */
 @media (max-width: 768px) {
-  .left-sidebar, .right-sidebar { display: none; }
+  .left-sidebar { display: none; }
   .mobile-bar { display: flex !important; }
   .main-content { margin-left: 0 !important; margin-right: 0 !important; }
 }

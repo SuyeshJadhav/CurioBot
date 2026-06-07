@@ -13,7 +13,7 @@ const DEFAULT_WIDTH = 320;
 const WIDTH_KEY = 'curio_sidebar_width';
 
 export function TutorSidebar() {
-  const { messages, isGeneratingChat, article, sendMessage } = useCurio();
+  const { messages, isGeneratingChat, article, sendMessage, isTutorOpen, setTutorOpen } = useCurio();
   const isChatReady = !!article;
 
   const sidebarRef = useRef<HTMLElement>(null);
@@ -40,6 +40,7 @@ export function TutorSidebar() {
   }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (window.innerWidth <= 768) return; // Disable resizing on mobile
     e.preventDefault();
     isDragging.current = true;
     startX.current = e.clientX;
@@ -69,13 +70,31 @@ export function TutorSidebar() {
   }, []);
 
   return (
-    <aside className="right-sidebar" ref={sidebarRef}>
-      <div className="sidebar-resize-handle" onMouseDown={onMouseDown} />
+    <>
+      {isTutorOpen && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={() => setTutorOpen(false)} 
+        />
+      )}
+      <aside className={`right-sidebar${isTutorOpen ? ' right-sidebar--open' : ''}`} ref={sidebarRef}>
+        <div className="sidebar-resize-handle" onMouseDown={onMouseDown} />
 
-      <div className="tutor-header">
-        <h3>The Tutor</h3>
-        <p>Interactive Guide</p>
-      </div>
+        <div className="tutor-header">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3>The Tutor</h3>
+              <p>Interactive Guide</p>
+            </div>
+            <button 
+              className="mobile-close-btn" 
+              onClick={() => setTutorOpen(false)}
+              aria-label="Close Chat"
+            >
+              <span className="material-symbols-outlined">{"close"}</span>
+            </button>
+          </div>
+        </div>
 
       <div className="chat-area" role="log" aria-live="polite" aria-label="Chat messages">
         {isChatReady ? (
@@ -109,6 +128,7 @@ export function TutorSidebar() {
       </div>
 
       <ChatInput onSend={sendMessage} disabled={!isChatReady || isGeneratingChat} />
-    </aside>
+      </aside>
+    </>
   );
 }

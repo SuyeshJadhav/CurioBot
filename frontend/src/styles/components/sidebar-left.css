@@ -426,3 +426,73 @@
 .recent-item:hover .recent-trash {
   opacity: 0.5;
 }
+
+/* ---- Mobile Layout for Left Sidebar (Slide-over Drawer) ---- */
+@media (max-width: 768px) {
+  .left-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 256px !important;
+    height: 100% !important;
+    z-index: 100 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #fdfcf8 !important; /* solid background */
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15) !important;
+    border-right: 1px solid #e5e9ec !important;
+  }
+
+  .left-sidebar.left-sidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Force elements to be expanded and visible in drawer on mobile,
+     regardless of desktop's collapsed setting in localStorage */
+  .sidebar-brand-name {
+    opacity: 1 !important;
+    max-width: 150px !important;
+    padding-left: 8px !important;
+    display: inline-block !important;
+  }
+
+  .nav-label {
+    width: 120px !important;
+    opacity: 1 !important;
+    margin-left: 10px !important;
+    display: inline-block !important;
+  }
+
+  .sidebar-history-section {
+    opacity: 1 !important;
+    max-height: 400px !important;
+  }
+
+  .sidebar-user-info {
+    width: 120px !important;
+    opacity: 1 !important;
+    margin-left: 10px !important;
+    display: flex !important;
+  }
+
+  .badge {
+    opacity: 1 !important;
+    max-width: 40px !important;
+    padding: 2px 6px !important;
+    margin-left: auto !important;
+  }
+
+  .section-label {
+    opacity: 1 !important;
+    max-height: 30px !important;
+    padding: 10px 0 4px !important;
+  }
+
+  .badge-dot {
+    margin-left: auto !important;
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+  }
+}

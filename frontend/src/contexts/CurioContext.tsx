@@ -46,6 +46,8 @@ const INITIAL_STATE: CurioState = {
   user: null,
   token: null,
   activeTab: 'home',
+  isTutorOpen: false,
+  isMenuOpen: false,
 
   currentTopic: null,
   article: null,
@@ -513,6 +515,14 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, activeCollectionId: id }));
   }, []);
 
+  const setTutorOpen = useCallback((open: boolean) => {
+    setState((prev) => ({ ...prev, isTutorOpen: open }));
+  }, []);
+
+  const setMenuOpen = useCallback((open: boolean) => {
+    setState((prev) => ({ ...prev, isMenuOpen: open }));
+  }, []);
+
   const clearSession = useCallback(() => {
     setState((prev) => ({
       ...INITIAL_STATE,
@@ -638,6 +648,8 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     addArticleToCollection,
     loadCollectionArticles,
     setActiveCollectionId,
+    setTutorOpen,
+    setMenuOpen,
     loadDailyWonder,
     generateDailyWonder,
     loadSettings,

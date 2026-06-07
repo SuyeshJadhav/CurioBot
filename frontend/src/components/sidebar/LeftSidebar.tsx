@@ -19,6 +19,8 @@ export function LeftSidebar() {
     logout,
     isGeneratingArticle,
     currentTopic,
+    isMenuOpen,
+    setMenuOpen,
   } = useCurio();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
@@ -39,8 +41,33 @@ export function LeftSidebar() {
 
   const toggle = useCallback(() => setCollapsed(p => !p), []);
 
+  const navigateTo = useCallback((tab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings') => {
+    changeTab(tab);
+    setMenuOpen(false);
+  }, [changeTab, setMenuOpen]);
+
+  const selectArticle = useCallback((id: string) => {
+    loadArticle(id);
+    setMenuOpen(false);
+  }, [loadArticle, setMenuOpen]);
+
+  const handleSignOut = useCallback(() => {
+    logout();
+    setMenuOpen(false);
+  }, [logout, setMenuOpen]);
+
   return (
-    <aside className={`left-sidebar${collapsed ? ' left-sidebar--collapsed' : ''}`} style={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}>
+    <>
+      {isMenuOpen && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={() => setMenuOpen(false)} 
+        />
+      )}
+      <aside 
+        className={`left-sidebar${collapsed ? ' left-sidebar--collapsed' : ''}${isMenuOpen ? ' left-sidebar--open' : ''}`} 
+        style={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
+      >
       
       {/* ── Top Brand and Toggle ────────────────────────────── */}
       <div className="sidebar-top">
@@ -75,7 +102,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'home' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('home'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('home'); }}
           title="Home"
         >
           <i className="ti ti-home"></i>
@@ -86,7 +113,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'discover' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('discover'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('discover'); }}
           title="Discover"
         >
           <i className="ti ti-sparkles"></i>
@@ -98,7 +125,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'search' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('search'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('search'); }}
           title="Search"
         >
           <i className="ti ti-search"></i>
@@ -114,7 +141,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'library' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('library'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('library'); }}
           title="Library"
         >
           <i className="ti ti-books"></i>
@@ -126,7 +153,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'interests' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('interests'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('interests'); }}
           title="My interests"
         >
           <i className="ti ti-adjustments-horizontal"></i>
@@ -162,7 +189,7 @@ export function LeftSidebar() {
                   </div>
                 )}
                 {history.slice(0, 4).map((entry) => (
-                  <div key={entry.id} className="recent-item" onClick={() => loadArticle(entry.id)}>
+                  <div key={entry.id} className="recent-item" onClick={() => selectArticle(entry.id)}>
                     <i className="ti ti-file-text" style={{ fontSize: '13px', flexShrink: 0 }} aria-hidden="true"></i>
                     <span>{entry.topic}</span>
                     <i 
@@ -187,7 +214,7 @@ export function LeftSidebar() {
         <a 
           className={`nav-item${activeTab === 'settings' ? ' active' : ''}`}
           href="#"
-          onClick={(e) => { e.preventDefault(); changeTab('settings'); }}
+          onClick={(e) => { e.preventDefault(); navigateTo('settings'); }}
           title="Settings"
           style={{ marginBottom: '8px' }}
         >
@@ -214,7 +241,7 @@ export function LeftSidebar() {
         {/* Logout Button */}
         <button 
           className="nav-item" 
-          onClick={logout}
+          onClick={handleSignOut}
           title="Sign Out"
           style={{ 
             border: 'none', 
@@ -229,5 +256,6 @@ export function LeftSidebar() {
       </div>
 
     </aside>
+    </>
   );
 }
