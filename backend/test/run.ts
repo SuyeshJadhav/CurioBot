@@ -18,7 +18,7 @@ async function main() {
   console.log("║     🧠 CurioBot — Curiosity Engine    ║");
   console.log("╚═══════════════════════════════════════╝");
 
-  const state = await supervisorAgent(defaultInterests);
+  const state = await supervisorAgent(defaultInterests, "1789f323-cbda-4e6c-aea5-644371a71733");
   const topic = state.currentTopic!;
 
   console.log("\n" + "═".repeat(60));

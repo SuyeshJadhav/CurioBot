@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@google/genai": "^1.48.0",
-    "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^1.1.44",
     "@langchain/langgraph": "^1.2.9",
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -12,17 +11,24 @@
     "express": "^4.21.2",
     "langchain": "^1.2.39",
     "ts-node": "^10.9.2",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "wikipedia": "^2.1.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.3",
     "@types/node": "^25.5.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^1.1.5",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^2.0.12"
   },
   "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
     "agent": "tsx test/run.ts",
     "server": "tsx server.ts",
+    "start": "tsx server.ts",
     "dev": "tsx --watch server.ts"
   }
 }

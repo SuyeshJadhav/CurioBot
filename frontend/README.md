@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# 🌟 CurioBot Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend of CurioBot is a modern, single-page application built with React 19, TypeScript, and Vite. It implements a whimsical **Pastel Journal** visual aesthetic (warm cream backgrounds, soft shadows, hand-sketched border details) that feels like an interactive personal notebook.
 
-Currently, two official plugins are available:
+## ✨ Core Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 📓 **Dual-Pane Explorer Layout:** Browse collections, history, and wonder topics on the left; read synthesized long-form articles in the center; converse with an AI tutor on the right.
+- 🎨 **Rich Styling Architecture:** Styled using **Tailwind CSS v4** combined with hand-crafted CSS variables (e.g. `--surface-cream`, `--ink-charcoal`, `--paper-shadow`).
+- ⚡ **Realtime Quest Visualizer:** High-fidelity pipeline loader mapping supervisor execution states (Ideation -> Web Search -> Wikipedia Research -> Writing).
+- 🔄 **Centralized Context:** State tracking is unified via React Context (`CurioContext.tsx`), eliminating prop-drilling.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📁 Component Directory Structure
 
-## Expanding the ESLint configuration
+All frontend source files reside inside `frontend/src/`:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+├── actions/         # API actions triggering requests to the Express backend
+│   └── curio.ts
+├── assets/          # Static illustrations and logo assets
+├── components/      # Reusable React components grouped by section
+│   ├── auth/        # AuthPage page (login & registration screens)
+│   ├── canvas/      # Central viewport cards (Ignite, History, Library, Saved, Settings)
+│   ├── chat/        # Right-hand Tutor chat components
+│   └── layout/      # AppShell window structures and MobileHeader
+├── contexts/        # Global React Context providers (CurioContext.tsx)
+├── types/           # Core typescript interfaces (curio.d.ts)
+├── App.tsx          # Root mounting entrypoint
+└── index.css        # Tailwind config, font faces, global journal CSS variables
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔄 Global State Management (`CurioContext.tsx`)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+State tracking is maintained inside `contexts/CurioContext.tsx`. The custom hook `useCurio()` exposes:
+- **Authentication:** `user` object, JWT `token`, and `login()` / `register()` / `logout()` handlers.
+- **Quest Ignition:** `igniteQuest(topic?)` triggering the LangGraph agent chain on the backend.
+- **Tutor Chat:** `messages` history and `sendMessage(message)` for continuous conversation.
+- **Daily Wonder:** `generateDailyWonder()` querying and saving today's spotlight topic.
+- **Library Collections:** Folder management and mapping articles to custom collections.
+
+---
+
+## 🛠️ Getting Started
+
+### Installation
+Run npm install in the frontend directory:
+```bash
+npm install
+```
+
+### Development Server
+Start the client server using Vite (defaults to `http://localhost:5173`):
+```bash
+npm run dev
+```
+
+### Production Build
+Compile typescript files and bundle production-optimized assets:
+```bash
+npm run build
 ```
