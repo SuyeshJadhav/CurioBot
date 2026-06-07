@@ -149,6 +149,7 @@ export function AuthPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
                   required
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -174,6 +175,7 @@ export function AuthPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
                 required
+                autoComplete="username"
               />
             </div>
           </div>
@@ -198,6 +200,7 @@ export function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
+                autoComplete={isRegister ? "new-password" : "current-password"}
               />
             </div>
           </div>

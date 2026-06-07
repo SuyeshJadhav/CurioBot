@@ -5,8 +5,7 @@
 
 import type { Message, User } from '../types/curio';
 
-const rawApiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
-const API_BASE = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 // Helper to get auth headers with localStorage token
 function getHeaders(): HeadersInit {
