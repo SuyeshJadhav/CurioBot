@@ -3,3 +3,5 @@ node_modules
 .env.local
 EXPLAIN.md
 */admin-seed.ts
+context.md
+*/logs

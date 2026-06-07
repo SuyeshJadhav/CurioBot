@@ -1,0 +1,51 @@
+/* ============================================
+   CurioBot — Shared Theme & Design Tokens
+   ============================================ */
+
+/* ---- CSS Variables (Design Tokens) ---- */
+:root {
+  --ink-sepia: #704214;
+  --ink-charcoal: #36454F;
+  --ink-wash: #A9A9A9;
+  --canvas-bg: #F9F7F2;
+  --surface-cream: #FFFEFA;
+  --surface: #faf9f9;
+  --primary: #4b626a;
+  --primary-container: #aec6cf;
+  --primary-fixed: #cee7f0;
+  --primary-fixed-dim: #b2cad3;
+  --secondary: #7b5455;
+  --secondary-container: #fecbcb;
+  --secondary-fixed: #ffdad9;
+  --secondary-fixed-dim: #ecbaba;
+  --tertiary: #745944;
+  --tertiary-container: #debba1;
+  --accent-lavender: #E6E6FA;
+  --accent-sage: #B2AC88;
+  --accent-indigo: #4B0082;
+  --success-green: #98FB98;
+  --outline: #72787a;
+  --outline-variant: #c2c7ca;
+  --surface-container: #efedee;
+  --surface-container-high: #e9e8e8;
+  --surface-container-low: #f5f3f3;
+  --on-surface: #1b1c1c;
+  --error: #ba1a1a;
+
+  --color-background-primary: var(--surface-cream);
+  --color-background-secondary: #faf9f9;
+  --color-border-tertiary: rgba(0,0,0,0.06);
+  --color-border-secondary: rgba(0,0,0,0.1);
+  --color-text-primary: var(--ink-charcoal);
+  --color-text-secondary: #5f6e75;
+  --color-text-tertiary: var(--ink-wash);
+  --color-background-info: rgba(174,198,207,0.22);
+  --color-text-info: var(--primary);
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --font-sans: var(--font-body);
+
+  --font-headline: 'Be Vietnam Pro', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-hand: 'Caveat', cursive;
+}
