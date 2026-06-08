@@ -63,7 +63,7 @@ export function OnboardingModal() {
     try {
       // 1. Save settings
       await saveSettings({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: 'gemini-3.1-flash-lite',
         reading_time: readingTime,
         knowledge_level: knowledgeLevel,
         topic_novelty: novelty,

@@ -8,7 +8,7 @@ export function SettingsCanvas() {
     saveSettings,
   } = useCurio();
 
-  const [model, setModel] = useState(userSettings?.model || 'gemini-3.1-flash-lite-preview');
+  const [model, setModel] = useState(userSettings?.model || 'gemini-3.1-flash-lite');
   const [readingTime, setReadingTime] = useState(userSettings?.reading_time || '5min');
   const [knowledgeLevel, setKnowledgeLevel] = useState(userSettings?.knowledge_level || 'intermediate');
   const [novelty, setNovelty] = useState(userSettings?.topic_novelty || 'mixed');
@@ -140,7 +140,6 @@ export function SettingsCanvas() {
               background: 'var(--color-background-primary)'
             }}
           >
-            <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (Preview)</option>
             <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
             <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
             <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
