@@ -40,9 +40,9 @@ export function InterestsCanvas() {
       <p className="section-sub">These drive what topics get generated for you — edit freely</p>
 
       {/* Interests list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
         {interests.map((interest) => (
-          <div key={interest} className="interest-tag" style={{ display: 'flex', width: '100%', padding: '8px 12px' }}>
+          <div key={interest} className="interest-tag" style={{ display: 'flex', alignItems: 'center', padding: '6px 12px', margin: 0 }}>
             <i className={`${getInterestIcon(interest)} interest-icon`} style={{ marginRight: '8px' }}></i>
             <span style={{ fontSize: '13px', textTransform: 'capitalize' }}>{interest}</span>
             <i 

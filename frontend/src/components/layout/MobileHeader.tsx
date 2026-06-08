@@ -1,7 +1,8 @@
 import { useCurio } from '../../contexts/CurioContext';
 
 export function MobileHeader() {
-  const { changeTab, isTutorOpen, setTutorOpen, isMenuOpen, setMenuOpen } = useCurio();
+  const { changeTab, isTutorOpen, setTutorOpen, isMenuOpen, setMenuOpen, activeArticleId, isGeneratingArticle } = useCurio();
+  const showTutorToggle = !!(activeArticleId || isGeneratingArticle);
 
   return (
     <header className="mobile-bar">
@@ -20,17 +21,19 @@ export function MobileHeader() {
         <span className="logo">{'CurioBot'}</span>
       </div>
       <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button
-          className="icon-btn"
-          aria-label="Tutor Chat"
-          onClick={() => setTutorOpen(!isTutorOpen)}
-          style={{
-            color: isTutorOpen ? '#7F77DD' : 'var(--primary-container)',
-            background: isTutorOpen ? 'rgba(127, 119, 221, 0.12)' : 'transparent',
-          }}
-        >
-          <span className="material-symbols-outlined">{"forum"}</span>
-        </button>
+        {showTutorToggle && (
+          <button
+            className="icon-btn"
+            aria-label="Tutor Chat"
+            onClick={() => setTutorOpen(!isTutorOpen)}
+            style={{
+              color: isTutorOpen ? '#7F77DD' : 'var(--primary-container)',
+              background: isTutorOpen ? 'rgba(127, 119, 221, 0.12)' : 'transparent',
+            }}
+          >
+            <span className="material-symbols-outlined">{"forum"}</span>
+          </button>
+        )}
         <button className="icon-btn" aria-label="Account">
           <span className="material-symbols-outlined">{"account_circle"}</span>
         </button>

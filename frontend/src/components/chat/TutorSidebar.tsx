@@ -37,6 +37,10 @@ export function TutorSidebar() {
     if (sidebarRef.current) sidebarRef.current.style.width = `${width}px`;
     const main = document.querySelector<HTMLElement>('.main-content');
     if (main) main.style.marginRight = `${width}px`;
+
+    return () => {
+      if (main) main.style.marginRight = '0px';
+    };
   }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {

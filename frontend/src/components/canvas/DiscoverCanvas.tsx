@@ -36,7 +36,8 @@ export function DiscoverCanvas() {
           const target = e.currentTarget;
           const topicVal = (target.elements.namedItem('topic') as HTMLInputElement).value;
           const hintVal = (target.elements.namedItem('hint') as HTMLInputElement).value;
-          igniteQuest(topicVal.trim() || undefined, hintVal.trim() || undefined);
+          const combinedHint = [topicVal.trim(), hintVal.trim()].filter(Boolean).join(' - ');
+          igniteQuest(topicVal.trim() || undefined, combinedHint || undefined);
         }} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input 

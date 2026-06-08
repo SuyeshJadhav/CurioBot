@@ -71,16 +71,7 @@ export function HomeCanvas() {
 
   const streakCount = calculateStreak();
 
-  // Last 14 days
-  const last14Days = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - (13 - i));
-    return {
-      dateStr: getLocalDateString(d),
-      dayLabel: d.toLocaleDateString(undefined, { weekday: 'narrow' }),
-      dateLabel: d.getDate(),
-    };
-  });
+
 
   // Pick recommendations from interests
   const getQueuedTopics = () => {
@@ -126,7 +117,7 @@ export function HomeCanvas() {
           e.preventDefault();
           const val = (e.currentTarget.elements.namedItem('quickTopic') as HTMLInputElement).value;
           if (val.trim()) {
-            igniteQuest(val.trim());
+            igniteQuest(val.trim(), val.trim());
           }
         }} style={{ display: 'flex', gap: '8px' }}>
           <input 
@@ -176,32 +167,7 @@ export function HomeCanvas() {
         </div>
       </div>
 
-      {/* Streak grid */}
-      <div className="streak-bar" style={{ marginBottom: '24px', justifyContent: 'space-between' }}>
-        {last14Days.map((day) => {
-          const isDone = localReadDatesSet.has(day.dateStr);
-          return (
-            <div 
-              key={day.dateStr} 
-              className={`streak-day${isDone ? ' done' : ''}`}
-              title={`${day.dateStr}: ${isDone ? 'Read' : 'No activity'}`}
-              style={{ 
-                flex: 1, 
-                height: '24px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontSize: '9px',
-                color: isDone ? '#fff' : 'var(--color-text-tertiary)',
-                fontWeight: 'bold',
-                cursor: 'default'
-              }}
-            >
-              {day.dateLabel}
-            </div>
-          );
-        })}
-      </div>
+
 
       {/* Today's Article Card */}
       <div className="card" style={{ padding: '18px 20px', marginBottom: '18px' }}>
@@ -239,7 +205,7 @@ export function HomeCanvas() {
               Today's handpicked wonder hasn't been generated yet. Spark it now to unlock today's mystery!
             </p>
             <button 
-              className="new-quest-btn" 
+              className="filter-btn on" 
               style={{ width: 'auto', padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
               onClick={generateDailyWonder}
             >

@@ -90,6 +90,57 @@ router.post(
 );
 
 /**
+ * @route   POST /api/auth/oauth/callback
+ * @desc    Exchange Supabase token for CurioBot token
+ * @access  Public
+ */
+router.post(
+  "/oauth/callback",
+  asyncHandler(async (req, res, next) => {
+    const { access_token } = req.body;
+    if (!access_token) {
+      return next(new AppError(400, "Access token is required"));
+    }
+
+    // Verify token with Supabase to get user details
+    const { data: { user }, error } = await supabase.auth.getUser(access_token);
+    
+    if (error || !user || !user.email) {
+      return next(new AppError(401, "Invalid OAuth token"));
+    }
+
+    // Check if user exists in our custom users table
+    let { data: existingUser } = await supabase
+      .from("users")
+      .select("id, email, username")
+      .eq("email", user.email)
+      .maybeSingle();
+
+    if (!existingUser) {
+      // Create new user linked to OAuth email
+      const dummyHash = hashPassword(Math.random().toString(36).slice(-8) + "OAuth!");
+      const defaultUsername = user.email.split("@")[0] + Math.floor(Math.random() * 1000);
+      
+      const { data: newUser, error: insertError } = await supabase
+        .from("users")
+        .insert({ 
+          email: user.email, 
+          username: defaultUsername, 
+          password_hash: dummyHash 
+        })
+        .select("id, email, username")
+        .single();
+
+      if (insertError) throw insertError;
+      existingUser = newUser;
+    }
+
+    const token = generateToken(existingUser.id);
+    res.json({ token, user: existingUser });
+  })
+);
+
+/**
  * @route   GET /api/auth/me
  * @desc    Get current user profile details
  * @access  Private

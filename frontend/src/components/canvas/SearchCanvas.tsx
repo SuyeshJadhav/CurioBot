@@ -4,26 +4,14 @@ import { useCurio } from '../../contexts/CurioContext';
 export function SearchCanvas() {
   const { history, loadArticle } = useCurio();
   const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<string[]>([
-    'multitask',
-    'memory consolidation',
-    'trauma'
-  ]);
-
-  const handleSearchSelect = (term: string) => {
-    setQuery(term);
-  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim() && !recentSearches.includes(query.trim())) {
-      setRecentSearches(prev => [query.trim(), ...prev.slice(0, 4)]);
-    }
   };
 
   // Filter history based on input
   const filteredHistory = history.filter(item => {
-    if (!query.trim()) return false;
+    if (!query.trim()) return true;
     const lower = query.toLowerCase();
     return (
       item.topic.toLowerCase().includes(lower)
@@ -62,13 +50,12 @@ export function SearchCanvas() {
       </p>
 
       {/* Dynamic Results list */}
-      {query.trim() !== '' && (
         <div style={{ marginBottom: '24px' }}>
           <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px', textTransform: 'uppercase' }}>
-            Search Results ({filteredHistory.length})
+            {query.trim() ? `Search Results (${filteredHistory.length})` : `Your Articles Map (${filteredHistory.length})`}
           </p>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
             {filteredHistory.map((item) => (
               <div 
                 key={item.id} 
@@ -98,36 +85,14 @@ export function SearchCanvas() {
             ))}
 
             {filteredHistory.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '24px 0', border: '1.5px dashed var(--color-border-tertiary)', borderRadius: 'var(--border-radius-md)', background: 'var(--color-background-secondary)' }}>
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '24px 0', border: '1.5px dashed var(--color-border-tertiary)', borderRadius: 'var(--border-radius-md)', background: 'var(--color-background-secondary)' }}>
                 <p className="card-body" style={{ color: 'var(--color-text-tertiary)' }}>
-                  No articles found matching "{query}".
+                  {query.trim() ? `No articles found matching "${query}".` : "Your library is empty. Go discover some topics!"}
                 </p>
               </div>
             )}
           </div>
         </div>
-      )}
-
-      <hr className="divider" />
-
-      {/* Recent Searches */}
-      <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        Recent searches
-      </p>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {recentSearches.map((term, i) => (
-          <div 
-            key={`${term}-${i}`} 
-            className="recent-item" 
-            onClick={() => handleSearchSelect(term)}
-            style={{ padding: '6px 8px' }}
-          >
-            <i className="ti ti-clock" style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', marginRight: '6px' }} aria-hidden="true"></i>
-            <span style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)' }}>{term}</span>
-          </div>
-        ))}
-      </div>
 
     </div>
   );

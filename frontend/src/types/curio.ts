@@ -118,6 +118,7 @@ export interface CurioState {
 // Context shape = state + action dispatchers
 export interface CurioContextType extends CurioState {
   login: (username: string, password: string) => Promise<void>;
+  loginWithOAuth: (token: string) => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
   changeTab: (tab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings') => void;

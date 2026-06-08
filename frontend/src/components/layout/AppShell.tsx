@@ -52,7 +52,7 @@ export function AppShell() {
           )}
         </main>
 
-        <TutorSidebar />
+        {(activeArticleId || isGeneratingArticle) && <TutorSidebar />}
       </div>
 
       {showOnboarding && <OnboardingModal />}

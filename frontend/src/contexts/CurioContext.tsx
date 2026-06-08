@@ -15,6 +15,7 @@ import type {
 } from '../types/curio';
 import {
   loginUser,
+  loginWithOAuthToken,
   registerUser,
   fetchCurrentUser,
   runCurioPipeline,
@@ -149,6 +150,16 @@ export function CurioProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     const result = await loginUser(username, password);
+    localStorage.setItem('curio_token', result.token);
+    setState((prev) => ({
+      ...prev,
+      token: result.token,
+      user: result.user,
+    }));
+  }, []);
+
+  const loginWithOAuth = useCallback(async (oauthToken: string) => {
+    const result = await loginWithOAuthToken(oauthToken);
     localStorage.setItem('curio_token', result.token);
     setState((prev) => ({
       ...prev,
@@ -631,6 +642,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
   const contextValue: CurioContextType = {
     ...state,
     login,
+    loginWithOAuth,
     register,
     logout,
     changeTab,

@@ -118,7 +118,6 @@ export function LeftSidebar() {
         >
           <i className="ti ti-sparkles"></i>
           <span className="nav-label">Discover</span>
-          {activeTab !== 'discover' && <div className="badge-dot" style={{ marginLeft: collapsed ? '0' : 'auto' }}></div>}
         </a>
 
         {/* Search Link */}

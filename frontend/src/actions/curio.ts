@@ -65,6 +65,15 @@ export async function loginUser(username: string, password: string): Promise<Aut
   return handleResponse<AuthResult>(res, 'Login failed');
 }
 
+export async function loginWithOAuthToken(accessToken: string): Promise<AuthResult> {
+  const res = await fetch(`${API_BASE}/api/auth/oauth/callback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ access_token: accessToken }),
+  });
+  return handleResponse<AuthResult>(res, 'OAuth login failed');
+}
+
 export async function registerUser(email: string, username: string, password: string): Promise<AuthResult> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
