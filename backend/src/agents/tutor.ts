@@ -5,7 +5,7 @@ export async function tutorAgent(
   state: AgentStateType,
   question: string,
   signal?: AbortSignal
-): Promise<string> {
+): Promise<{ reply: string; inputTokens: number; outputTokens: number }> {
   const model = state.userSettings?.model || "gemini-3.1-flash-lite";
   const levelGuide = ({
     beginner: "Use simple language, everyday analogies. The user is new to this topic.",
@@ -64,5 +64,13 @@ export async function tutorAgent(
   });
 
   const result = await Promise.race([messagePromise, abortPromise]);
-  return result.text || "";
+  const reply = result.text || "";
+  let inputTokens = 0;
+  let outputTokens = 0;
+  if (result.usageMetadata) {
+    inputTokens = result.usageMetadata.promptTokenCount || 0;
+    outputTokens = result.usageMetadata.candidatesTokenCount || 0;
+  }
+
+  return { reply, inputTokens, outputTokens };
 }

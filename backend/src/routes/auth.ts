@@ -38,7 +38,7 @@ router.post(
     const { data: newUser, error: insertError } = await supabase
       .from("users")
       .insert({ email, username, password_hash: passwordHash })
-      .select("id, email, username")
+      .select("id, email, username, token_balance")
       .single();
 
     if (insertError) {
@@ -68,7 +68,7 @@ router.post(
     // Lookup by username or email
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, email, username, password_hash")
+      .select("id, email, username, password_hash, token_balance")
       .or(`email.eq.${username},username.eq.${username}`)
       .maybeSingle();
 
@@ -84,6 +84,7 @@ router.post(
         id: user.id,
         email: user.email,
         username: user.username,
+        token_balance: user.token_balance,
       },
     });
   }),
@@ -112,7 +113,7 @@ router.post(
     // Check if user exists in our custom users table
     let { data: existingUser } = await supabase
       .from("users")
-      .select("id, email, username")
+      .select("id, email, username, token_balance")
       .eq("email", user.email)
       .maybeSingle();
 
@@ -128,7 +129,7 @@ router.post(
           username: defaultUsername, 
           password_hash: dummyHash 
         })
-        .select("id, email, username")
+        .select("id, email, username, token_balance")
         .single();
 
       if (insertError) throw insertError;
@@ -152,7 +153,7 @@ router.get(
     const userId = (req as any).userId;
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, email, username")
+      .select("id, email, username, token_balance")
       .eq("id", userId)
       .single();
 

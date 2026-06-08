@@ -496,3 +496,33 @@
     margin: 0 !important;
   }
 }
+
+/* Token balance progress bar in left sidebar */
+.sidebar-tokens-inner {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.25s ease, opacity 0.2s ease, margin-left 0.25s ease;
+  width: 120px; /* expanded width */
+  margin-left: 10px;
+}
+.left-sidebar--collapsed .sidebar-tokens-inner {
+  width: 0;
+  opacity: 0;
+  margin-left: 0;
+}
+.sidebar-tokens:hover {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+@media (max-width: 768px) {
+  .sidebar-tokens-inner {
+    width: 120px !important;
+    opacity: 1 !important;
+    margin-left: 10px !important;
+    display: flex !important;
+  }
+}
+

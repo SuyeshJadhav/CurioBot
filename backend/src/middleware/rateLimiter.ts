@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../lib/errors';
 import supabase from '../lib/supabase';
+import { getUserTokenBalance } from '../lib/db';
 
 // In-memory concurrency locks: Map<userId, { timer: NodeJS.Timeout; timestamp: number }>
 export const activeGenerations = new Map<string, { timer: NodeJS.Timeout; timestamp: number }>();
@@ -137,3 +138,35 @@ export const checkDailyCeiling = async (req: Request, res: Response, next: NextF
     next(err);
   }
 };
+
+/**
+ * Middleware: Checks user's token balance in Supabase
+ * Rejects requests if balance <= 0 (except for system wonder user)
+ */
+export const checkTokenBalance = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = (req as any).userId;
+  if (!userId) {
+    return next(new AppError(401, 'Unauthorized: User context missing'));
+  }
+
+  // Exempt system wonder user
+  if (userId === '00000000-0000-0000-0000-000000000000') {
+    return next();
+  }
+
+  try {
+    const balance = await getUserTokenBalance(userId);
+    if (balance <= 0) {
+      return next(
+        new AppError(
+          403,
+          'You have exhausted your token balance. Please contact the administrator to refill your tokens.'
+        )
+      );
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+

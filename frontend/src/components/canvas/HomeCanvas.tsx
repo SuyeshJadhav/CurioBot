@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
 import { Skeleton, MetricSkeleton } from '../common/Skeletons';
 
@@ -23,55 +22,8 @@ export function HomeCanvas() {
     loadArticle,
     igniteQuest,
     interests,
-    readTimestamps,
     isLoadingUserData,
   } = useCurio();
-
-  // Stable stateful reference to current time to satisfy render purity rules
-  const [now] = useState(() => new Date());
-
-  // Helper to format local date string (YYYY-MM-DD)
-  const getLocalDateString = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const todayStr = getLocalDateString(now);
-  const yesterdayStr = getLocalDateString(new Date(now.getTime() - 86400000));
-
-  const localReadDatesSet = new Set(
-    readTimestamps.map((ts) => getLocalDateString(new Date(ts)))
-  );
-
-  // Compute Streak
-  const calculateStreak = () => {
-    let streak = 0;
-    let currentDateStr = todayStr;
-
-    if (!localReadDatesSet.has(todayStr) && !localReadDatesSet.has(yesterdayStr)) {
-      return 0;
-    }
-
-    if (!localReadDatesSet.has(todayStr)) {
-      currentDateStr = yesterdayStr;
-    }
-
-    const testDate = new Date(currentDateStr);
-    for (let i = 0; i < 365; i++) {
-      const dateStr = getLocalDateString(testDate);
-      if (localReadDatesSet.has(dateStr)) {
-        streak++;
-        testDate.setDate(testDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    return streak;
-  };
-
-  const streakCount = calculateStreak();
 
 
 
@@ -159,14 +111,9 @@ export function HomeCanvas() {
           <>
             <MetricSkeleton />
             <MetricSkeleton />
-            <MetricSkeleton />
           </>
         ) : (
           <>
-            <div className="metric">
-              <p className="metric-label">🔥 Reading streak</p>
-              <p className="metric-val">{streakCount} {streakCount === 1 ? 'day' : 'days'}</p>
-            </div>
             <div className="metric">
               <p className="metric-label">📖 Articles read</p>
               <p className="metric-val">{history.length}</p>

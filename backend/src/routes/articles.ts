@@ -9,7 +9,6 @@ import {
   unsaveSketch,
   deleteArticle,
   recordArticleRead,
-  getArticleReadDates,
 } from "../lib/db";
 import { AppError } from "../lib/errors";
 
@@ -130,19 +129,6 @@ router.delete(
   }),
 );
 
-/**
- * @route   GET /api/reads/dates
- * @desc    Get all timestamps when user read articles
- * @access  Private
- */
-router.get(
-  "/reads/dates",
-  authenticate,
-  asyncHandler(async (req, res) => {
-    const userId = (req as any).userId;
-    const dates = await getArticleReadDates(userId);
-    res.json(dates);
-  }),
-);
+
 
 export default router;

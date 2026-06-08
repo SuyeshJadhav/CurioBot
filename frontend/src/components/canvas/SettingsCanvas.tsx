@@ -5,12 +5,12 @@ import { SettingsSkeleton } from '../common/Skeletons';
 
 export function SettingsCanvas() {
   const {
+    user,
     userSettings,
     saveSettings,
     isLoadingUserData,
   } = useCurio();
 
-  const [model, setModel] = useState(userSettings?.model || 'gemini-3.1-flash-lite');
   const [readingTime, setReadingTime] = useState(userSettings?.reading_time || '5min');
   const [novelty, setNovelty] = useState(userSettings?.topic_novelty || 'mixed');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
@@ -20,7 +20,7 @@ export function SettingsCanvas() {
     setSaveStatus('Saving...');
 
     const payload: UserSettings = {
-      model: model,
+      model: userSettings?.model || 'gemini-3.1-flash-lite',
       reading_time: readingTime,
       knowledge_level: userSettings?.knowledge_level || 'intermediate',
       topic_novelty: novelty,
@@ -109,30 +109,28 @@ export function SettingsCanvas() {
           </select>
         </div>
 
-        {/* Model Card */}
-        <div className="card" style={{ padding: '16px' }}>
-          <p className="card-title" style={{ fontSize: '13px', margin: '0 0 4px' }}>Model</p>
-          <p className="card-body" style={{ marginBottom: '8px', fontSize: '12px' }}>
-            Gemini model used for generation
-          </p>
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            style={{
-              width: '100%',
-              fontSize: '12px',
-              padding: '6px 8px',
-              borderRadius: 'var(--border-radius-md)',
-              border: '0.5px solid var(--color-border-secondary)',
-              outline: 'none',
-              background: 'var(--color-background-primary)'
-            }}
-          >
-            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
-            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-          </select>
+        {/* Token Balance Card */}
+        <div className="card" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p className="card-title" style={{ fontSize: '13px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              🪙 Token Balance
+            </p>
+            <p className="card-body" style={{ fontSize: '12px', margin: 0, color: 'var(--color-text-secondary)' }}>
+              Remaining AI computation capacity for your curiosity quests
+            </p>
+          </div>
+          <div style={{
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+            color: 'var(--primary)',
+            background: 'var(--primary-fixed)',
+            padding: '6px 12px',
+            borderRadius: 'var(--border-radius-md)',
+            fontFamily: 'monospace',
+            border: '1px solid var(--color-border-secondary)'
+          }}>
+            {user?.token_balance !== undefined ? user.token_balance.toLocaleString() : '100,000'}
+          </div>
         </div>
 
         {/* Save button and status */}

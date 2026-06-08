@@ -165,7 +165,7 @@ export async function askTutor(
   question: string,
   history: Message[],
   articleContext: string
-): Promise<string> {
+): Promise<{ reply: string; tokenBalance?: number }> {
   const res = await fetch(`${API_BASE}/api/tutor/chat`, {
     method: 'POST',
     headers: getHeaders(),
@@ -179,8 +179,11 @@ export async function askTutor(
     }),
   });
 
-  const data = await handleResponse<{ reply: string }>(res, 'Tutor request failed');
-  return data.reply;
+  const data = await handleResponse<{ reply: string; token_balance?: number }>(res, 'Tutor request failed');
+  return {
+    reply: data.reply,
+    tokenBalance: data.token_balance,
+  };
 }
 
 // ── Navigation & Persistence Actions ─────────────────────────
@@ -338,11 +341,5 @@ export async function deleteArticle(id: string): Promise<void> {
   await handleResponse<any>(res, 'Failed to delete article');
 }
 
-export async function fetchReadTimestamps(): Promise<string[]> {
-  const res = await fetch(`${API_BASE}/api/reads/dates`, {
-    method: 'GET',
-    headers: getHeaders(),
-  });
-  return handleResponse<string[]>(res, 'Failed to fetch read timestamps');
-}
+
 

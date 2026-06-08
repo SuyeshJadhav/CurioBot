@@ -13,6 +13,7 @@ describe("HTTP API - Full Coverage", () => {
       generalRateLimiter: (_req: any, _res: any, next: any) => next(),
       generateRateLimiter: (_req: any, _res: any, next: any) => next(),
       checkDailyCeiling: (_req: any, _res: any, next: any) => next(),
+      checkTokenBalance: (_req: any, _res: any, next: any) => next(),
       acquireLock: (_userId: string) => true,
       releaseLock: (_userId: string) => {},
     }));
@@ -59,6 +60,7 @@ describe("HTTP API - Full Coverage", () => {
       generalRateLimiter: (_req: any, _res: any, next: any) => next(),
       generateRateLimiter: (_req: any, _res: any, next: any) => next(),
       checkDailyCeiling: (_req: any, _res: any, next: any) => next(),
+      checkTokenBalance: (_req: any, _res: any, next: any) => next(),
       acquireLock: (_userId: string) => false,
       releaseLock: (_userId: string) => {},
     }));
@@ -82,6 +84,7 @@ describe("HTTP API - Full Coverage", () => {
       generateRateLimiter: (_req: any, _res: any, next: any) => next(),
       checkDailyCeiling: (_req: any, _res: any, next: any) =>
         next(new AppError(403, "Daily ceiling reached")),
+      checkTokenBalance: (_req: any, _res: any, next: any) => next(),
       acquireLock: (_userId: string) => true,
       releaseLock: (_userId: string) => {},
     }));
@@ -117,6 +120,7 @@ describe("HTTP API - Full Coverage", () => {
       generateRateLimiter: (_req: any, _res: any, next: any) =>
         next(new AppError(429, "Generation rate limit exceeded")),
       checkDailyCeiling: (_req: any, _res: any, next: any) => next(),
+      checkTokenBalance: (_req: any, _res: any, next: any) => next(),
       acquireLock: (_userId: string) => true,
       releaseLock: (_userId: string) => {},
     }));
@@ -240,6 +244,7 @@ describe("HTTP API - Full Coverage", () => {
       generalRateLimiter: (_req: any, _res: any, next: any) => next(),
       generateRateLimiter: (_req: any, _res: any, next: any) => next(),
       checkDailyCeiling: (_req: any, _res: any, next: any) => next(),
+      checkTokenBalance: (_req: any, _res: any, next: any) => next(),
       acquireLock: (userId: string) => {
         if (activeLocks.has(userId)) {
           return false;

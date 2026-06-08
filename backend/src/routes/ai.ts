@@ -1,13 +1,14 @@
 import { Router, NextFunction } from "express";
 import { asyncHandler, authenticate } from "../middleware/auth";
 import { getUserInterests } from "../lib/memory";
-import { getUserSettings, recordArticleRead } from "../lib/db";
+import { getUserSettings, recordArticleRead, deductUserTokens, getUserTokenBalance } from "../lib/db";
 import { AppError } from "../lib/errors";
 import {
   generateRateLimiter,
   checkDailyCeiling,
   acquireLock,
   releaseLock,
+  checkTokenBalance,
 } from "../middleware/rateLimiter";
 import { pipelineLogger } from "../lib/observability";
 import { validateAndSanitizePrompt, validateInterestsArray } from "../lib/security";
@@ -24,6 +25,7 @@ router.post(
   authenticate,
   generateRateLimiter,
   checkDailyCeiling,
+  checkTokenBalance,
   asyncHandler(async (req, res, next: NextFunction) => {
     const userId = (req as any).userId;
     const { interests, hint } = req.body;
@@ -165,6 +167,17 @@ router.post(
         },
       ];
 
+      // Calculate total tokens consumed by nodes in this generation
+      const totalTokens = nodes.reduce((acc: number, n: any) => acc + (n.inputTokens || 0) + (n.outputTokens || 0), 0);
+      if (totalTokens > 0) {
+        try {
+          await deductUserTokens(userId, totalTokens);
+          console.log(`🪙 [Token Deduction] Deducted ${totalTokens} tokens from user ${userId}`);
+        } catch (dbErr) {
+          console.error(`⚠️ [Token Deduction Error] Failed to deduct tokens for user ${userId}:`, dbErr);
+        }
+      }
+
       pipelineLogger.logRun({
         userId,
         topic: finalStateObj?.currentTopic?.title,
@@ -191,7 +204,8 @@ router.post(
 router.post(
   "/tutor/chat",
   authenticate,
-  asyncHandler(async (req, res) => {
+  checkTokenBalance,
+  asyncHandler(async (req, res, next: NextFunction) => {
     const userId = (req as any).userId;
     const { message, context, history } = req.body;
 
@@ -245,8 +259,19 @@ router.post(
       nodeMetrics: [],
     };
 
-    const reply = await tutorAgent(tutorState, validatedMessage);
-    res.json({ reply });
+    const { reply, inputTokens, outputTokens } = await tutorAgent(tutorState, validatedMessage);
+    const totalTokens = inputTokens + outputTokens;
+
+    let newBalance = 0;
+    try {
+      newBalance = await deductUserTokens(userId, totalTokens);
+      console.log(`🪙 [Token Deduction] Deducted ${totalTokens} tutor tokens from user ${userId}. New balance: ${newBalance}`);
+    } catch (dbErr) {
+      console.error(`⚠️ [Token Deduction Error] Failed to deduct tutor tokens for user ${userId}:`, dbErr);
+      newBalance = await getUserTokenBalance(userId).catch(() => 0);
+    }
+
+    res.json({ reply, token_balance: newBalance });
   }),
 );
 

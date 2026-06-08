@@ -362,19 +362,40 @@ export async function recordArticleRead(userId: string, articleId: string): Prom
   }
 }
 
-export async function getArticleReadDates(userId: string): Promise<string[]> {
+export async function getUserTokenBalance(userId: string): Promise<number> {
   const { data, error } = await supabase
-    .from("article_reads")
-    .select("read_at")
-    .eq("user_id", userId)
-    .order("read_at", { ascending: false });
+    .from("users")
+    .select("token_balance")
+    .eq("id", userId)
+    .single();
 
   if (error) {
-    console.error(`Failed to fetch article read dates: ${error.message}`);
-    return [];
+    throw new Error(`Failed to fetch user token balance: ${error.message}`);
   }
 
-  return (data || []).map((row: any) => row.read_at);
+  return data?.token_balance ?? 0;
 }
+
+export async function deductUserTokens(userId: string, tokens: number): Promise<number> {
+  // If it's the system user, don't deduct or change anything
+  if (userId === '00000000-0000-0000-0000-000000000000') {
+    return 999999999;
+  }
+
+  const currentBalance = await getUserTokenBalance(userId);
+  const newBalance = Math.max(0, currentBalance - tokens);
+
+  const { error } = await supabase
+    .from("users")
+    .update({ token_balance: newBalance })
+    .eq("id", userId);
+
+  if (error) {
+    throw new Error(`Failed to deduct user tokens: ${error.message}`);
+  }
+
+  return newBalance;
+}
+
 
 

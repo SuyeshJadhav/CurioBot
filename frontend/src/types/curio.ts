@@ -22,6 +22,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  token_balance?: number;
 }
 
 export interface SavedSketch {
@@ -112,7 +113,6 @@ export interface CurioState {
 
   // ── Read Tracking & Overlay ──────────────────────────────
   activeArticleId: string | null;
-  readTimestamps: string[];
   isLoadingUserData: boolean;
 }
 
@@ -150,6 +150,5 @@ export interface CurioContextType extends CurioState {
   addInterest: (interest: string) => Promise<void>;
   deleteInterest: (interest: string) => Promise<void>;
   deleteArticle: (id: string) => Promise<void>;
-  loadReadTimestamps: () => Promise<void>;
 }
 

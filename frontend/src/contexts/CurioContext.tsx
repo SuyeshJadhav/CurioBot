@@ -38,7 +38,6 @@ import {
   addInterest as apiAddInterest,
   deleteInterest as apiDeleteInterest,
   deleteArticle as apiDeleteArticle,
-  fetchReadTimestamps,
 } from '../actions/curio';
 
 const CurioContext = createContext<CurioContextType | null>(null);
@@ -80,7 +79,6 @@ const INITIAL_STATE: CurioState = {
   userSettings: null,
   interests: [],
   activeArticleId: null,
-  readTimestamps: [],
   isLoadingUserData: false,
 };
 
@@ -114,17 +112,18 @@ export function CurioProvider({ children }: { children: ReactNode }) {
   const loadUserData = useCallback(async () => {
     setState((prev) => ({ ...prev, isLoadingUserData: true }));
     try {
+      const currentUser = await fetchCurrentUser().catch(() => null);
       const historyList = await fetchHistory();
       const sketches = await fetchSavedSketches();
       const libraries = await fetchLibraryCollections();
       const wonder = await fetchDailyWonder();
       const settings = await fetchSettings();
       const interestsList = await fetchInterests();
-      const timestamps = await fetchReadTimestamps().catch(() => []);
 
       setState((prev) => ({
         ...prev,
         isLoadingUserData: false,
+        ...(currentUser ? { user: currentUser } : {}),
         history: historyList.map((entry) => ({
           id: entry.id,
           topic: entry.title,
@@ -135,7 +134,6 @@ export function CurioProvider({ children }: { children: ReactNode }) {
         dailyWonder: wonder.topic ? wonder : null,
         userSettings: settings,
         interests: interestsList,
-        readTimestamps: timestamps,
       }));
     } catch (err) {
       console.error('Failed to load user data:', err);
@@ -221,7 +219,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      const replyText = await askTutor(
+      const { reply, tokenBalance } = await askTutor(
         content,
         currentMessages,
         currentArticle ?? ''
@@ -230,7 +228,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
       const botMsg: Message = {
         id: `msg-${Date.now() + 1}`,
         role: 'bot',
-        content: replyText,
+        content: reply,
         timestamp: new Date(),
       };
 
@@ -238,6 +236,10 @@ export function CurioProvider({ children }: { children: ReactNode }) {
         ...prev,
         messages: [...prev.messages, botMsg],
         isGeneratingChat: false,
+        user: prev.user && tokenBalance !== undefined ? {
+          ...prev.user,
+          token_balance: tokenBalance
+        } : prev.user
       }));
     } catch (err) {
       const errMsg: Message = {
@@ -362,14 +364,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const loadReadTimestamps = useCallback(async () => {
-    try {
-      const timestamps = await fetchReadTimestamps();
-      setState((prev) => ({ ...prev, readTimestamps: timestamps }));
-    } catch (err) {
-      console.error('Failed to reload read timestamps:', err);
-    }
-  }, []);
+
 
   // ── Sketches (Bookmarks) ────────────────────────────────────
 
@@ -678,7 +673,6 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     addInterest,
     deleteInterest,
     deleteArticle,
-    loadReadTimestamps,
   };
 
   return (
