@@ -431,10 +431,12 @@ export function OnboardingModal() {
           <button
             onClick={handleBack}
             disabled={step === 1 || isSubmitting}
-            className="new-quest-btn"
+            className="filter-btn"
             style={{
-              width: 'auto',
-              padding: '0.5rem 1.2rem',
+              padding: '8px 24px',
+              borderRadius: 'var(--border-radius-md)',
+              fontWeight: 600,
+              cursor: 'pointer',
               visibility: step === 1 ? 'hidden' : 'visible',
               opacity: isSubmitting ? 0.5 : 1
             }}
