@@ -18,7 +18,7 @@ export function MobileHeader() {
         >
           <span className="material-symbols-outlined">{"menu"}</span>
         </button>
-        <span className="logo">{'CurioBot'}</span>
+        <span className="logo">{'Curios'}</span>
       </div>
       <div style={{ display: 'flex', gap: '0.75rem' }}>
         {showTutorToggle && (

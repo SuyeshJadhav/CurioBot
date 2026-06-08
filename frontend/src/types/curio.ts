@@ -113,6 +113,7 @@ export interface CurioState {
   // ── Read Tracking & Overlay ──────────────────────────────
   activeArticleId: string | null;
   readTimestamps: string[];
+  isLoadingUserData: boolean;
 }
 
 // Context shape = state + action dispatchers

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
+import { Skeleton, MetricSkeleton } from '../common/Skeletons';
 
 const INTEREST_TOPICS: Record<string, string[]> = {
   "how things work": ["How Microwave Ovens Heat Food", "Why Mirrors Don't Reverse Up and Down"],
@@ -23,6 +24,7 @@ export function HomeCanvas() {
     igniteQuest,
     interests,
     readTimestamps,
+    isLoadingUserData,
   } = useCurio();
 
   // Stable stateful reference to current time to satisfy render purity rules
@@ -153,18 +155,28 @@ export function HomeCanvas() {
 
       {/* Metrics Row */}
       <div className="row">
-        <div className="metric">
-          <p className="metric-label">🔥 Reading streak</p>
-          <p className="metric-val">{streakCount} {streakCount === 1 ? 'day' : 'days'}</p>
-        </div>
-        <div className="metric">
-          <p className="metric-label">📖 Articles read</p>
-          <p className="metric-val">{history.length}</p>
-        </div>
-        <div className="metric">
-          <p className="metric-label">💾 Saved</p>
-          <p className="metric-val">{savedSketches.length}</p>
-        </div>
+        {isLoadingUserData ? (
+          <>
+            <MetricSkeleton />
+            <MetricSkeleton />
+            <MetricSkeleton />
+          </>
+        ) : (
+          <>
+            <div className="metric">
+              <p className="metric-label">🔥 Reading streak</p>
+              <p className="metric-val">{streakCount} {streakCount === 1 ? 'day' : 'days'}</p>
+            </div>
+            <div className="metric">
+              <p className="metric-label">📖 Articles read</p>
+              <p className="metric-val">{history.length}</p>
+            </div>
+            <div className="metric">
+              <p className="metric-label">💾 Saved</p>
+              <p className="metric-val">{savedSketches.length}</p>
+            </div>
+          </>
+        )}
       </div>
 
 
@@ -175,7 +187,13 @@ export function HomeCanvas() {
           Today's Article
         </p>
 
-        {isGeneratingWonder ? (
+        {isLoadingUserData ? (
+          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <Skeleton style={{ height: '15px', width: '40%' }} />
+            <Skeleton style={{ height: '12px', width: '90%', marginTop: '4px' }} />
+            <Skeleton style={{ height: '12px', width: '70%' }} />
+          </div>
+        ) : isGeneratingWonder ? (
           <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="material-symbols-outlined ignite-icon" style={{ fontSize: '1.2rem', animation: 'spin 1.4s linear infinite' }}>
               progress_activity
@@ -220,43 +238,54 @@ export function HomeCanvas() {
         <p className="card-title" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', letterSpacing: '0.06em', marginBottom: '8px' }}>
           Up next — recommended topics
         </p>
-        <p className="card-body" style={{ marginBottom: '12px', fontSize: '12px' }}>
-          Click any of these recommended concepts to spawn a new research quest:
-        </p>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {queuedTopics.map((topic) => (
-            <div 
-              key={topic}
-              onClick={() => igniteQuest(topic)}
-              style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: 'var(--border-radius-md)',
-                background: 'var(--color-background-primary)',
-                border: '0.5px solid var(--color-border-tertiary)',
-                cursor: 'pointer',
-                transition: 'transform 0.15s, border-color 0.15s',
-                fontSize: '12.5px',
-                fontWeight: 500,
-                color: 'var(--color-text-primary)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateX(3px)';
-                e.currentTarget.style.borderColor = 'var(--primary-container)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.borderColor = 'var(--color-border-tertiary)';
-              }}
-            >
-              <i className="ti ti-arrow-right-circle" style={{ color: 'var(--primary)', fontSize: '14px' }}></i>
-              <span>{topic}</span>
+
+        {isLoadingUserData ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+            <Skeleton style={{ height: '32px', width: '100%' }} />
+            <Skeleton style={{ height: '32px', width: '100%' }} />
+            <Skeleton style={{ height: '32px', width: '100%' }} />
+          </div>
+        ) : (
+          <>
+            <p className="card-body" style={{ marginBottom: '12px', fontSize: '12px' }}>
+              Click any of these recommended concepts to spawn a new research quest:
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {queuedTopics.map((topic) => (
+                <div 
+                  key={topic}
+                  onClick={() => igniteQuest(topic)}
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--border-radius-md)',
+                    background: 'var(--color-background-primary)',
+                    border: '0.5px solid var(--color-border-tertiary)',
+                    cursor: 'pointer',
+                    transition: 'transform 0.15s, border-color 0.15s',
+                    fontSize: '12.5px',
+                    fontWeight: 500,
+                    color: 'var(--color-text-primary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateX(3px)';
+                    e.currentTarget.style.borderColor = 'var(--primary-container)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.borderColor = 'var(--color-border-tertiary)';
+                  }}
+                >
+                  <i className="ti ti-arrow-right-circle" style={{ color: 'var(--primary)', fontSize: '14px' }}></i>
+                  <span>{topic}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
 
     </div>

@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
 import type { UserSettings } from '../../types/curio';
+import { SettingsSkeleton } from '../common/Skeletons';
 
 export function SettingsCanvas() {
   const {
     userSettings,
     saveSettings,
+    isLoadingUserData,
   } = useCurio();
 
   const [model, setModel] = useState(userSettings?.model || 'gemini-3.1-flash-lite');
   const [readingTime, setReadingTime] = useState(userSettings?.reading_time || '5min');
-  const [knowledgeLevel, setKnowledgeLevel] = useState(userSettings?.knowledge_level || 'intermediate');
   const [novelty, setNovelty] = useState(userSettings?.topic_novelty || 'mixed');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
@@ -21,7 +22,7 @@ export function SettingsCanvas() {
     const payload: UserSettings = {
       model: model,
       reading_time: readingTime,
-      knowledge_level: knowledgeLevel,
+      knowledge_level: userSettings?.knowledge_level || 'intermediate',
       topic_novelty: novelty,
       onboarding_complete: true,
     };
@@ -34,6 +35,17 @@ export function SettingsCanvas() {
       setSaveStatus('Failed to save settings. Please try again.');
     }
   };
+
+  if (isLoadingUserData) {
+    return (
+      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+        <div className="noise-overlay" />
+        <h2 className="section-title">Settings</h2>
+        <p className="section-sub">Persona, writing style, model, and account preferences</p>
+        <SettingsSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
@@ -71,30 +83,6 @@ export function SettingsCanvas() {
           </select>
         </div>
 
-        {/* Knowledge Level Card */}
-        <div className="card" style={{ padding: '16px' }}>
-          <p className="card-title" style={{ fontSize: '13px', margin: '0 0 4px' }}>Knowledge level</p>
-          <p className="card-body" style={{ marginBottom: '8px', fontSize: '12px' }}>
-            Assume reader familiarity and adjust vocabulary
-          </p>
-          <select
-            value={knowledgeLevel}
-            onChange={(e) => setKnowledgeLevel(e.target.value as any)}
-            style={{
-              width: '100%',
-              fontSize: '12px',
-              padding: '6px 8px',
-              borderRadius: 'var(--border-radius-md)',
-              border: '0.5px solid var(--color-border-secondary)',
-              outline: 'none',
-              background: 'var(--color-background-primary)'
-            }}
-          >
-            <option value="beginner">New to this (Beginner)</option>
-            <option value="intermediate">Curious learner (Intermediate)</option>
-            <option value="expert">Know my stuff (Expert)</option>
-          </select>
-        </div>
 
         {/* Topic Novelty Card */}
         <div className="card" style={{ padding: '16px' }}>

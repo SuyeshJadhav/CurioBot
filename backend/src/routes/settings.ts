@@ -3,6 +3,7 @@ import { asyncHandler, authenticate } from "../middleware/auth";
 import { getUserSettings, saveUserSettings } from "../lib/db";
 import { getUserInterests, addInterest, deleteInterest } from "../lib/memory";
 import { AppError } from "../lib/errors";
+import { validateAndSanitizePrompt } from "../lib/security";
 
 const router = Router();
 
@@ -33,22 +34,7 @@ const ALLOWED_READING_TIMES = ["2min", "5min", "10min"];
 const ALLOWED_TOPIC_NOVELTY = ["familiar", "mixed", "wildcard"];
 
 
-function sanitizeInputString(input: any, maxLength: number): string {
-  if (typeof input !== "string") return "";
-  let sanitized = input.trim().slice(0, maxLength);
-  const overridePatterns = [
-    /ignore\s+previous/gi,
-    /override\s+instruction/gi,
-    /system\s+prompt/gi,
-    /ignore\s+above/gi,
-    /you\s+must\s+ignore/gi,
-    /disregard/gi,
-  ];
-  for (const pattern of overridePatterns) {
-    sanitized = sanitized.replace(pattern, "[removed]");
-  }
-  return sanitized;
-}
+
 
 /**
  * @route   PUT /api/settings
@@ -125,17 +111,17 @@ router.post(
   asyncHandler(async (req, res, next: NextFunction) => {
     const userId = (req as any).userId;
     const { interest } = req.body;
-
-    const sanitizedInterest = sanitizeInputString(interest, 50);
-    if (!sanitizedInterest) {
-      return next(
-        new AppError(
-          400,
-          "interest is required and must be under 50 characters.",
-        ),
-      );
+ 
+    let sanitizedInterest = "";
+    try {
+      sanitizedInterest = validateAndSanitizePrompt(interest, "interest", 50);
+      if (!sanitizedInterest) {
+        throw new AppError(400, "interest is required.");
+      }
+    } catch (err) {
+      return next(err);
     }
-
+ 
     await addInterest(sanitizedInterest, userId);
     res.json({ success: true });
   }),

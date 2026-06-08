@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
+import { InterestSkeleton } from '../common/Skeletons';
 
 export function InterestsCanvas() {
   const {
     interests,
     addInterest,
     deleteInterest,
+    isLoadingUserData,
   } = useCurio();
 
   const [newInterest, setNewInterest] = useState('');
@@ -30,6 +32,17 @@ export function InterestsCanvas() {
       console.error(err);
     }
   };
+
+  if (isLoadingUserData) {
+    return (
+      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+        <div className="noise-overlay" />
+        <h2 className="section-title">My interests</h2>
+        <p className="section-sub">These drive what topics get generated for you — edit freely</p>
+        <InterestSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>

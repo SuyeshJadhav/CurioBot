@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useCurio } from '../../contexts/CurioContext';
+import { ArticleSkeleton } from '../common/Skeletons';
 
 export function ArticleReaderCanvas() {
   const {
@@ -16,6 +17,37 @@ export function ArticleReaderCanvas() {
   } = useCurio();
 
   const isSaved = savedSketches.some(s => s.article_id === currentArticleId);
+
+  if (!article) {
+    return (
+      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+        <div className="noise-overlay" />
+
+        {/* Back button */}
+        <button 
+          onClick={closeArticle}
+          className="nav-item active"
+          style={{ 
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: 'var(--border-radius-md)',
+            cursor: 'pointer',
+            fontSize: '12px',
+            border: 'none',
+            marginBottom: '1.5rem',
+            textDecoration: 'none'
+          }}
+        >
+          <i className="ti ti-arrow-back-up" style={{ fontSize: '14px' }}></i>
+          <span>Back to main view</span>
+        </button>
+
+        <ArticleSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>

@@ -151,3 +151,35 @@
   background: #1D9E75;
   border-color: #1D9E75;
 }
+
+/* ---- Loading Skeleton Wave Shimmer Effect ---- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.skeleton::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent
+  );
+  animation: shimmer-wave 1.6s infinite;
+}
+
+@keyframes shimmer-wave {
+  100% {
+    transform: translateX(100%);
+  }
+}
+

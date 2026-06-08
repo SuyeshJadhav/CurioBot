@@ -62,7 +62,7 @@ const INITIAL_STATE: CurioState = {
     {
       id: 'init-1',
       role: 'bot',
-      content: "Hello! I'm CurioBot — your curiosity guide. Tap the ✨ Ignite button to begin, or ask me anything!",
+      content: "Hello! I'm Curios — your curiosity guide. Tap the ✨ Ignite button to begin, or ask me anything!",
       timestamp: new Date(),
     },
   ],
@@ -81,6 +81,7 @@ const INITIAL_STATE: CurioState = {
   interests: [],
   activeArticleId: null,
   readTimestamps: [],
+  isLoadingUserData: false,
 };
 
 export function CurioProvider({ children }: { children: ReactNode }) {
@@ -92,6 +93,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
       const storedToken = localStorage.getItem('curio_token');
       if (storedToken) {
         try {
+          setState((prev) => ({ ...prev, isLoadingUserData: true }));
           const user = await fetchCurrentUser();
           setState((prev) => ({
             ...prev,
@@ -101,6 +103,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
         } catch {
           console.warn('Failed to restore session. Clearing token.');
           localStorage.removeItem('curio_token');
+          setState((prev) => ({ ...prev, isLoadingUserData: false }));
         }
       }
     }
@@ -109,6 +112,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
 
   // ── Trigger Data Loading when Logged In ─────────────────────
   const loadUserData = useCallback(async () => {
+    setState((prev) => ({ ...prev, isLoadingUserData: true }));
     try {
       const historyList = await fetchHistory();
       const sketches = await fetchSavedSketches();
@@ -120,6 +124,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
 
       setState((prev) => ({
         ...prev,
+        isLoadingUserData: false,
         history: historyList.map((entry) => ({
           id: entry.id,
           topic: entry.title,
@@ -134,6 +139,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
       }));
     } catch (err) {
       console.error('Failed to load user data:', err);
+      setState((prev) => ({ ...prev, isLoadingUserData: false }));
     }
   }, []);
 
@@ -317,6 +323,8 @@ export function CurioProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       ...prev,
       isGeneratingArticle: true,
+      article: null,
+      currentTopic: null,
       messages: [INITIAL_STATE.messages[0]],
       activeArticleId: id,
     }));
@@ -683,7 +691,7 @@ export function CurioProvider({ children }: { children: ReactNode }) {
 export function useCurio(): CurioContextType {
   const ctx = useContext(CurioContext);
   if (!ctx) {
-    throw new Error('[CurioBot] useCurio() must be called inside a <CurioProvider>.');
+    throw new Error('[Curios] useCurio() must be called inside a <CurioProvider>.');
   }
   return ctx;
 }

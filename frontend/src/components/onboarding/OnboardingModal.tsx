@@ -19,7 +19,7 @@ export function OnboardingModal() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [customInterest, setCustomInterest] = useState('');
   const [readingTime, setReadingTime] = useState<'2min' | '5min' | '10min'>('5min');
-  const [knowledgeLevel, setKnowledgeLevel] = useState<'beginner' | 'intermediate' | 'expert'>('intermediate');
+  const knowledgeLevel = 'intermediate';
   const [novelty, setNovelty] = useState<'familiar' | 'mixed' | 'wildcard'>('mixed');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,7 +45,7 @@ export function OnboardingModal() {
   };
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 3) {
       setStep(prev => prev + 1);
     } else {
       handleSubmit();
@@ -177,16 +177,15 @@ export function OnboardingModal() {
               color: 'var(--primary)',
               fontSize: '0.9rem',
               fontWeight: 650
-            }}>CurioBot Setup</span>
+            }}>Curios Setup</span>
             <h2 style={{ margin: '2px 0 0', fontSize: '1.4rem', fontWeight: 700 }}>
               {step === 1 && 'What sparks your interest?'}
               {step === 2 && 'How much time do you have?'}
-              {step === 3 && 'Choose your knowledge depth'}
-              {step === 4 && 'Curiosity novelty preference'}
+              {step === 3 && 'Curiosity novelty preference'}
             </h2>
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {[1, 2, 3, 4].map(idx => (
+            {[1, 2, 3].map(idx => (
               <div key={idx} className={`progress-dot ${step === idx ? 'active' : ''}`} />
             ))}
           </div>
@@ -197,7 +196,7 @@ export function OnboardingModal() {
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--ink-wash)', lineHeight: 1.5 }}>
-                Select topics you're curious about. CurioBot will use these as seed ideas to search the web and Wikipedia for new reads.
+                Select topics you're curious about. Curios will use these as seed ideas to search the web and Wikipedia for new reads.
               </p>
 
               {/* Presets Grid */}
@@ -317,43 +316,9 @@ export function OnboardingModal() {
           )}
 
           {step === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--ink-wash)', lineHeight: 1.5 }}>
-                Choose your prior familiarity with topics. CurioBot will adapt vocabulary and technical explanations.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button
-                  className={`tile-btn ${knowledgeLevel === 'beginner' ? 'selected' : ''}`}
-                  onClick={() => setKnowledgeLevel('beginner')}
-                >
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--ink-charcoal)' }}>🌱 New to this (Beginner)</strong>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--ink-wash)' }}>No prior knowledge assumed. Simple analogies, clear jargon definitions.</span>
-                </button>
-
-                <button
-                  className={`tile-btn ${knowledgeLevel === 'intermediate' ? 'selected' : ''}`}
-                  onClick={() => setKnowledgeLevel('intermediate')}
-                >
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--ink-charcoal)' }}>🎓 Curious learner (Intermediate)</strong>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--ink-wash)' }}>Curious, educated non-specialist. Explains specialized jargon but skips basics.</span>
-                </button>
-
-                <button
-                  className={`tile-btn ${knowledgeLevel === 'expert' ? 'selected' : ''}`}
-                  onClick={() => setKnowledgeLevel('expert')}
-                >
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--ink-charcoal)' }}>🧠 Know my stuff (Expert)</strong>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--ink-wash)' }}>Domain familiarity assumed. Precise terminology, deep dive into mechanics.</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--ink-wash)', lineHeight: 1.5 }}>
-                How adventurous should CurioBot be when suggesting new article topics?
+                How adventurous should Curios be when suggesting new article topics?
               </p>
 
               <div style={{
@@ -460,7 +425,7 @@ export function OnboardingModal() {
               gap: '6px'
             }}
           >
-            {isSubmitting ? 'Saving...' : step === 4 ? 'Complete Onboarding ✨' : 'Continue'}
+            {isSubmitting ? 'Saving...' : step === 3 ? 'Complete Onboarding ✨' : 'Continue'}
           </button>
         </div>
       </div>

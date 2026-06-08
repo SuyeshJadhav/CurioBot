@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { apiLogger } from './src/middleware/logger';
 import { errorHandler } from './src/middleware/errorHandler';
@@ -18,9 +19,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Apply Global Middlewares
-app.use(cors({ origin: '*' }));
-app.use(express.json());
+// Apply Global Security Middlewares
+app.use(helmet());
+
+// Tighten CORS to allow frontend endpoints only
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.FRONTEND_URL || 'https://curio-bot.vercel.app']
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS policy'));
+    }
+  },
+  credentials: true
+}));
+
+// Enforce size limit to prevent Denial of Service (DoS) payload attacks
+app.use(express.json({ limit: '10kb' }));
 app.use(generalRateLimiter);
 app.use(apiLogger); // Register custom colored request/response logging
 

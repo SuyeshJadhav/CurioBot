@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
+import { ListSkeleton } from '../common/Skeletons';
 
 export function LibraryCanvas() {
   const {
@@ -17,6 +18,7 @@ export function LibraryCanvas() {
     loadCollectionArticles,
     setActiveCollectionId,
     loadArticle,
+    isLoadingUserData,
   } = useCurio();
 
   const [filter, setFilter] = useState<'all' | 'saved' | 'read' | 'topic'>('all');
@@ -66,6 +68,23 @@ export function LibraryCanvas() {
     if (diffDays === 1) return 'Yesterday';
     return `${diffDays} days ago`;
   };
+
+  if (isLoadingUserData) {
+    return (
+      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+        <div className="noise-overlay" />
+        <h2 className="section-title">Library</h2>
+        <p className="section-sub">All your articles in one place — saved, read, and by topic</p>
+        <div className="filter-row" style={{ opacity: 0.5, pointerEvents: 'none' }}>
+          <button className="filter-btn on">All</button>
+          <button className="filter-btn">Saved</button>
+          <button className="filter-btn">Read</button>
+          <button className="filter-btn">By topic</button>
+        </div>
+        <ListSkeleton count={4} />
+      </div>
+    );
+  }
 
   // ── Render By Topic Sub-View Folder ──────────────────────────
   if (filter === 'topic' && activeCollectionId) {

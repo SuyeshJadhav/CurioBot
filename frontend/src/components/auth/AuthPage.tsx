@@ -102,7 +102,7 @@ export function AuthPage() {
               marginBottom: '0.25rem',
             }}
           >
-            {'CurioBot'}
+            {'Curios'}
           </h1>
           <span
             style={{

@@ -10,6 +10,7 @@ import {
   releaseLock,
 } from "../middleware/rateLimiter";
 import { pipelineLogger } from "../lib/observability";
+import { validateAndSanitizePrompt, validateInterestsArray } from "../lib/security";
 
 const router = Router();
 
@@ -25,7 +26,16 @@ router.post(
   checkDailyCeiling,
   asyncHandler(async (req, res, next: NextFunction) => {
     const userId = (req as any).userId;
-    const { interests, hint } = req.body as { interests?: string[]; hint?: string };
+    const { interests, hint } = req.body;
+
+    let validatedInterests: string[] = [];
+    let validatedHint: string = "";
+    try {
+      validatedInterests = validateInterestsArray(interests);
+      validatedHint = validateAndSanitizePrompt(hint, "hint", 150);
+    } catch (err) {
+      return next(err);
+    }
 
     // 1. Concurrency Lock check
     if (!acquireLock(userId)) {
@@ -44,8 +54,8 @@ router.post(
     const resolvedInterests =
       dbInterests.length > 0
         ? dbInterests
-        : interests?.length
-          ? interests
+        : validatedInterests.length > 0
+          ? validatedInterests
           : ["science", "technology", "history", "culture"];
 
     const { runSupervisorStream } = await import("../agents/supervisor");
@@ -92,7 +102,7 @@ router.post(
           res.write(`data: ${JSON.stringify(event)}\n\n`);
         },
         stateTracker,
-        hint
+        validatedHint || undefined
       );
 
       if (!resultState.currentTopic || !resultState.article) {
@@ -183,14 +193,18 @@ router.post(
   authenticate,
   asyncHandler(async (req, res) => {
     const userId = (req as any).userId;
-    const { message, context, history } = req.body as {
-      message: string;
-      context?: string;
-      history?: Array<{ role: "user" | "assistant"; content: string }>;
-    };
+    const { message, context, history } = req.body;
 
-    if (!message) {
-      throw new AppError(400, "message is required.");
+    let validatedMessage = "";
+    let validatedContext = "";
+    try {
+      validatedMessage = validateAndSanitizePrompt(message, "message", 1000);
+      if (!validatedMessage) {
+        throw new AppError(400, "message is required.");
+      }
+      validatedContext = validateAndSanitizePrompt(context, "context", 10000);
+    } catch (err) {
+      return next(err);
     }
 
     // Dynamically load tutor agent
@@ -218,7 +232,7 @@ router.post(
       hint: undefined,
       research: [],
       wikiResearch: [],
-      article: context ?? "",
+      article: validatedContext,
       tldr: undefined,
       rabbitHoles: undefined,
       researchSummary: undefined as string | undefined,
@@ -231,7 +245,7 @@ router.post(
       nodeMetrics: [],
     };
 
-    const reply = await tutorAgent(tutorState, message);
+    const reply = await tutorAgent(tutorState, validatedMessage);
     res.json({ reply });
   }),
 );

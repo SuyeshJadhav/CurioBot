@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
+import { Skeleton } from '../common/Skeletons';
 
 export function DailyWonderCanvas() {
   const {
@@ -7,11 +8,38 @@ export function DailyWonderCanvas() {
     isGeneratingWonder,
     loadDailyWonder,
     generateDailyWonder,
+    isLoadingUserData,
   } = useCurio();
 
   useEffect(() => {
     loadDailyWonder();
   }, [loadDailyWonder]);
+
+  if (isLoadingUserData) {
+    return (
+      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto' }}>
+        <div className="noise-overlay" />
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-headline)', fontSize: '2rem', fontWeight: 700, color: 'var(--ink-sepia)', marginBottom: '0.5rem' }}>
+            💡 The Daily Wonder
+          </h2>
+          <p style={{ fontSize: '1rem', color: 'var(--ink-wash)' }}>
+            A single, handpicked mystery generated every single day to expand your horizons.
+          </p>
+        </div>
+        <div className="card" style={{ padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <Skeleton style={{ height: '28px', width: '30%', borderRadius: '6px' }} />
+          <Skeleton style={{ height: '36px', width: '60%' }} />
+          <Skeleton style={{ height: '14px', width: '20%', marginTop: '4px' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+            <Skeleton style={{ height: '14px', width: '100%' }} />
+            <Skeleton style={{ height: '14px', width: '95%' }} />
+            <Skeleton style={{ height: '14px', width: '80%' }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isGeneratingWonder) {
     return (

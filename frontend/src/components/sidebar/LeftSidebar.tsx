@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCurio } from '../../contexts/CurioContext';
+import { SidebarRecentSkeleton } from '../common/Skeletons';
 
 const EXPANDED_WIDTH = 220;
 const COLLAPSED_WIDTH = 56;
@@ -21,6 +22,7 @@ export function LeftSidebar() {
     currentTopic,
     isMenuOpen,
     setMenuOpen,
+    isLoadingUserData,
   } = useCurio();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
@@ -93,9 +95,9 @@ export function LeftSidebar() {
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <img src="/favicon.svg" alt="CurioBot Logo" style={{ width: '18px', height: '18px', display: 'block' }} />
+            <img src="/favicon.svg" alt="Curios Logo" style={{ width: '18px', height: '18px', display: 'block' }} />
           </button>
-          <span className="sidebar-brand-name" style={{ fontWeight: 650, fontSize: '14px', color: 'var(--color-text-primary)' }}>CurioBot</span>
+          <span className="sidebar-brand-name" style={{ fontWeight: 650, fontSize: '14px', color: 'var(--color-text-primary)' }}>Curios</span>
         </div>
 
         {/* Home Link */}
@@ -161,7 +163,12 @@ export function LeftSidebar() {
 
         {/* Recent Quests Section */}
         <div className="sidebar-history-section">
-          {(history.length > 0 || isGeneratingArticle) && (
+          {isLoadingUserData ? (
+            <>
+              <div className="section-label" style={{ marginTop: '8px' }}>Recent</div>
+              <SidebarRecentSkeleton count={3} />
+            </>
+          ) : (history.length > 0 || isGeneratingArticle) && (
             <>
               <div className="section-label" style={{ marginTop: '8px' }}>Recent</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
