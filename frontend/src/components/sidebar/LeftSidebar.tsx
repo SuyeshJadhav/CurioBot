@@ -93,7 +93,7 @@ export function LeftSidebar() {
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <i className="ti ti-brain" style={{ fontSize: '18px', color: '#7F77DD' }}></i>
+            <img src="/file.svg" alt="CurioBot Logo" style={{ width: '18px', height: '18px', display: 'block' }} />
           </button>
           <span className="sidebar-brand-name" style={{ fontWeight: 650, fontSize: '14px', color: 'var(--color-text-primary)' }}>CurioBot</span>
         </div>
