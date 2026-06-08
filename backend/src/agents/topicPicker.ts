@@ -1,4 +1,3 @@
-import { getAllInterests } from "../lib/memory";
 import { generateEmbedding } from "../lib/embeddings";
 import { AgentStateType, NodeMetrics } from "../types";
 import { ai, safetySettings } from "../lib/gemini";
@@ -61,7 +60,7 @@ export async function topicPickerAgent(
   state: AgentStateType,
 ): Promise<Partial<AgentStateType>> {
   const startTime = Date.now();
-  const interests = await getAllInterests(state.userId);
+  const interests = state.interests || [];
 
   console.log("🔍 [Topic Picker Agent] Selecting topic...");
 
@@ -78,7 +77,7 @@ export async function topicPickerAgent(
 
   const prompt = `You are the editorial director of a general knowledge magazine — think Kurzgesagt, Wait But Why, or a really good Wikipedia rabbit hole. Your job is to pick topics that make a curious person stop scrolling and think "I need to read this."
 
-The reader is broadly curious about: ${interests.map((i) => i.interest).join(", ")}${hintSection}
+The reader is broadly curious about: ${interests.join(", ")}${hintSection}
 
 Editorial direction (follow this strictly):
 <topic_novelty_guide>${noveltyGuide}</topic_novelty_guide>

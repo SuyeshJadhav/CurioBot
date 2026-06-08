@@ -54,10 +54,10 @@ router.post(
 
     const dbInterests = await getUserInterests(userId);
     const resolvedInterests =
-      dbInterests.length > 0
-        ? dbInterests
-        : validatedInterests.length > 0
-          ? validatedInterests
+      validatedInterests.length > 0
+        ? validatedInterests
+        : dbInterests.length > 0
+          ? dbInterests
           : ["science", "technology", "history", "culture"];
 
     const { runSupervisorStream } = await import("../agents/supervisor");
