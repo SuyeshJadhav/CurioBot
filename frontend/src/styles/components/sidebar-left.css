@@ -139,7 +139,7 @@
 .sidebar-history-section {
   overflow: hidden;
   opacity: 1;
-  max-height: 400px;
+  max-height: none;
   transition: opacity 0.15s ease, max-height 0.25s ease;
   padding: 0 6px;
 }
@@ -403,9 +403,16 @@
   margin-bottom: 1px;
   transition: background 0.15s, color 0.15s;
 }
-.recent-item:hover {
+.recent-item:hover,
+.recent-item.active {
   background: var(--color-background-primary);
   color: var(--color-text-primary);
+}
+.recent-item.active {
+  font-weight: 550;
+}
+.recent-item.active .recent-trash {
+  opacity: 0.5;
 }
 .recent-item span {
   overflow: hidden;

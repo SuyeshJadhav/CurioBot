@@ -148,7 +148,8 @@ export function CurioProvider({ children }: { children: ReactNode }) {
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [state.token, state.user, loadUserData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.token, loadUserData]);
 
   // ── Auth Actions ────────────────────────────────────────────
 

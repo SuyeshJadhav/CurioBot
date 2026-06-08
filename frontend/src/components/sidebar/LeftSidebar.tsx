@@ -23,6 +23,7 @@ export function LeftSidebar() {
     isMenuOpen,
     setMenuOpen,
     isLoadingUserData,
+    activeArticleId,
   } = useCurio();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
@@ -194,20 +195,27 @@ export function LeftSidebar() {
                     </span>
                   </div>
                 )}
-                {history.slice(0, 4).map((entry) => (
-                  <div key={entry.id} className="recent-item" onClick={() => selectArticle(entry.id)}>
-                    <i className="ti ti-file-text" style={{ fontSize: '13px', flexShrink: 0 }} aria-hidden="true"></i>
-                    <span>{entry.topic}</span>
-                    <i 
-                      className="ti ti-trash recent-trash" 
-                      aria-hidden="true"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Delete "${entry.topic}"?`)) deleteArticle(entry.id);
-                      }}
-                    ></i>
-                  </div>
-                ))}
+                {history.map((entry) => {
+                  const isActive = entry.id === activeArticleId;
+                  return (
+                    <div 
+                      key={entry.id} 
+                      className={`recent-item${isActive ? ' active' : ''}`} 
+                      onClick={() => selectArticle(entry.id)}
+                    >
+                      <i className="ti ti-file-text" style={{ fontSize: '13px', flexShrink: 0 }} aria-hidden="true"></i>
+                      <span>{entry.topic}</span>
+                      <i 
+                        className="ti ti-trash recent-trash" 
+                        aria-hidden="true"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete "${entry.topic}"?`)) deleteArticle(entry.id);
+                        }}
+                      ></i>
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}
