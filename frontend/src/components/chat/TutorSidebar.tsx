@@ -2,7 +2,8 @@
 // Resizable via drag on the left edge. No collapse — always visible.
 
 import { useRef, useCallback, useEffect } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { useChat } from '../../contexts/ChatContext';
+import { usePipeline } from '../../contexts/PipelineContext';
 import { ChatMessage } from './ChatMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { ChatInput } from './ChatInput';
@@ -13,7 +14,8 @@ const DEFAULT_WIDTH = 320;
 const WIDTH_KEY = 'curio_sidebar_width';
 
 export function TutorSidebar() {
-  const { messages, isGeneratingChat, article, sendMessage, isTutorOpen, setTutorOpen } = useCurio();
+  const { messages, isGeneratingChat, sendMessage, isTutorOpen, setTutorOpen } = useChat();
+  const { article } = usePipeline();
   const isChatReady = !!article;
 
   const sidebarRef = useRef<HTMLElement>(null);

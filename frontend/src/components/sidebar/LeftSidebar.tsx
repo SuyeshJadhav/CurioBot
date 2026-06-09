@@ -2,7 +2,8 @@
 // Redesigned to match the Tabler Icons layout while retaining premium collapsibility.
 
 import { useCallback, useEffect, useState } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { usePipeline } from '../../contexts/PipelineContext';
 import { SidebarRecentSkeleton } from '../common/Skeletons';
 
 const EXPANDED_WIDTH = 220;
@@ -11,20 +12,12 @@ const COLLAPSED_KEY = 'curio_left_sidebar_collapsed';
 
 export function LeftSidebar() {
   const {
-    history,
-    activeTab,
-    changeTab,
-    loadArticle,
-    deleteArticle,
-    user,
-    logout,
-    isGeneratingArticle,
-    currentTopic,
-    isMenuOpen,
-    setMenuOpen,
-    isLoadingUserData,
-    activeArticleId,
-  } = useCurio();
+    activeTab, changeTab, user, logout, isMenuOpen, setMenuOpen,
+  } = useAuth();
+  const {
+    history, loadArticle, deleteArticle, isGeneratingArticle, currentTopic,
+    activeArticleId, isLoadingHistory,
+  } = usePipeline();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
     localStorage.getItem(COLLAPSED_KEY) === 'true'
@@ -164,7 +157,7 @@ export function LeftSidebar() {
 
         {/* Recent Quests Section */}
         <div className="sidebar-history-section">
-          {isLoadingUserData ? (
+          {isLoadingHistory ? (
             <>
               <div className="section-label" style={{ marginTop: '8px' }}>Recent</div>
               <SidebarRecentSkeleton count={3} />

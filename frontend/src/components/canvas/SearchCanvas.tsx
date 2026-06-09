@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePipeline } from '../../contexts/PipelineContext';
 
 export function SearchCanvas() {
-  const { history, loadArticle } = useCurio();
+  const { history, loadArticle } = usePipeline();
   const [query, setQuery] = useState('');
 
   const handleSearchSubmit = (e: React.FormEvent) => {

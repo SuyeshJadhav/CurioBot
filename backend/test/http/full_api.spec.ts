@@ -8,7 +8,10 @@ import { generateToken } from "../../src/lib/auth";
 describe("HTTP API - Full Coverage", () => {
   // --- POST /api/generate tests ---
   it("POST /api/generate - valid auth returns completed payload", async () => {
-    vi.resetModules();
+    vi.doMock("../../src/lib/memory", () => ({
+      getUserInterests: vi.fn(async () => ["science"]),
+    }));
+
     vi.doMock("../../src/middleware/rateLimiter", () => ({
       generalRateLimiter: (_req: any, _res: any, next: any) => next(),
       generateRateLimiter: (_req: any, _res: any, next: any) => next(),

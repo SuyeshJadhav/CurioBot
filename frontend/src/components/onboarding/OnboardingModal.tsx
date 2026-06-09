@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePreferences } from '../../contexts/UserPreferencesContext';
 
 const PRESETS = [
   'space exploration', 'astronomy', 'history', 'ancient egypt', 'nature',
@@ -8,12 +8,7 @@ const PRESETS = [
 ];
 
 export function OnboardingModal() {
-  const {
-    saveSettings,
-    addInterest,
-    loadInterests,
-    loadSettings,
-  } = useCurio();
+  const { saveSettings, addInterest, loadInterests, loadSettings } = usePreferences();
 
   const [step, setStep] = useState(1);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);

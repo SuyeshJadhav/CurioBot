@@ -1,4 +1,4 @@
-import { useCurio } from '../../contexts/CurioContext';
+import { usePipeline } from '../../contexts/PipelineContext';
 
 const BROWSE_TOPICS = [
   { label: 'Human behavior', class: 'tag-teal' },
@@ -12,7 +12,7 @@ const BROWSE_TOPICS = [
 export function DiscoverCanvas() {
   const {
     igniteQuest,
-  } = useCurio();
+  } = usePipeline();
 
   return (
     <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>

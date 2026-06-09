@@ -39,9 +39,9 @@ async function main() {
     state.conversationHistory.push({ role: "user", content: input });
 
     const response = await tutorAgent(state, input);
-    console.log(`\nCurioBot: ${response}\n`);
+    console.log(`\nCurioBot: ${response.reply}\n`);
 
-    state.conversationHistory.push({ role: "assistant", content: response });
+    state.conversationHistory.push({ role: "assistant", content: response.reply });
   }
 
   console.log("\n👋  See you next time!\n");

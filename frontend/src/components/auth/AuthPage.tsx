@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function AuthPage() {
-  const { login, loginWithOAuth, register } = useCurio();
+  const { login, loginWithOAuth, register } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');

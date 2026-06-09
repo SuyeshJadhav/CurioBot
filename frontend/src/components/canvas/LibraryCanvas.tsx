@@ -1,25 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePipeline } from '../../contexts/PipelineContext';
+import { useLibrary } from '../../contexts/LibraryContext';
 import { ListSkeleton } from '../common/Skeletons';
 
 export function LibraryCanvas() {
+  const { history, deleteArticle, loadArticle, isLoadingHistory } = usePipeline();
   const {
-    history,
-    deleteArticle,
-    savedSketches,
-    deleteSavedSketch,
-    updateSketchNotes,
-    loadSavedSketches,
-    libraryCollections,
-    activeCollectionId,
-    collectionArticles,
-    loadLibrary,
-    createCollection,
-    loadCollectionArticles,
-    setActiveCollectionId,
-    loadArticle,
-    isLoadingUserData,
-  } = useCurio();
+    savedSketches, deleteSavedSketch, updateSketchNotes, loadSavedSketches,
+    libraryCollections, activeCollectionId, collectionArticles, loadLibrary,
+    createCollection, loadCollectionArticles, setActiveCollectionId,
+  } = useLibrary();
+  const isLoadingUserData = isLoadingHistory;
 
   const [filter, setFilter] = useState<'all' | 'saved' | 'read' | 'topic'>('all');
 

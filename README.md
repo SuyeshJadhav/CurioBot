@@ -34,10 +34,9 @@ CurioBot doesn't just give you an article to read; it provides an **Interactive 
 - ⏳ **Timeout & Cancellation Protection:** Integrated `AbortSignal` cancellation flows that cleanly terminate running tasks when a client disconnects or times out.
 - 📊 **Detailed Observability:** Custom pipeline logging to `logs/pipeline_runs.jsonl` tracking execution duration, token counts, Tavily queries, and estimated API cost per run.
 - 🛡️ **Rate Limiting & Safety Locks:** Enforces sliding window rate limits, concurrency locks (blocking multiple parallel generations for the same user), and daily generation ceilings (20 articles/user/day).
-- ⚙️ **Daily Wonder Pre-Generation Worker:** A background worker pool that maintains a buffer of unused pre-generated daily wonder articles, serving them instantly to visitors to minimize load times and API costs.
 - 🎨 **Whimsical Multi-Canvas Viewport:** A custom-designed React 19 pastel journal UI featuring interactive canvas viewports:
   - **Home Canvas:** Pipeline progress checklist and article reader (with TLDR and rabbit holes).
-  - **Discover Canvas:** Daily Wonder article spotlight.
+  - **Discover Canvas:** Start custom topic explorations or quick-launch generations using predefined tag buttons.
   - **Search Canvas:** Directory search and bookmarking.
   - **Library Canvas:** Custom collection folders and mappings.
   - **Interests Canvas:** Interactive tag builder.
@@ -171,18 +170,18 @@ CurioBot/
 │   ├── src/
 │   │   ├── agents/      # LangGraph nodes (supervisor, topicPicker, dedupTopic, researcher, wikiResearcher, writer, tutor)
 │   │   ├── data/        # Seed interests and editorial templates
-│   │   ├── lib/         # API wrappers (gemini, mcp, supabase, memory, embeddings, tavily, wonderWorker, observability)
+│   │   ├── lib/         # API wrappers (gemini, mcp, supabase, memory, embeddings, tavily, observability)
 │   │   ├── middleware/  # Middlewares (logger, auth, rateLimiter, errorHandler)
-│   │   ├── routes/      # Modular routers (auth, ai, articles, wonder, library, settings)
+│   │   ├── routes/      # Modular routers (auth, ai [generate/tutor], articles, library, settings)
 │   │   └── types/       # Shared TypeScript types & AgentState Annotation
 │   ├── logs/            # Pipeline observability execution files
 │   ├── server.ts        # Express entry point
 │   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── actions/     # API request triggers (curio.ts)
+│   │   ├── actions/     # Modular actions (apiClient, authActions, pipelineActions, libraryActions, settingsActions, curio.ts legacy barrel)
 │   │   ├── components/  # Canvas sub-views, layouts, chat widgets
-│   │   ├── contexts/    # CurioContext global state
+│   │   ├── contexts/    # Split domain contexts (Auth, UserPreferences, Pipeline, Library, Chat, and CurioContext composer)
 │   │   ├── types/       # Client TypeScript types
 │   │   ├── index.css    # Tailwind v4 custom journal variables
 │   │   └── App.tsx      # App shell context mapping

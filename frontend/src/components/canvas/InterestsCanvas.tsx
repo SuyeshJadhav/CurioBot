@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePreferences } from '../../contexts/UserPreferencesContext';
 import { InterestSkeleton } from '../common/Skeletons';
 
 export function InterestsCanvas() {
@@ -7,8 +7,7 @@ export function InterestsCanvas() {
     interests,
     addInterest,
     deleteInterest,
-    isLoadingUserData,
-  } = useCurio();
+  } = usePreferences();
 
   const [newInterest, setNewInterest] = useState('');
 
@@ -33,7 +32,7 @@ export function InterestsCanvas() {
     }
   };
 
-  if (isLoadingUserData) {
+  if (interests === undefined) {
     return (
       <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
         <div className="noise-overlay" />

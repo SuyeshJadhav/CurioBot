@@ -104,8 +104,6 @@ export interface CurioState {
   libraryCollections: LibraryCollection[];
   activeCollectionId: string | null;
   collectionArticles: CollectionArticle[];
-  dailyWonder: DailyWonder | null;
-  isGeneratingWonder: boolean;
   
   // ── User Settings & Interests ─────────────────────────────
   userSettings: UserSettings | null;
@@ -141,8 +139,6 @@ export interface CurioContextType extends CurioState {
   addArticleToCollection: (collectionId: string, articleId: string) => Promise<void>;
   loadCollectionArticles: (collectionId: string) => Promise<void>;
   setActiveCollectionId: (collectionId: string | null) => void;
-  loadDailyWonder: () => Promise<void>;
-  generateDailyWonder: () => Promise<void>;
   
   loadSettings: () => Promise<void>;
   saveSettings: (settings: UserSettings) => Promise<void>;

@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useCurio } from '../../contexts/CurioContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { usePreferences } from '../../contexts/UserPreferencesContext';
 import type { UserSettings } from '../../types/curio';
 import { SettingsSkeleton } from '../common/Skeletons';
 
 export function SettingsCanvas() {
-  const {
-    user,
-    userSettings,
-    saveSettings,
-    isLoadingUserData,
-  } = useCurio();
+  const { user } = useAuth();
+  const { userSettings, saveSettings } = usePreferences();
+  const isLoadingUserData = !userSettings && !user;
 
   const [readingTime, setReadingTime] = useState(userSettings?.reading_time || '5min');
   const [novelty, setNovelty] = useState(userSettings?.topic_novelty || 'mixed');

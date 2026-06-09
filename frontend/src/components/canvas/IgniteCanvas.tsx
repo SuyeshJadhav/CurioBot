@@ -9,7 +9,8 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePipeline } from '../../contexts/PipelineContext';
+import { useLibrary } from '../../contexts/LibraryContext';
 
 // ── Pipeline step labels ──────────────────────────────────────
 // Shows the user what the agent is doing while they wait.
@@ -25,18 +26,10 @@ export function IgniteCanvas() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const {
-    article,
-    currentTopic,
-    currentArticleId,
-    isGeneratingArticle,
-    generationStatus,
-    igniteQuest,
-    savedSketches,
-    toggleSaveArticle,
-    libraryCollections,
-    addArticleToCollection,
-    rabbitHoles,
-  } = useCurio();
+    article, currentTopic, currentArticleId, isGeneratingArticle,
+    generationStatus, igniteQuest, rabbitHoles,
+  } = usePipeline();
+  const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
   useEffect(() => {
     if (!article) {

@@ -29,44 +29,6 @@ describe("CurioBot Issue Resolutions", () => {
     consoleSpy.mockRestore();
   });
 
-  it("wonder pool generation route skips wonder pool when user preferences do not match", async () => {
-    vi.resetModules();
-    const mockUserSettings = {
-      knowledge_level: "beginner", // Mismatch (requires intermediate)
-      topic_novelty: "mixed",
-    };
-
-    vi.doMock("../../src/lib/db", () => ({
-      getDailyWonder: vi.fn(async () => null),
-      getUserSettings: vi.fn(async () => mockUserSettings),
-      publishDailyWonder: vi.fn(async () => {}),
-      saveArticle: vi.fn(async () => "article-123"),
-    }));
-
-    // Mock supervisor to bypass live generation
-    vi.doMock("../../src/agents/supervisor", () => ({
-      supervisorAgent: vi.fn(async () => ({
-        currentTopic: { title: "Live Topic", summary: "summary", domain: "science" },
-        articleId: "live-article-123",
-        article: "content",
-      })),
-    }));
-
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
-    const { default: app } = await import("../../server");
-    const { generateToken } = await import("../../src/lib/auth");
-    const token = generateToken("test-user-settings-mismatch");
-
-    const request = (await import("supertest")).default;
-    const res = await request(app)
-      .post("/api/wonder/generate")
-      .set("Authorization", `Bearer ${token}`);
-
-    expect(res.status).toBe(200);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Personalization mismatch for pool"));
-    consoleSpy.mockRestore();
-  });
 
   it("mcp transport cleanup listener triggers process.kill on transport.pid", async () => {
     const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);

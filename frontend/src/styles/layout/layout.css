@@ -44,7 +44,7 @@
 @media (max-width: 768px) {
   .left-sidebar { display: none; }
   .mobile-bar { display: flex !important; }
-  .main-content { margin-left: 0 !important; margin-right: 0 !important; }
+  .main-content { margin-left: 0 !important; margin-right: 0 !important; padding-top: 56px; }
 }
 .mobile-bar {
   display: none;

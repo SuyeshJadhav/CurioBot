@@ -1,20 +1,14 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useCurio } from '../../contexts/CurioContext';
+import { usePipeline } from '../../contexts/PipelineContext';
+import { useLibrary } from '../../contexts/LibraryContext';
 import { ArticleSkeleton } from '../common/Skeletons';
 
 export function ArticleReaderCanvas() {
   const {
-    article,
-    currentTopic,
-    currentArticleId,
-    closeArticle,
-    igniteQuest,
-    savedSketches,
-    toggleSaveArticle,
-    libraryCollections,
-    addArticleToCollection,
-  } = useCurio();
+    article, currentTopic, currentArticleId, closeArticle, igniteQuest,
+  } = usePipeline();
+  const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
   const isSaved = savedSketches.some(s => s.article_id === currentArticleId);
 
