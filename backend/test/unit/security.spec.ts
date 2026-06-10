@@ -68,10 +68,10 @@ describe("Interests Array Validation", () => {
   });
 
   it("throws error for arrays exceeding limit size", () => {
-    const tooMany = Array(16).fill("interest");
+    const tooMany = Array(51).fill("interest");
     expect(() => {
       validateInterestsArray(tooMany);
-    }).toThrow(/Maximum of 15 interests allowed/);
+    }).toThrow(/Maximum of 50 interests allowed/);
   });
 
   it("throws error if any element contains prompt injection", () => {

@@ -82,7 +82,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     setPipelineMessages([INIT_BOT_MSG]);
     try {
       const result = await runCurioPipeline(
-        interests.length ? interests : undefined,
+        interests.length ? interests.slice(0, 15) : undefined,
         (status, data) => { setGenerationStatus(status); if (status === 'researching' && data) setCurrentTopic(data.title); },
         hint,
         topicObj,

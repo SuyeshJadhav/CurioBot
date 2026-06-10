@@ -61,8 +61,8 @@ export function validateInterestsArray(interests: any): string[] {
   if (!Array.isArray(interests)) {
     throw new AppError(400, "interests must be an array of strings.");
   }
-  if (interests.length > 15) {
-    throw new AppError(400, "Maximum of 15 interests allowed.");
+  if (interests.length > 50) {
+    throw new AppError(400, "Maximum of 50 interests allowed.");
   }
   
   return interests.map((item, idx) => {
