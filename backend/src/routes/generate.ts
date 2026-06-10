@@ -109,13 +109,27 @@ router.post(
   checkTokenBalance,
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const userId = (req as any).userId;
-    const { interests, hint } = req.body;
+    const { interests, hint, topic } = req.body;
 
     let validatedInterests: string[] = [];
     let validatedHint = "";
+    let validatedTopic: any = undefined;
     try {
       validatedInterests = validateInterestsArray(interests);
       validatedHint = validateAndSanitizePrompt(hint, "hint", 150);
+      if (topic) {
+        if (typeof topic !== "object" || Array.isArray(topic)) {
+          throw new AppError(400, "topic must be an object.");
+        }
+        if (!topic.title) {
+          throw new AppError(400, "topic.title is required.");
+        }
+        validatedTopic = {
+          title: validateAndSanitizePrompt(topic.title, "topic.title", 150),
+          domain: topic.domain ? validateAndSanitizePrompt(topic.domain, "topic.domain", 50) : undefined,
+          summary: topic.summary ? validateAndSanitizePrompt(topic.summary, "topic.summary", 250) : undefined,
+        };
+      }
     } catch (err) { return next(err); }
 
     // ── Reconnection: replay buffer if an active run exists ─────────────────
@@ -178,6 +192,7 @@ router.post(
         resolvedInterests, userId, controller.signal,
         (event) => broadcast(gen, event),
         stateTracker, validatedHint || undefined,
+        validatedTopic,
       );
 
       if (!resultState.currentTopic || !resultState.article) {

@@ -139,7 +139,7 @@ export function ArticleReaderCanvas() {
                   gap: '4px',
                   transition: 'opacity 0.2s',
                 }}
-                onClick={() => igniteQuest(undefined, hole.title)}
+                onClick={() => igniteQuest({ title: hole.title, domain: hole.domain, summary: hole.why })}
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >

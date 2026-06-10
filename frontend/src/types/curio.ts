@@ -125,7 +125,7 @@ export interface CurioContextType extends CurioState {
   setMenuOpen: (open: boolean) => void;
   
   sendMessage: (content: string) => Promise<void>;
-  igniteQuest: (topic?: string, hint?: string) => Promise<void>;
+  igniteQuest: (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => Promise<void>;
   clearSession: () => void;
 
   loadArticle: (id: string) => Promise<void>;

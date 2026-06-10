@@ -10,6 +10,17 @@ export async function dedupTopicNode(
 		return { dedupPassed: false };
 	}
 
+	// If a specific topic was requested, bypass dedup similarity check entirely
+	if (state.requestedTopic) {
+		console.log(`✅ [Dedup] Bypassing dedup for requested topic: "${state.currentTopic.title}"`);
+		const nodeMetric: NodeMetrics = {
+			nodeName: "dedup_topic",
+			durationMs: Date.now() - startTime,
+			success: true,
+		};
+		return { dedupPassed: true, nodeMetrics: [nodeMetric] };
+	}
+
 	// Reuse the embedding already computed by topicPicker — no extra API call
 	if (!state.topicEmbedding) {
 		console.warn("⚠️ [Dedup] No embedding found, skipping dedup check.");

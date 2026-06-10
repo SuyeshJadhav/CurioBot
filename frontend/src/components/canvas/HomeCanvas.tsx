@@ -193,7 +193,7 @@ export function HomeCanvas() {
                   justifyContent: 'space-between',
                   gap: '12px'
                 }}
-                onClick={() => igniteQuest(suggestion.topic, suggestion.topic)}
+                onClick={() => igniteQuest({ title: suggestion.topic, domain: suggestion.tag })}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
                   e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.04)';

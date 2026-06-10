@@ -1,11 +1,11 @@
 import { generateEmbedding } from "../lib/embeddings";
-import { AgentStateType, NodeMetrics } from "../types";
+import { AgentStateType, NodeMetrics, Topic } from "../types";
 import { ai, safetySettings } from "../lib/gemini";
 import { pickRandomTemplate } from "../data/editorialTemplates";
 import { AppError } from "../lib/errors";
 
 
-interface Topic {
+interface LocalTopic {
   id: string;
   title: string;
   domain: string;
@@ -15,7 +15,7 @@ interface Topic {
   read: boolean;
 }
 
-const FALLBACK_TOPIC: Topic = {
+const FALLBACK_TOPIC: LocalTopic = {
   id: "strange-history-of-time-zones",
   title: "The Strange History of Time Zones",
   domain: "history",
@@ -27,7 +27,7 @@ const FALLBACK_TOPIC: Topic = {
   read: false,
 };
 
-function validateTopic(obj: any): Topic {
+function validateTopic(obj: any): LocalTopic {
   if (!obj || typeof obj !== "object") {
     throw new Error("Candidate is not a JSON object");
   }
@@ -61,6 +61,31 @@ export async function topicPickerAgent(
 ): Promise<Partial<AgentStateType>> {
   const startTime = Date.now();
   const interests = state.interests || [];
+
+  if (state.requestedTopic && (!state.dedupAttempts || state.dedupAttempts === 0)) {
+    console.log(`🔍 [Topic Picker Agent] Using requested topic: "${state.requestedTopic.title}"`);
+    const candidate: Topic = {
+      id: state.requestedTopic.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      title: state.requestedTopic.title,
+      domain: state.requestedTopic.domain || interests[0] || "general",
+      summary: state.requestedTopic.summary || `An exploration of ${state.requestedTopic.title}.`,
+      connections: [],
+      read: false
+    };
+    const durationMs = Date.now() - startTime;
+    const nodeMetric: NodeMetrics = {
+      nodeName: "topic picker",
+      durationMs,
+      success: true,
+      inputTokens: 0,
+      outputTokens: 0,
+    };
+    return {
+      currentTopic: candidate,
+      seenTopics: [candidate.title],
+      nodeMetrics: [nodeMetric],
+    };
+  }
 
   console.log("🔍 [Topic Picker Agent] Selecting topic...");
 

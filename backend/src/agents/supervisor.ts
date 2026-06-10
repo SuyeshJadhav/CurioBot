@@ -1,4 +1,4 @@
-import { AgentState, AgentStateType } from "../types";
+import { AgentState, AgentStateType, Topic } from "../types";
 import { topicPickerAgent } from "./topicPicker";
 import { researcherAgent } from "./researcher";
 import { writerAgent } from "./writer";
@@ -63,12 +63,13 @@ export async function supervisorAgent(
   interests: string[],
   userId: string,
   signal?: AbortSignal,
-  hint?: string
+  hint?: string,
+  topic?: Partial<Topic>
 ): Promise<AgentStateType & { articleId?: string }> {
   console.log("\n🎯 [Supervisor] Starting pipeline...");
 
   const settings = await getUserSettings(userId);
-  const result = await app.invoke({ interests, userId, userSettings: settings, signal, hint });
+  const result = await app.invoke({ interests, userId, userSettings: settings, signal, hint, requestedTopic: topic });
 
   let articleId: string | undefined;
   let dbStartTime = Date.now();
@@ -133,7 +134,8 @@ export async function runSupervisorStream(
   signal: AbortSignal,
   onUpdate: (event: { status: string; data?: any }) => void,
   stateTracker?: { lastState: any },
-  hint?: string
+  hint?: string,
+  topic?: Partial<Topic>
 ): Promise<AgentStateType & { articleId?: string }> {
   console.log("\n🎯 [Supervisor] Starting streaming pipeline...");
 
@@ -141,7 +143,7 @@ export async function runSupervisorStream(
   onUpdate({ status: 'picking_topic' });
 
   const stream = await app.stream(
-    { interests, userId, userSettings: settings, signal, hint },
+    { interests, userId, userSettings: settings, signal, hint, requestedTopic: topic },
     { streamMode: "updates" }
   );
 

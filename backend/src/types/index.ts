@@ -61,6 +61,7 @@ export const AgentState = Annotation.Root({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),
     default: () => []
   }),
+  requestedTopic: Annotation<Partial<Topic> | undefined>(),
   currentTopic: Annotation<Topic | undefined>(),
   topicEmbedding: Annotation<number[] | undefined>(),
   signal: Annotation<AbortSignal | undefined>(),

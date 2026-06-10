@@ -18,7 +18,7 @@ export interface PipelineContextType {
   history: HistoryEntry[];
   isLoadingHistory: boolean;
   pipelineMessages: Message[];  // error messages from pipeline runs
-  igniteQuest: (topic?: string, hint?: string) => Promise<void>;
+  igniteQuest: (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => Promise<void>;
   loadArticle: (id: string) => Promise<void>;
   closeArticle: () => void;
   clearSession: () => void;
@@ -62,16 +62,30 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { if (token) loadHistory(); }, [token, loadHistory]);
 
-  const igniteQuest = useCallback(async (topic?: string, hint?: string) => {
-    setCurrentTopic(topic ?? null); setArticle(null); setCurrentArticleId(null);
+  const igniteQuest = useCallback(async (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => {
+    let topicObj: { title: string; domain?: string; summary?: string } | undefined = undefined;
+    let displayTitle: string | null = null;
+
+    if (topic) {
+      if (typeof topic === 'string') {
+        topicObj = { title: topic };
+        displayTitle = topic;
+      } else {
+        topicObj = topic;
+        displayTitle = topic.title;
+      }
+    }
+
+    setCurrentTopic(displayTitle); setArticle(null); setCurrentArticleId(null);
     setActiveArticleId(null); setIsGeneratingArticle(true);
     setGenerationStatus('picking_topic'); setRabbitHoles(null); setTldr(null);
     setPipelineMessages([INIT_BOT_MSG]);
     try {
       const result = await runCurioPipeline(
-        topic ? [topic] : (interests.length ? interests : undefined),
+        interests.length ? interests : undefined,
         (status, data) => { setGenerationStatus(status); if (status === 'researching' && data) setCurrentTopic(data.title); },
         hint,
+        topicObj,
       );
       setCurrentTopic(result.topic.title); setArticle(result.article);
       setCurrentArticleId(result.articleId ?? null); setActiveArticleId(result.articleId ?? null);

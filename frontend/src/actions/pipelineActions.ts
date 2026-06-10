@@ -22,10 +22,11 @@ export async function runCurioPipeline(
   interests: string[] = ['science', 'technology', 'history', 'culture'],
   onStatus?: (status: string, data?: any) => void,
   hint?: string,
+  topic?: { title: string; domain?: string; summary?: string },
 ): Promise<PipelineResult> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      return await attemptPipeline(interests, onStatus, hint);
+      return await attemptPipeline(interests, onStatus, hint, topic);
     } catch (err: any) {
       const isNetworkDrop = err instanceof TypeError || err.message?.includes('network');
       if (!isNetworkDrop || attempt === MAX_RETRIES) throw err;
@@ -41,11 +42,12 @@ async function attemptPipeline(
   interests: string[],
   onStatus?: (status: string, data?: any) => void,
   hint?: string,
+  topic?: { title: string; domain?: string; summary?: string },
 ): Promise<PipelineResult> {
   const res = await fetch(`${API_BASE}/api/generate`, {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify({ interests, hint }),
+    body: JSON.stringify({ interests, hint, topic }),
   });
 
   if (!res.ok) {
