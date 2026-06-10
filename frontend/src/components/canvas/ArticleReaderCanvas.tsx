@@ -6,7 +6,7 @@ import { ArticleSkeleton } from '../common/Skeletons';
 
 export function ArticleReaderCanvas() {
   const {
-    article, currentTopic, currentArticleId, closeArticle, igniteQuest,
+    article, currentTopic, currentArticleId, closeArticle, igniteQuest, rabbitHoles,
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
@@ -104,6 +104,93 @@ export function ArticleReaderCanvas() {
           {article || ''}
         </ReactMarkdown>
       </div>
+
+      {/* Recommended Articles Section (Medium Style) */}
+      {rabbitHoles && rabbitHoles.length > 0 && (
+        <div style={{
+          marginTop: '3rem',
+          paddingTop: '1.5rem',
+          borderTop: '1px dashed var(--color-border-tertiary, #e5e9ec)',
+        }}>
+          <h4 style={{
+            fontFamily: 'var(--font-headline)',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'var(--color-text-secondary, #57534e)',
+            marginBottom: '1rem',
+            marginTop: 0,
+          }}>
+            Explore next
+          </h4>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '1.5rem',
+          }}>
+            {rabbitHoles.slice(0, 2).map((hole, index) => (
+              <div 
+                key={index} 
+                style={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  transition: 'opacity 0.2s',
+                }}
+                onClick={() => igniteQuest(undefined, hole.title)}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                <span style={{
+                  fontSize: '0.68rem',
+                  textTransform: 'uppercase',
+                  color: 'var(--primary, #7F77DD)',
+                  fontWeight: 650,
+                  letterSpacing: '0.04em',
+                }}>
+                  {hole.domain}
+                </span>
+                <h3 style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  margin: '2px 0',
+                  color: 'var(--color-text-primary, #1c1917)',
+                  fontFamily: 'var(--font-headline)',
+                  lineHeight: '1.3',
+                }}>
+                  {hole.title}
+                </h3>
+                <p style={{
+                  fontSize: '0.78rem',
+                  color: 'var(--color-text-secondary, #57534e)',
+                  margin: 0,
+                  lineHeight: '1.4',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}>
+                  {hole.why}
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.75rem',
+                  color: 'var(--primary, #7F77DD)',
+                  fontWeight: 600,
+                  marginTop: '4px',
+                }}>
+                  <span>Read story</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>arrow_forward</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer actions */}
       <div 

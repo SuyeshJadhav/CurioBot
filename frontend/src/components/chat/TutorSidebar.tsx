@@ -11,9 +11,7 @@ import { ChatInput } from './ChatInput';
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 560;
 const DEFAULT_WIDTH = 320;
-const WIDTH_KEY = 'curio_sidebar_width';
-
-export function TutorSidebar() {
+const WIDTH_KEY = 'curio_sidebar_width';export function TutorSidebar() {
   const { messages, isGeneratingChat, sendMessage, isTutorOpen, setTutorOpen } = useChat();
   const { article } = usePipeline();
   const isChatReady = !!article;

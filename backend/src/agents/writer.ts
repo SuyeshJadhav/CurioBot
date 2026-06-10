@@ -32,6 +32,8 @@ async function generateContentWithAbort(
 					tldr: { type: "string" },
 					rabbit_holes: {
 						type: "array",
+						minItems: 2,
+						maxItems: 2,
 						items: {
 							type: "object",
 							properties: {
@@ -156,7 +158,7 @@ Return ONLY a valid JSON object with these exact fields:
 - title: the article title (string)
 - article: the full article body in markdown (string)
 - tldr: one sentence that captures the core insight (string)
-- rabbit_holes: array of 2-3 objects, each with "title", "domain", and "why"
+- rabbit_holes: array of exactly 2 objects, each with "title", "domain", and "why"
 `;
 
 	let response: any;

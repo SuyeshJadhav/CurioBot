@@ -6,11 +6,10 @@
 //   2. LOADING — spinner overlay while LangGraph pipeline runs
 //   3. ARTICLE — Markdown content from the writer node (via react-markdown)
 
-import { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { useLibrary } from '../../contexts/LibraryContext';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // ── Pipeline step labels ──────────────────────────────────────
 // Shows the user what the agent is doing while they wait.
@@ -22,39 +21,11 @@ const PIPELINE_STEPS = [
 ];
 
 export function IgniteCanvas() {
-  const [showRabbitHoles, setShowRabbitHoles] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
   const {
     article, currentTopic, currentArticleId, isGeneratingArticle,
-    generationStatus, igniteQuest, rabbitHoles,
+    generationStatus, igniteQuest,
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
-
-  useEffect(() => {
-    if (!article) {
-      setShowRabbitHoles(false);
-      return;
-    }
-
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting) {
-          setShowRabbitHoles(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(sentinel);
-    return () => {
-      if (sentinel) observer.unobserve(sentinel);
-    };
-  }, [article]);
 
   // Helper to determine step status
   const getStepState = (index: number, currentStatus: string | null): 'completed' | 'active' | 'pending' => {
@@ -184,7 +155,7 @@ export function IgniteCanvas() {
     );
   }
 
-  // ── Article state ─────────────────────────────────────────
+  // ── Article state (Fallback / HMR check) ──────────────────
   if (article) {
     return (
       <article style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto' }}>
@@ -229,107 +200,6 @@ export function IgniteCanvas() {
             {article}
           </ReactMarkdown>
         </div>
-
-        <div ref={sentinelRef} style={{ height: '1px' }} />
-
-        {/* Rabbit Holes Scroll Gate Panel */}
-        {showRabbitHoles && rabbitHoles && rabbitHoles.length > 0 && (
-          <div className="rabbit-holes-container" style={{
-            marginTop: '2.5rem',
-            padding: '1.5rem',
-            background: 'rgba(174, 198, 207, 0.08)',
-            border: '1px solid var(--outline-variant)',
-            borderRadius: '12px',
-            boxShadow: 'var(--shadow-sm)',
-            animation: 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-          }}>
-            <h3 style={{
-              fontFamily: 'var(--font-headline)',
-              fontSize: '1.15rem',
-              fontWeight: 655,
-              color: 'var(--ink-charcoal)',
-              marginBottom: '1rem',
-              marginTop: 0,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <span className="material-symbols-outlined" style={{ color: 'var(--tertiary)', fontSize: '1.3rem' }}>
-                route
-              </span>
-              Follow a Rabbit Hole
-            </h3>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-              gap: '1rem'
-            }}>
-              {rabbitHoles.map((hole, index) => (
-                <div key={index} className="card paper-shadow" style={{
-                  padding: '1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.4rem',
-                  background: 'var(--surface-paper)',
-                  transition: 'all 0.2s ease',
-                  border: '1px solid var(--outline-variant)',
-                  borderRadius: '8px'
-                }}>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--font-hand)',
-                    color: 'var(--primary)',
-                    textTransform: 'uppercase',
-                    fontWeight: 650
-                  }}>
-                    {hole.domain}
-                  </div>
-                  <h4 style={{
-                    margin: 0,
-                    fontSize: '0.92rem',
-                    fontWeight: 600,
-                    color: 'var(--ink-charcoal)',
-                    fontFamily: 'var(--font-headline)'
-                  }}>
-                    {hole.title}
-                  </h4>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '0.8rem',
-                    color: 'var(--ink-wash)',
-                    lineHeight: 1.45,
-                    flex: 1
-                  }}>
-                    {hole.why}
-                  </p>
-                  <button
-                    className="new-quest-btn"
-                    style={{
-                      marginTop: '0.8rem',
-                      alignSelf: 'flex-start',
-                      fontSize: '0.78rem',
-                      padding: '0.35rem 0.8rem',
-                      border: '1px solid var(--outline-variant)',
-                      background: 'rgba(174, 198, 207, 0.15)',
-                      borderRadius: 'var(--border-radius-sm)',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.2rem'
-                    }}
-                    onClick={() => igniteQuest(undefined, hole.title)}
-                  >
-                    Explore this
-                    <span className="material-symbols-outlined" style={{ fontSize: '0.9rem' }}>
-                      arrow_right_alt
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Footer actions */}
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
