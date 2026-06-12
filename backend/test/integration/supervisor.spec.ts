@@ -26,6 +26,6 @@ describe("supervisor pipeline integration", () => {
       expect(typeof articleId).toBe("string");
       expect(articleId).toBe("article-1");
     },
-    { timeout: 20000 },
+    20000,
   );
 });

@@ -1,6 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 
-const baseAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+let baseAiInstance: GoogleGenAI | null = null;
+
+function getAi(): GoogleGenAI {
+  if (!baseAiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.warn("⚠️ [Gemini Client] GEMINI_API_KEY is not defined in process.env!");
+    }
+    baseAiInstance = new GoogleGenAI({ apiKey: apiKey || "" });
+  }
+  return baseAiInstance;
+}
 
 // Helper to wrap API calls with retry logic on 429 or 503
 async function withRetry<T>(fn: () => Promise<T>, retries = 5, delay = 2000): Promise<T> {
@@ -26,12 +37,12 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 5, delay = 2000): Pr
 
 export const ai = {
   models: {
-    generateContent: (args: any) => withRetry(() => baseAi.models.generateContent(args)),
-    embedContent: (args: any) => withRetry(() => baseAi.models.embedContent(args)),
+    generateContent: (args: any) => withRetry(() => getAi().models.generateContent(args)),
+    embedContent: (args: any) => withRetry(() => getAi().models.embedContent(args)),
   },
   chats: {
     create: (args: any) => {
-      const chat = baseAi.chats.create(args);
+      const chat = getAi().chats.create(args);
       const originalSendMessage = chat.sendMessage.bind(chat);
       chat.sendMessage = (msgArgs: any) => withRetry(() => originalSendMessage(msgArgs));
       return chat;
@@ -56,4 +67,4 @@ export const safetySettings = [
 		category: "HARM_CATEGORY_DANGEROUS_CONTENT",
 		threshold: "BLOCK_MEDIUM_AND_ABOVE",
 	},
-] as const;
+] as const;

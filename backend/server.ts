@@ -1,7 +1,8 @@
+import "dotenv/config";
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { apiLogger } from './src/middleware/logger';
 import { errorHandler } from './src/middleware/errorHandler';
 import { generalRateLimiter } from './src/middleware/rateLimiter';
@@ -12,8 +13,6 @@ import aiRouter from './src/routes/ai';
 import articlesRouter from './src/routes/articles';
 import libraryRouter from './src/routes/library';
 import settingsRouter from './src/routes/settings';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

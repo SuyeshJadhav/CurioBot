@@ -40,6 +40,7 @@ router.post(
       interests: dbInterests,
       seenTopics: [] as string[],
       userSettings: settings,
+      requestedTopic: undefined,
       currentTopic: context
         ? { id: "current", title: "Current Article", domain: "general", summary: "", connections: [], read: true }
         : undefined,

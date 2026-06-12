@@ -62,13 +62,14 @@ export async function topicPickerAgent(
   const startTime = Date.now();
   const interests = state.interests || [];
 
-  if (state.requestedTopic && (!state.dedupAttempts || state.dedupAttempts === 0)) {
-    console.log(`🔍 [Topic Picker Agent] Using requested topic: "${state.requestedTopic.title}"`);
+  const requestedTitle = state.requestedTopic?.title;
+  if (requestedTitle && (!state.dedupAttempts || state.dedupAttempts === 0)) {
+    console.log(`🔍 [Topic Picker Agent] Using requested topic: "${requestedTitle}"`);
     const candidate: Topic = {
-      id: state.requestedTopic.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-      title: state.requestedTopic.title,
-      domain: state.requestedTopic.domain || interests[0] || "general",
-      summary: state.requestedTopic.summary || `An exploration of ${state.requestedTopic.title}.`,
+      id: requestedTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      title: requestedTitle,
+      domain: state.requestedTopic?.domain || interests[0] || "general",
+      summary: state.requestedTopic?.summary || `An exploration of ${requestedTitle}.`,
       connections: [],
       read: false
     };
