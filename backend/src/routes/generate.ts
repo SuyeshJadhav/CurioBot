@@ -189,10 +189,47 @@ function cleanupActiveRun(userId: string) {
   releaseLock(userId);
 }
 
+// ── Reconnect Guard Middleware ───────────────────────────────────────────────
+function reconnectGuard(req: Request, res: Response, next: NextFunction) {
+  const userId = (req as any).userId;
+  if (!userId) return next();
+
+  const existing = activeGenerations.get(userId);
+  const requestedJobId = req.query.jobId as string | undefined;
+  
+  const isReconnect = existing && !existing.finished && 
+    (!requestedJobId || requestedJobId === existing.jobId);
+
+  if (!isReconnect) {
+    return next();
+  }
+
+  // ── Re-attach SSE stream ────────────────────────────────────────────────
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  if (existing.disconnectTimer) {
+    clearTimeout(existing.disconnectTimer);
+    existing.disconnectTimer = undefined;
+  }
+  existing.writers.push(res);
+  for (const line of existing.buffer) {
+    try {
+      res.write(line);
+    } catch {
+      /* ignore */
+    }
+  }
+  res.on("close", () => handleDisconnect(userId, res));
+}
+
 // ── POST /generate ───────────────────────────────────────────────────────────
 router.post(
   "/",
   authenticate,
+  reconnectGuard,
   generateRateLimiter,
   checkDailyCeiling,
   checkTokenBalance,
@@ -225,30 +262,6 @@ router.post(
       }
     } catch (err) {
       return next(err);
-    }
-
-    // ── Reconnection: replay buffer if an active run exists ─────────────────
-    const existing = activeGenerations.get(userId);
-    if (existing && !existing.finished) {
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-cache");
-      res.setHeader("Connection", "keep-alive");
-      res.flushHeaders();
-
-      if (existing.disconnectTimer) {
-        clearTimeout(existing.disconnectTimer);
-        existing.disconnectTimer = undefined;
-      }
-      existing.writers.push(res);
-      for (const line of existing.buffer) {
-        try {
-          res.write(line);
-        } catch {
-          /* ignore */
-        }
-      }
-      res.on("close", () => handleDisconnect(userId, res));
-      return;
     }
 
     // ── Acquire concurrency lock ─────────────────────────────────────────────
@@ -299,6 +312,9 @@ router.post(
       jobToUser.set(jobId, userId);
 
       res.on("close", () => handleDisconnect(userId, res));
+      
+      // Emit the initial queued status so the client can persist the jobId
+      broadcast(gen, { status: "queued", jobId });
     } catch (err: any) {
       releaseLock(userId);
       console.error(`🔴 [API] Failed to start generation job:`, err);

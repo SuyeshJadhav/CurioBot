@@ -3,34 +3,38 @@ import { AppError } from '../lib/errors';
 import supabase from '../lib/supabase';
 import { getUserTokenBalance } from '../lib/db';
 
-// In-memory concurrency locks: Map<userId, { timer: NodeJS.Timeout; timestamp: number }>
-export const activeGenerations = new Map<string, { timer: NodeJS.Timeout; timestamp: number }>();
+// In-memory concurrency locks
+const activeLocks = new Set<string>();
+const lockTimers = new Map<string, NodeJS.Timeout>();
 const LOCK_TTL_MS = 180 * 1000; // 180 seconds absolute failsafe TTL
 
 /**
  * Concurrency check lock
  */
 export function acquireLock(userId: string): boolean {
-  if (activeGenerations.has(userId)) {
+  if (activeLocks.has(userId)) {
     return false;
   }
 
   // Set absolute failsafe TTL timer to release the lock in case of uncaught node loop issues
   const timer = setTimeout(() => {
     console.warn(`⚠️ [Failsafe TTL] Concurrency lock for user ${userId} expired after ${LOCK_TTL_MS}ms. Forcing release.`);
-    activeGenerations.delete(userId);
+    activeLocks.delete(userId);
+    lockTimers.delete(userId);
   }, LOCK_TTL_MS);
 
-  activeGenerations.set(userId, { timer, timestamp: Date.now() });
+  activeLocks.add(userId);
+  lockTimers.set(userId, timer);
   return true;
 }
 
 export function releaseLock(userId: string): void {
-  const lock = activeGenerations.get(userId);
-  if (lock) {
-    clearTimeout(lock.timer);
-    activeGenerations.delete(userId);
+  const timer = lockTimers.get(userId);
+  if (timer) {
+    clearTimeout(timer);
   }
+  activeLocks.delete(userId);
+  lockTimers.delete(userId);
 }
 
 // In-memory sliding window store

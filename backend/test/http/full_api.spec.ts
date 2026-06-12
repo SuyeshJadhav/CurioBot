@@ -21,28 +21,37 @@ describe("HTTP API - Full Coverage", () => {
       releaseLock: (_userId: string) => {},
     }));
 
-    vi.doMock("../../src/agents/supervisor", () => ({
-      runSupervisorStream: async (
-        _interests: any,
-        _userId: any,
-        _signal: any,
-        _onUpdate: any,
-        _stateTracker: any,
-      ) => ({
-        currentTopic: {
-          title: "Generated Topic",
-          domain: "science",
-          summary: "A short summary",
-        },
-        topicEmbedding: [0.1, 0.2],
-        research: [],
-        wikiResearch: [],
-        article:
-          "This is a sufficiently long generated article used for testing the API response body.",
-        nodeMetrics: [],
-        articleId: "article-1",
-      }),
-    }));
+    vi.doMock("../../src/lib/queue", () => {
+      const EventEmitter = require('events');
+      const queueEvents = new EventEmitter();
+      
+      const generationQueue = {
+        add: vi.fn(async (name, data) => {
+          const jobId = "job-" + Date.now();
+          // Simulate worker processing the job and emitting the event asynchronously
+          setTimeout(() => {
+            queueEvents.emit('completed', { 
+              jobId, 
+              returnvalue: {
+                status: "completed",
+                result: {
+                  topic: {
+                    title: "Generated Topic",
+                    domain: "science",
+                    summary: "A short summary",
+                  },
+                  article: "This is a sufficiently long generated article used for testing the API response body.",
+                  articleId: "article-1",
+                }
+              }
+            });
+          }, 50);
+          return { id: jobId };
+        }),
+      };
+
+      return { generationQueue, queueEvents };
+    });
 
     const { default: app } = await import("../../server");
     const token = generateToken("test-user");
@@ -260,29 +269,35 @@ describe("HTTP API - Full Coverage", () => {
       },
     }));
     let callCount = 0;
-    vi.doMock("../../src/agents/supervisor", () => ({
-      runSupervisorStream: async () => {
-        callCount += 1;
-        if (callCount === 1) {
-          throw new Error("Supabase insert failed during database sync");
-        }
+    vi.doMock("../../src/lib/queue", () => {
+      const EventEmitter = require('events');
+      const queueEvents = new EventEmitter();
+      
+      const generationQueue = {
+        add: vi.fn(async (name, data) => {
+          callCount += 1;
+          const jobId = "job-err-" + Date.now();
+          
+          setTimeout(() => {
+            if (callCount === 1) {
+              queueEvents.emit('failed', { 
+                jobId, 
+                failedReason: "Supabase insert failed during database sync" 
+              });
+            } else {
+              queueEvents.emit('completed', { 
+                jobId, 
+                returnvalue: { article: "ok", articleId: "article-2" }
+              });
+            }
+          }, 50);
+          
+          return { id: jobId };
+        }),
+      };
 
-        return {
-          currentTopic: {
-            title: "Generated Topic",
-            domain: "science",
-            summary: "A short summary",
-          },
-          topicEmbedding: [0.1, 0.2],
-          research: [],
-          wikiResearch: [],
-          article:
-            "This is a sufficiently long generated article used for testing the API response body.",
-          nodeMetrics: [],
-          articleId: "article-2",
-        };
-      },
-    }));
+      return { generationQueue, queueEvents };
+    });
 
     const { default: app } = await import("../../server");
     const token = generateToken("lock-user");

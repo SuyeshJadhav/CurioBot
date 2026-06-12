@@ -34,7 +34,7 @@ describe("rateLimiter concurrency locks", () => {
       // wait a tick for timer handler
       await Promise.resolve();
 
-      expect(rl.activeGenerations.has(userId)).toBe(false);
+      expect(rl.acquireLock(userId)).toBe(true);
     } finally {
       vi.useRealTimers();
     }

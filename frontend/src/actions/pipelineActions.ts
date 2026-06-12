@@ -13,6 +13,10 @@ export interface PipelineResult {
 const MAX_RETRIES = 3;
 const RETRY_BACKOFF_MS = [1000, 2500, 5000];
 
+/** Persists the active BullMQ job ID across retries so we reconnect, not re-enqueue */
+let _activeJobId: string | null = null;
+export function clearActiveJobId() { _activeJobId = null; }
+
 /**
  * Runs the article generation pipeline over SSE.
  * Automatically retries with exponential backoff if the stream drops
@@ -44,7 +48,11 @@ async function attemptPipeline(
   hint?: string,
   topic?: { title: string; domain?: string; summary?: string },
 ): Promise<PipelineResult> {
-  const res = await fetch(`${API_BASE}/api/generate`, {
+  const url = _activeJobId 
+    ? `${API_BASE}/api/generate?jobId=${encodeURIComponent(_activeJobId)}`
+    : `${API_BASE}/api/generate`;
+
+  const res = await fetch(url, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ interests, hint, topic }),
@@ -86,15 +94,22 @@ async function readSSEStream(
       if (!trimmed?.startsWith('data: ')) continue;
       try {
         const parsed = JSON.parse(trimmed.slice(6));
-        if (parsed.status === 'completed') {
+        if (parsed.status === 'queued' && parsed.jobId) {
+          _activeJobId = parsed.jobId;
+        } else if (parsed.status === 'completed') {
           finalResult = parsed.result;
+          clearActiveJobId();
         } else if (parsed.status === 'failed') {
+          clearActiveJobId();
           throw new Error(parsed.error || 'Pipeline generation failed');
         } else if (onStatus) {
           onStatus(parsed.status, parsed.data);
         }
       } catch (e: any) {
-        if (e.message?.includes('failed')) throw e;
+        if (e.message?.includes('failed')) {
+          clearActiveJobId();
+          throw e;
+        }
       }
     }
   }

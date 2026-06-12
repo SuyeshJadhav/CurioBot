@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { HistoryEntry, Message } from '../types/curio';
-import { runCurioPipeline, fetchHistory, fetchArticleById, deleteArticle as apiDeleteArticle } from '../actions/pipelineActions';
+import { runCurioPipeline, fetchHistory, fetchArticleById, deleteArticle as apiDeleteArticle, clearActiveJobId } from '../actions/pipelineActions';
 import { useAuth } from './AuthContext';
 import { usePreferences } from './UserPreferencesContext';
 
@@ -63,6 +63,9 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
   useEffect(() => { if (token) loadHistory(); }, [token, loadHistory]);
 
   const igniteQuest = useCallback(async (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => {
+    if (isGeneratingArticle) return;
+    clearActiveJobId();
+
     let topicObj: { title: string; domain?: string; summary?: string } | undefined = undefined;
     let displayTitle: string | null = null;
 
@@ -96,7 +99,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       setIsGeneratingArticle(false); setGenerationStatus(null);
       setPipelineMessages((m) => [...m, { id: `err-${Date.now()}`, role: 'bot', content: `⚠️ ${err.message}`, timestamp: new Date() }]);
     }
-  }, [interests, loadHistory]);
+  }, [interests, loadHistory, isGeneratingArticle]);
 
   const loadArticle = useCallback(async (id: string) => {
     setIsGeneratingArticle(true); setArticle(null); setCurrentTopic(null); setActiveArticleId(id);
