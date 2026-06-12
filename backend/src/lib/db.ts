@@ -362,15 +362,42 @@ export async function recordArticleRead(userId: string, articleId: string): Prom
   }
 }
 
+const TOKEN_REFRESH_AMOUNT = 100_000;
+const TOKEN_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 export async function getUserTokenBalance(userId: string): Promise<number> {
   const { data, error } = await supabase
     .from("users")
-    .select("token_balance")
+    .select("token_balance, last_token_refresh")
     .eq("id", userId)
     .single();
 
   if (error) {
     throw new Error(`Failed to fetch user token balance: ${error.message}`);
+  }
+
+  const lastRefresh = data?.last_token_refresh
+    ? new Date(data.last_token_refresh).getTime()
+    : 0;
+  const now = Date.now();
+
+  // Auto-refresh balance every 24 hours
+  if (now - lastRefresh >= TOKEN_REFRESH_INTERVAL_MS) {
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({
+        token_balance: TOKEN_REFRESH_AMOUNT,
+        last_token_refresh: new Date(now).toISOString(),
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error(`⚠️ Failed to refresh token balance for user ${userId}:`, updateError.message);
+      // Return existing balance rather than throwing — don't block the user
+      return data?.token_balance ?? 0;
+    }
+
+    return TOKEN_REFRESH_AMOUNT;
   }
 
   return data?.token_balance ?? 0;
