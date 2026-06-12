@@ -14,6 +14,9 @@ import articlesRouter from './src/routes/articles';
 import libraryRouter from './src/routes/library';
 import settingsRouter from './src/routes/settings';
 
+// Initialize the BullMQ Worker process
+import './src/worker';
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
