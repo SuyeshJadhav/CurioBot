@@ -148,7 +148,7 @@ const worker = new Worker(
       await redisSub.unsubscribe(cancelChannel);
     }
   },
-  { connection: redisConnection },
+  { connection: redisConnection as any },
 );
 
 worker.on("failed", (job, err) => {

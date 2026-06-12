@@ -12,9 +12,9 @@ const redisConnection = new Redis(
 export const GENERATION_QUEUE_NAME = "curios-generation";
 
 export const generationQueue = new Queue(GENERATION_QUEUE_NAME, {
-  connection: redisConnection,
+  connection: redisConnection as any,
 });
 
 export const queueEvents = new QueueEvents(GENERATION_QUEUE_NAME, {
-  connection: redisConnection,
+  connection: redisConnection as any,
 });
