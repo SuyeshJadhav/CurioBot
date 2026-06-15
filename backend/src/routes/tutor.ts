@@ -62,7 +62,7 @@ router.post(
       nodeMetrics: [],
     };
 
-    const { reply, inputTokens, outputTokens } = await tutorAgent(tutorState, validatedMessage);
+    const { reply, inputTokens, outputTokens } = await tutorAgent(tutorState as any, validatedMessage);
     const totalTokens = inputTokens + outputTokens;
 
     let newBalance = 0;

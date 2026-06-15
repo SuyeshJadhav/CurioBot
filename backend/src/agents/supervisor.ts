@@ -1,11 +1,18 @@
 import { AgentState, AgentStateType, Topic } from "../types";
 import { topicPickerAgent } from "./topicPicker";
+import { curiosityScorerAgent } from "./curiosityScorer";
 import { researcherAgent } from "./researcher";
 import { writerAgent } from "./writer";
 import { StateGraph, START, END } from '@langchain/langgraph'
 import { addSeenTopic } from "../lib/memory";
 import { wikiResearcherAgent } from "./wikiResearcher";
 import { dedupTopicNode } from "./dedupTopic";
+import { outlineAgent } from "./outline";
+import { editorAgent } from "./editor";
+import { researchBriefAgent } from "./researchBrief";
+import { observabilityAgent } from "./observability";
+import fs from "fs";
+import path from "path";
 
 const FALLBACK_TOPIC = {
   id: "strange-history-of-time-zones",
@@ -17,21 +24,85 @@ const FALLBACK_TOPIC = {
   read: false,
 };
 
+function logNodeIO(nodeName: string, input: any, output: any) {
+  const logDir = path.join(__dirname, '../../logs');
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  const logFile = path.join(logDir, 'langgraph_io.jsonl');
+  
+  const sanitize = (val: any): any => {
+    if (val === null || val === undefined) return val;
+    if (Array.isArray(val)) {
+      if (val.length > 5) {
+        return `[Array of ${val.length} items]`;
+      }
+      return val.map(sanitize);
+    }
+    if (typeof val === 'object') {
+      const cleaned: any = {};
+      for (const k of Object.keys(val)) {
+        if (k === 'topicEmbedding' || k === 'signal' || k === 'userSettings') continue;
+        if (typeof val[k] === 'string' && val[k].length > 1000) {
+          cleaned[k] = val[k].slice(0, 1000) + `... [truncated, total length: ${val[k].length}]`;
+        } else {
+          cleaned[k] = sanitize(val[k]);
+        }
+      }
+      return cleaned;
+    }
+    return val;
+  };
+
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    nodeName,
+    input: sanitize(input),
+    output: sanitize(output)
+  };
+
+  try {
+    fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n', 'utf8');
+  } catch (err) {
+    console.warn("⚠️ Failed to write LangGraph IO log:", err);
+  }
+}
+
+function wrapNode(name: string, nodeFn: any) {
+  return async (state: any) => {
+    const inputSnapshot = { ...state };
+    try {
+      const output = await nodeFn(state);
+      logNodeIO(name, inputSnapshot, output);
+      return output;
+    } catch (error) {
+      logNodeIO(name, inputSnapshot, { error: String(error) });
+      throw error;
+    }
+  };
+}
+
 async function startResearchNode(_state: AgentStateType): Promise<{}> {
   return {}
 }
 
 const graph = new StateGraph(AgentState)
-  .addNode("topic picker", topicPickerAgent)
-  .addNode("dedup topic", dedupTopicNode)
-  .addNode("start research", startResearchNode)
-  .addNode("use fallback", (_state) => ({ currentTopic: FALLBACK_TOPIC, dedupPassed: true }))
-  .addNode("researcher", researcherAgent)
-  .addNode("wiki researcher", wikiResearcherAgent)
-  .addNode("writer", writerAgent)
+  .addNode("topic picker", wrapNode("topic picker", topicPickerAgent))
+  .addNode("curiosity scorer", wrapNode("curiosity scorer", curiosityScorerAgent))
+  .addNode("dedup topic", wrapNode("dedup topic", dedupTopicNode))
+  .addNode("start research", wrapNode("start research", startResearchNode))
+  .addNode("use fallback", wrapNode("use fallback", (_state: AgentStateType) => ({ currentTopic: FALLBACK_TOPIC, dedupPassed: true })))
+  .addNode("researcher", wrapNode("researcher", researcherAgent))
+  .addNode("wiki researcher", wrapNode("wiki researcher", wikiResearcherAgent))
+  .addNode("research brief agent", wrapNode("research brief agent", researchBriefAgent))
+  .addNode("outline agent", wrapNode("outline agent", outlineAgent))
+  .addNode("writer", wrapNode("writer", writerAgent))
+  .addNode("editor agent", wrapNode("editor agent", editorAgent))
+  .addNode("observability agent", wrapNode("observability agent", observabilityAgent))
 
   .addEdge(START, "topic picker")
-  .addEdge("topic picker", "dedup topic")
+  .addEdge("topic picker", "curiosity scorer")
+  .addEdge("curiosity scorer", "dedup topic")
 
   // Conditional: passed  -> fan out to research; failed -> retry or fallback
   .addConditionalEdges("dedup topic", (state) => {
@@ -48,9 +119,13 @@ const graph = new StateGraph(AgentState)
   .addEdge("start research", "wiki researcher")
   .addEdge("use fallback", "researcher")
   .addEdge("use fallback", "wiki researcher")
-  .addEdge("researcher", "writer")
-  .addEdge("wiki researcher", "writer")
-  .addEdge("writer", END)
+  .addEdge("researcher", "research brief agent")
+  .addEdge("wiki researcher", "research brief agent")
+  .addEdge("research brief agent", "outline agent")
+  .addEdge("outline agent", "writer")
+  .addEdge("writer", "editor agent")
+  .addEdge("editor agent", "observability agent")
+  .addEdge("observability agent", END)
 
 const app = graph.compile()
 
@@ -172,7 +247,7 @@ export async function runSupervisorStream(
       stateTracker.lastState = lastState;
     }
 
-    if (nodeName === 'topic picker') {
+    if (nodeName === 'curiosity scorer') {
       onUpdate({ status: 'researching', data: (chunk as any)[nodeName].currentTopic });
     } else if (nodeName === 'researcher') {
       researcherDone = true;

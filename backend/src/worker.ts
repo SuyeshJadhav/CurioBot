@@ -89,8 +89,11 @@ const worker = new Worker(
         );
       }
 
+      const obsNode = nodes.find((n: any) => n.nodeName === "observability");
+      const editNode = nodes.find((n: any) => n.nodeName === "editor");
+
       // Observability Logging
-      pipelineLogger.logRun({
+      await pipelineLogger.logRun({
         userId,
         topic: resultState.currentTopic?.title,
         domain: resultState.currentTopic?.domain,
@@ -102,6 +105,31 @@ const worker = new Worker(
         ),
         totalCostEstimate: 0,
         status: "success",
+        researchFactCount: resultState.researchFactCount,
+        briefFactCount: resultState.briefFactCount,
+        outlineSectionCount: resultState.outlineSectionCount,
+        articleWordCount: resultState.articleWordCount,
+        researchFactsUsed: resultState.researchFactsUsed,
+        mustIncludeFacts: obsNode?.mustIncludeFacts,
+        mustIncludeFactsUsed: obsNode?.mustIncludeFactsUsed,
+        outlineTargetWords: obsNode?.outlineTargetWords,
+        actualArticleWords: obsNode?.actualArticleWords,
+        factConsistency: obsNode?.factConsistency,
+        hookStrength: obsNode?.hookStrength,
+        narrativeFlow: obsNode?.narrativeFlow,
+        curiosityFactor: obsNode?.curiosityFactor,
+        sectionBalance: obsNode?.sectionBalance,
+        conclusionQuality: obsNode?.conclusionQuality,
+        unsupportedClaims: obsNode?.unsupportedClaims,
+        informationDensity: obsNode?.informationDensity,
+        curiosityGap: obsNode?.curiosityGap,
+        primaryQuestion: obsNode?.primaryQuestion,
+        winningCandidateReason: obsNode?.winningCandidateReason,
+        factCorrections: editNode?.factCorrections,
+        sectionsExpanded: editNode?.sectionsExpanded,
+        sectionsCompressed: editNode?.sectionsCompressed,
+        transitionsImproved: editNode?.transitionsImproved,
+        hookStrengthened: editNode?.hookStrengthened,
       });
 
       return {
@@ -124,7 +152,7 @@ const worker = new Worker(
       console.error(`❌ [Worker] Job ${jobId} failed:`, err);
 
       // Log failure
-      pipelineLogger.logRun({
+      await pipelineLogger.logRun({
         userId,
         topic: topic?.title,
         startTime,

@@ -4,12 +4,27 @@ interface QuickQuestFormProps {
   igniteQuest: (topic: string, hint?: string) => void;
 }
 
+const mobileStyles = `
+  @media (max-width: 480px) {
+    .qqf-topic-row {
+      flex-wrap: wrap !important;
+    }
+    .qqf-submit-btn {
+      width: 100% !important;
+      padding: 10px 20px !important;
+      justify-content: center;
+    }
+  }
+`;
+
 export function QuickQuestForm({ igniteQuest }: QuickQuestFormProps) {
   const [topicFocused, setTopicFocused] = useState(false);
   const [hintFocused, setHintFocused] = useState(false);
 
   return (
-    <div style={{
+    <>
+      <style>{mobileStyles}</style>
+      <div style={{
       background: 'var(--surface-cream)',
       border: '1.5px solid var(--outline-variant)',
       borderRadius: '14px',
@@ -52,7 +67,7 @@ export function QuickQuestForm({ igniteQuest }: QuickQuestFormProps) {
         style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
       >
         {/* Topic input row */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+        <div className="qqf-topic-row" style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
           <div style={{
             flex: 1,
             display: 'flex',
@@ -88,6 +103,7 @@ export function QuickQuestForm({ igniteQuest }: QuickQuestFormProps) {
           </div>
 
           <button
+            className="qqf-submit-btn"
             type="submit"
             style={{
               flexShrink: 0,
@@ -163,5 +179,6 @@ export function QuickQuestForm({ igniteQuest }: QuickQuestFormProps) {
         </div>
       </form>
     </div>
+    </>
   );
 }

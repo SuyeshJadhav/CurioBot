@@ -10,8 +10,63 @@ beforeEach(async () => {
   // Provide default mocks for external SDKs to avoid real network calls
   vi.mock("../src/lib/gemini", () => {
     const generateContent = vi.fn(async (args: any) => {
-      const isWriter = args?.config?.responseSchema?.properties?.rabbit_holes !== undefined;
-      if (isWriter) {
+      const props = args?.config?.responseSchema?.properties || {};
+      const schema = args?.config?.responseSchema || {};
+
+      if (schema.type === "array") {
+        const itemProps = schema.items?.properties || {};
+        if (itemProps.novelty !== undefined) {
+          // Curiosity Scorer mock
+          return {
+            text: JSON.stringify([
+              {
+                title: "Mock Topic 1",
+                novelty: 9,
+                specificity: 8,
+                surprise: 9,
+                mechanism: 8,
+                rabbitHolePotential: 7,
+                primaryQuestion: "Why does Mock Topic 1 exist?",
+                winningCandidateReason: "It is extremely novel."
+              },
+              {
+                title: "Mock Topic 2",
+                novelty: 7,
+                specificity: 7,
+                surprise: 8,
+                mechanism: 9,
+                rabbitHolePotential: 8,
+                primaryQuestion: "How does Mock Topic 2 work?",
+                winningCandidateReason: "It has a strong mechanism."
+              }
+            ]),
+            usageMetadata: {},
+          };
+        }
+        
+        // Topic Picker mock
+        return {
+          text: JSON.stringify([
+            {
+              title: "Mock Topic 1",
+              angle: "A surprising hook about Mock Topic 1",
+              category: "science",
+              hook: "A compelling hook for Mock Topic 1",
+              connections: ["connection1"]
+            },
+            {
+              title: "Mock Topic 2",
+              angle: "A surprising hook about Mock Topic 2",
+              category: "history",
+              hook: "A compelling hook for Mock Topic 2",
+              connections: ["connection2"]
+            }
+          ]),
+          usageMetadata: {},
+        };
+      }
+
+      if (props.rabbit_holes !== undefined) {
         return {
           text: JSON.stringify({
             title: "Mock Topic",
@@ -25,6 +80,114 @@ beforeEach(async () => {
           usageMetadata: {},
         };
       }
+
+      if (props.coreConcepts !== undefined) {
+        return {
+          text: JSON.stringify({
+            coreConcepts: ["Mock Core Concept"],
+            interestingFacts: ["Mock Interesting Fact"],
+            examples: ["Mock Example"],
+            controversies: ["Mock Controversy"],
+            historicalContext: ["Mock Historical Context"],
+            recentDevelopments: ["Mock Recent Development"],
+            articleAngles: ["Mock Article Angle"],
+            narrativeHooks: ["Mock Narrative Hook"],
+            counterintuitiveInsights: ["Mock Counterintuitive Insight"],
+            mustIncludeFacts: ["Mock Must Include Fact"],
+            sectionSuggestions: ["Mock Section Suggestion"],
+            premiseNotes: [],
+            primaryAngle: "Why railway accidents created time zones",
+            forbiddenAngles: ["general history of clocks"],
+            primaryQuestion: "Why did railway accidents create time zones?",
+            winningCandidateReason: "It connects accidents to time zones."
+          }),
+          usageMetadata: {},
+        };
+      }
+
+      if (props.sections !== undefined) {
+        return {
+          text: JSON.stringify({
+            title: "The Ultimate Guide",
+            hook: "Did you know this interesting fact?",
+            sections: [
+              { 
+                heading: "Introduction", 
+                purpose: "Cover the basics.",
+                keyFacts: ["Fact A"],
+                example: "Example A",
+                transition: "Transition A"
+              },
+              { 
+                heading: "Advanced Topics", 
+                purpose: "Deep dive.",
+                keyFacts: ["Fact B"],
+                example: "Example B",
+                transition: "Transition B"
+              },
+              { 
+                heading: "Examples", 
+                purpose: "Real-world cases.",
+                keyFacts: ["Fact C"],
+                example: "Example C",
+                transition: "Transition C"
+              },
+              { 
+                heading: "Limitations", 
+                purpose: "Challenges faced.",
+                keyFacts: ["Fact D"],
+                example: "Example D",
+                transition: "Transition D"
+              }
+            ]
+          }),
+          usageMetadata: {},
+        };
+      }
+
+      if (props.editedArticle !== undefined) {
+        return {
+          text: JSON.stringify({
+            editedArticle: "This is the edited article.",
+            editorNotes: {
+              factCorrections: 1,
+              sectionsExpanded: 0,
+              sectionsCompressed: 0,
+              transitionsImproved: 2,
+              hookStrengthened: true
+            }
+          }),
+          usageMetadata: {},
+        };
+      }
+
+      if (props.factConsistency !== undefined) {
+        return {
+          text: JSON.stringify({
+            factConsistency: 9,
+            hookStrength: 8,
+            narrativeFlow: 8,
+            curiosityFactor: 9,
+            sectionBalance: 7,
+            conclusionQuality: 8,
+            unsupportedClaims: 0,
+            informationDensity: 9,
+            curiosityGap: 8
+          }),
+          usageMetadata: {},
+        };
+      }
+
+      if (props.factsUsed !== undefined) {
+        return {
+          text: JSON.stringify({
+            factsUsed: ["Mock Must Include Fact"],
+            count: 1
+          }),
+          usageMetadata: {},
+        };
+      }
+
       return {
         text: JSON.stringify({
           id: "mock-topic",
@@ -33,6 +196,8 @@ beforeEach(async () => {
           summary: "A mock topic for tests",
           connections: [],
           read: false,
+          primaryQuestion: "Why did railway accidents create time zones?",
+          winningCandidateReason: "It connects accidents to time zones."
         }),
         usageMetadata: {},
       };

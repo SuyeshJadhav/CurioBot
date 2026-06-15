@@ -15,6 +15,22 @@ export interface Topic {
   summary: string;
   connections: string[];
   read: boolean;
+  novelty?: number;
+  surprise?: number;
+  specificity?: number;
+  mechanism?: number;
+  rabbitHolePotential?: number;
+  overallScore?: number;
+  primaryQuestion?: string;
+  winningCandidateReason?: string;
+}
+
+export interface TopicCandidate {
+  title: string;
+  angle: string;
+  category: string;
+  hook: string;
+  connections: string[];
 }
 
 export interface Message {
@@ -30,6 +46,26 @@ export interface NodeMetrics {
   outputTokens?: number;
   tavilyCount?: number;
   error?: string;
+  mustIncludeFacts?: number;
+  mustIncludeFactsUsed?: number;
+  outlineTargetWords?: number;
+  actualArticleWords?: number;
+  factConsistency?: number;
+  hookStrength?: number;
+  narrativeFlow?: number;
+  curiosityFactor?: number;
+  sectionBalance?: number;
+  conclusionQuality?: number;
+  unsupportedClaims?: number;
+  factCorrections?: number;
+  sectionsExpanded?: number;
+  sectionsCompressed?: number;
+  transitionsImproved?: number;
+  hookStrengthened?: boolean;
+  informationDensity?: number;
+  curiosityGap?: number;
+  primaryQuestion?: string;
+  winningCandidateReason?: string;
 }
 
 export interface UserSettings {
@@ -53,6 +89,40 @@ export interface RabbitHole {
   why: string;
 }
 
+export interface OutlineSection {
+  heading: string;
+  purpose: string;
+  keyFacts: string[];
+  example: string;
+  transition: string;
+  targetWordCount: number;
+}
+
+export interface ArticleOutline {
+  title: string;
+  hook: string;
+  sections: OutlineSection[];
+}
+
+export interface ResearchBrief {
+  coreConcepts: string[];
+  interestingFacts: string[];
+  examples: string[];
+  controversies: string[];
+  historicalContext: string[];
+  recentDevelopments: string[];
+  articleAngles: string[];
+  narrativeHooks: string[];
+  counterintuitiveInsights: string[];
+  mustIncludeFacts: string[];
+  sectionSuggestions: string[];
+  premiseNotes?: string[];
+  primaryAngle?: string;
+  forbiddenAngles?: string[];
+  primaryQuestion?: string;
+  winningCandidateReason?: string;
+}
+
 export const AgentState = Annotation.Root({
   userId: Annotation<string>(),
   interests: Annotation<string[]>(),
@@ -64,6 +134,7 @@ export const AgentState = Annotation.Root({
   requestedTopic: Annotation<Partial<Topic> | undefined>(),
   currentTopic: Annotation<Topic | undefined>(),
   topicEmbedding: Annotation<number[] | undefined>(),
+  candidates: Annotation<TopicCandidate[] | undefined>(),
   signal: Annotation<AbortSignal | undefined>(),
   hint: Annotation<string | undefined>(),
   research: Annotation<SearchResult[]>({
@@ -74,6 +145,9 @@ export const AgentState = Annotation.Root({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),
     default: () => []
   }),
+  researchBrief: Annotation<ResearchBrief | undefined>(),
+  outline: Annotation<ArticleOutline | undefined>(),
+  keyFacts: Annotation<string[] | undefined>(),
   article: Annotation<string | undefined>(),
   tldr: Annotation<string | undefined>(),
   rabbitHoles: Annotation<RabbitHole[] | undefined>(),
@@ -90,7 +164,12 @@ export const AgentState = Annotation.Root({
   nodeMetrics: Annotation<NodeMetrics[]>({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),
     default: () => []
-  })
+  }),
+  researchFactCount: Annotation<number | undefined>(),
+  briefFactCount: Annotation<number | undefined>(),
+  outlineSectionCount: Annotation<number | undefined>(),
+  articleWordCount: Annotation<number | undefined>(),
+  researchFactsUsed: Annotation<number | undefined>()
 })
 
 export type AgentStateType = typeof AgentState.State

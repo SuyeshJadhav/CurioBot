@@ -1,0 +1,272 @@
+import { ai, safetySettings } from "../lib/gemini";
+import { AgentStateType, NodeMetrics } from "../types";
+
+export async function observabilityAgent(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  const startTime = Date.now();
+  const signal = state.signal;
+
+  if (signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+
+  console.log(`\n📊 [Observability Agent] Running evaluation metrics...`);
+
+  const model = state.userSettings?.model || "gemini-3.1-flash-lite";
+  const article = state.article || "";
+
+  // 1. Calculate researchFactCount using sentence counting heuristic
+  let researchFactCount = 0;
+  for (const r of state.research || []) {
+    researchFactCount += (r.content || "").split(/[.!?]+/).filter(s => s.trim().length > 10).length;
+  }
+  for (const w of state.wikiResearch || []) {
+    researchFactCount += (w || "").split(/[.!?]+/).filter(s => s.trim().length > 10).length;
+  }
+
+  // 2. Calculate briefFactCount
+  let briefFactCount = 0;
+  if (state.researchBrief) {
+    const brief = state.researchBrief;
+    briefFactCount += (brief.coreConcepts || []).length;
+    briefFactCount += (brief.interestingFacts || []).length;
+    briefFactCount += (brief.examples || []).length;
+    briefFactCount += (brief.controversies || []).length;
+    briefFactCount += (brief.historicalContext || []).length;
+    briefFactCount += (brief.recentDevelopments || []).length;
+    briefFactCount += (brief.articleAngles || []).length;
+    briefFactCount += (brief.narrativeHooks || []).length;
+    briefFactCount += (brief.counterintuitiveInsights || []).length;
+    briefFactCount += (brief.mustIncludeFacts || []).length;
+    briefFactCount += (brief.sectionSuggestions || []).length;
+  }
+
+  // 3. Calculate outlineSectionCount
+  const outlineSectionCount = state.outline?.sections?.length || 0;
+
+  // 4. Calculate articleWordCount
+  const articleWordCount = article ? article.split(/\s+/).filter(Boolean).length : 0;
+
+  // 5. Evaluate researchFactsUsed using Gemini
+  const mustIncludeFacts = state.researchBrief?.mustIncludeFacts || state.keyFacts || [];
+  let researchFactsUsed = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+
+  if (mustIncludeFacts.length > 0 && article) {
+    const prompt = `You are an evaluation assistant. Your task is to determine how many of the key research facts were actually used or referenced in the final article.
+
+List of Research Facts:
+${mustIncludeFacts.map((f, i) => `${i + 1}. ${f}`).join("\n")}
+
+Final Article:
+${article}
+
+Analyze the article and check if each fact is present (either directly or paraphrased).
+Return ONLY a JSON object matching this schema:
+{
+  "factsUsed": ["fact 1", "fact 2", ...], // list of facts from the input list that were used
+  "count": 0 // number of facts used
+}`;
+
+    try {
+      const apiCall = ai.models.generateContent({
+        model,
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: {
+          safetySettings: safetySettings as any,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              factsUsed: { type: "array", items: { type: "string" } },
+              count: { type: "integer" }
+            },
+            required: ["factsUsed", "count"]
+          }
+        }
+      });
+
+      let response: any;
+      if (signal) {
+        const abortPromise = new Promise<never>((_, reject) => {
+          signal.addEventListener("abort", () => {
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        });
+        response = await Promise.race([apiCall, abortPromise]);
+      } else {
+        response = await apiCall;
+      }
+
+      if (response.usageMetadata) {
+        totalInputTokens += response.usageMetadata.promptTokenCount || 0;
+        totalOutputTokens += response.usageMetadata.candidatesTokenCount || 0;
+      }
+
+      const parsed = JSON.parse(response.text || "{}");
+      researchFactsUsed = typeof parsed.count === "number" ? parsed.count : (parsed.factsUsed || []).length;
+    } catch (err: any) {
+      if (err.name === "AbortError" || err.message === "Aborted") {
+        throw err;
+      }
+      console.warn("⚠️ [Observability Agent] Failed to evaluate research facts used, falling back to 0...", err);
+    }
+  }
+
+  let factConsistency = 0;
+  let hookStrength = 0;
+  let narrativeFlow = 0;
+  let curiosityFactor = 0;
+  let sectionBalance = 0;
+  let conclusionQuality = 0;
+  let unsupportedClaims = 0;
+  let informationDensity = 0;
+  let curiosityGap = 0;
+
+  if (article) {
+    const evalPrompt = `You are an expert educational content evaluator. Assess the quality of the final article relative to the Research Summary and Research Brief.
+
+Final Article:
+${article}
+
+Research Summary:
+${state.researchSummary || "None"}
+
+Research Brief:
+${state.researchBrief ? JSON.stringify(state.researchBrief) : "None"}
+
+Evaluation Criteria:
+1. factConsistency (0-10): How consistent is the article with the research summary and brief? (10 = no contradictions; 0 = complete contradiction/misleading)
+2. hookStrength (0-10): How engaging is the opening hook? Does it grab attention without cheap clickbait?
+3. narrativeFlow (0-10): How logical and smooth is the transitions/progression (Hook -> Core Concept -> Examples -> Implications -> Conclusion)?
+4. curiosityFactor (0-10): How well does it raise questions and present surprising/counterintuitive information?
+5. sectionBalance (0-10): How balanced are the sections in length and development relative to outline targets (or relative to each other if outline targets are missing)?
+6. conclusionQuality (0-10): Does the conclusion connect back to the hook, reveal a larger implication, and avoid generic clichés?
+7. unsupportedClaims (integer count): The absolute count of claims in the article that are unsupported by, or directly contradict, the Research Summary and Research Brief.
+8. informationDensity (0-10): Rate how dense the information is. Does each paragraph introduce new, meaningful knowledge and insights? (10 = extremely high density, no fluff or filler; 0 = extremely verbose/empty or redundant paragraphs)
+9. curiosityGap (0-10): Rate the strength of the curiosity gap in the opening hook. Does the opening create a knowledge gap that the article later resolves, making the reader say "I need to read this"? (10 = powerful curiosity gap like "Scientists won a Nobel Prize using office supplies"; 0 = weak opening that simply defines terms like "Graphene is a carbon material")
+
+Return ONLY a JSON object matching this schema:
+{
+  "factConsistency": number,
+  "hookStrength": number,
+  "narrativeFlow": number,
+  "curiosityFactor": number,
+  "sectionBalance": number,
+  "conclusionQuality": number,
+  "unsupportedClaims": number,
+  "informationDensity": number,
+  "curiosityGap": number
+}`;
+
+    try {
+      const apiCall = ai.models.generateContent({
+        model,
+        contents: [{ role: "user", parts: [{ text: evalPrompt }] }],
+        config: {
+          safetySettings: safetySettings as any,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              factConsistency: { type: "integer" },
+              hookStrength: { type: "integer" },
+              narrativeFlow: { type: "integer" },
+              curiosityFactor: { type: "integer" },
+              sectionBalance: { type: "integer" },
+              conclusionQuality: { type: "integer" },
+              unsupportedClaims: { type: "integer" },
+              informationDensity: { type: "integer" },
+              curiosityGap: { type: "integer" }
+            },
+            required: [
+              "factConsistency",
+              "hookStrength",
+              "narrativeFlow",
+              "curiosityFactor",
+              "sectionBalance",
+              "conclusionQuality",
+              "unsupportedClaims",
+              "informationDensity",
+              "curiosityGap"
+            ]
+          }
+        }
+      });
+
+      let response: any;
+      if (signal) {
+        const abortPromise = new Promise<never>((_, reject) => {
+          signal.addEventListener("abort", () => {
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        });
+        response = await Promise.race([apiCall, abortPromise]);
+      } else {
+        response = await apiCall;
+      }
+
+      if (response.usageMetadata) {
+        totalInputTokens += response.usageMetadata.promptTokenCount || 0;
+        totalOutputTokens += response.usageMetadata.candidatesTokenCount || 0;
+      }
+
+      const parsed = JSON.parse(response.text || "{}");
+      factConsistency = typeof parsed.factConsistency === "number" ? parsed.factConsistency : 0;
+      hookStrength = typeof parsed.hookStrength === "number" ? parsed.hookStrength : 0;
+      narrativeFlow = typeof parsed.narrativeFlow === "number" ? parsed.narrativeFlow : 0;
+      curiosityFactor = typeof parsed.curiosityFactor === "number" ? parsed.curiosityFactor : 0;
+      sectionBalance = typeof parsed.sectionBalance === "number" ? parsed.sectionBalance : 0;
+      conclusionQuality = typeof parsed.conclusionQuality === "number" ? parsed.conclusionQuality : 0;
+      unsupportedClaims = typeof parsed.unsupportedClaims === "number" ? parsed.unsupportedClaims : 0;
+      informationDensity = typeof parsed.informationDensity === "number" ? parsed.informationDensity : 0;
+      curiosityGap = typeof parsed.curiosityGap === "number" ? parsed.curiosityGap : 0;
+    } catch (err: any) {
+      if (err.name === "AbortError" || err.message === "Aborted") {
+        throw err;
+      }
+      console.warn("⚠️ [Observability Agent] Failed to evaluate narrative quality metrics, falling back to 0...", err);
+    }
+  }
+
+  const briefMustIncludeFacts = state.researchBrief?.mustIncludeFacts || [];
+  const mustIncludeFactsCount = briefMustIncludeFacts.length;
+  const mustIncludeFactsUsed = (state.researchBrief?.mustIncludeFacts && state.researchBrief.mustIncludeFacts.length > 0)
+    ? researchFactsUsed
+    : 0;
+
+  const outlineTargetWords = (state.outline?.sections || []).reduce((acc, s) => acc + (s.targetWordCount || 0), 0);
+
+  const durationMs = Date.now() - startTime;
+  const nodeMetric: NodeMetrics = {
+    nodeName: "observability",
+    durationMs,
+    success: true,
+    inputTokens: totalInputTokens,
+    outputTokens: totalOutputTokens,
+    mustIncludeFacts: mustIncludeFactsCount,
+    mustIncludeFactsUsed,
+    outlineTargetWords,
+    actualArticleWords: articleWordCount,
+    factConsistency,
+    hookStrength,
+    narrativeFlow,
+    curiosityFactor,
+    sectionBalance,
+    conclusionQuality,
+    unsupportedClaims,
+    informationDensity,
+    curiosityGap,
+    primaryQuestion: state.currentTopic?.primaryQuestion,
+    winningCandidateReason: state.currentTopic?.winningCandidateReason
+  };
+
+  return {
+    researchFactCount,
+    briefFactCount,
+    outlineSectionCount,
+    articleWordCount,
+    researchFactsUsed,
+    nodeMetrics: [nodeMetric]
+  };
+}

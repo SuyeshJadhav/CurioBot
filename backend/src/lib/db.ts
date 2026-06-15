@@ -362,7 +362,7 @@ export async function recordArticleRead(userId: string, articleId: string): Prom
   }
 }
 
-const TOKEN_REFRESH_AMOUNT = 100_000;
+const TOKEN_REFRESH_AMOUNT = 200_000;
 const TOKEN_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function getUserTokenBalance(userId: string): Promise<number> {

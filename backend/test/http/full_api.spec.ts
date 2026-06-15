@@ -50,7 +50,7 @@ describe("HTTP API - Full Coverage", () => {
         }),
       };
 
-      return { generationQueue, queueEvents };
+      return { generationQueue, queueEvents, GENERATION_QUEUE_NAME: "curios-generation" };
     });
 
     const { default: app } = await import("../../server");
@@ -296,7 +296,7 @@ describe("HTTP API - Full Coverage", () => {
         }),
       };
 
-      return { generationQueue, queueEvents };
+      return { generationQueue, queueEvents, GENERATION_QUEUE_NAME: "curios-generation" };
     });
 
     const { default: app } = await import("../../server");

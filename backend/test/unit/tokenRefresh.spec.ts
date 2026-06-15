@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from "vitest";
 
 const TWENTY_FIVE_HOURS_MS = 25 * 60 * 60 * 1000;
 const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
-const TOKEN_REFRESH_AMOUNT = 100_000;
+const TOKEN_REFRESH_AMOUNT = 200_000;
 
 /** Build a minimal fluent supabase-client stub for the `users` table. */
 function makeSupabaseMock(
@@ -29,7 +29,7 @@ function makeSupabaseMock(
 }
 
 describe("getUserTokenBalance — 24-hour auto-refresh", () => {
-  it("resets balance to 100,000 when last_token_refresh is older than 24 hours", async () => {
+  it("resets balance to 200,000 when last_token_refresh is older than 24 hours", async () => {
     const oldRefresh = new Date(Date.now() - TWENTY_FIVE_HOURS_MS).toISOString();
     const { client, updateFn, updateEqFn } = makeSupabaseMock({
       token_balance: 0,

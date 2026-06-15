@@ -13,21 +13,33 @@ function getAi(): GoogleGenAI {
   return baseAiInstance;
 }
 
-// Helper to wrap API calls with retry logic on 429 or 503
+// Helper to wrap API calls with retry logic on 429, 503, or transient network failures
 async function withRetry<T>(fn: () => Promise<T>, retries = 5, delay = 2000): Promise<T> {
   try {
     return await fn();
   } catch (err: any) {
-    const isRetryable = err?.status === "RESOURCE_EXHAUSTED" || 
-                        err?.status === 429 || 
-                        err?.status === 503 ||
-                        err?.status === "UNAVAILABLE" ||
-                        String(err).includes("429") || 
-                        String(err).includes("503") ||
-                        String(err).includes("RESOURCE_EXHAUSTED") ||
-                        String(err).includes("UNAVAILABLE");
+    const errString = String(err).toLowerCase();
+    const errCauseString = err?.cause ? String(err.cause).toLowerCase() : "";
+    const isAbort = err?.name === "AbortError" || err?.message === "Aborted" || errString.includes("abort");
+
+    const isRetryable = !isAbort && (
+      err?.status === "RESOURCE_EXHAUSTED" || 
+      err?.status === 429 || 
+      err?.status === 503 ||
+      err?.status === "UNAVAILABLE" ||
+      errString.includes("429") || 
+      errString.includes("503") ||
+      errString.includes("resource_exhausted") ||
+      errString.includes("unavailable") ||
+      errString.includes("fetch failed") ||
+      errString.includes("econnreset") ||
+      errString.includes("timeout") ||
+      errCauseString.includes("econnreset") ||
+      errCauseString.includes("timeout")
+    );
+
     if (isRetryable && retries > 0) {
-      console.warn(`⚠️ [Gemini API] Rate limited or Unavailable (${err?.status || '503'}). Retrying in ${delay}ms... (${retries} retries left)`);
+      console.warn(`⚠️ [Gemini API] Call failed (${err.message || err}). Retrying in ${delay}ms... (${retries} retries left)`);
       await new Promise((resolve) => setTimeout(resolve, delay));
       return withRetry(fn, retries - 1, delay * 2);
     }
