@@ -51,32 +51,8 @@ export function InterestsCanvas() {
       <h2 className="section-title">My interests</h2>
       <p className="section-sub">These drive what topics get generated for you — edit freely</p>
 
-      {/* Interests list */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
-        {interests.map((interest) => (
-          <div key={interest} className="interest-tag" style={{ display: 'flex', alignItems: 'center', padding: '6px 12px', margin: 0 }}>
-            <i className={`${getInterestIcon(interest)} interest-icon`} style={{ marginRight: '8px' }}></i>
-            <span style={{ fontSize: '13px', textTransform: 'capitalize' }}>{interest}</span>
-            <i 
-              className="ti ti-x remove-btn" 
-              style={{ fontSize: '13px', marginLeft: 'auto', opacity: 0.6 }} 
-              onClick={() => deleteInterest(interest)}
-              aria-hidden="true"
-            ></i>
-          </div>
-        ))}
-
-        {interests.length === 0 && (
-          <span style={{ fontStyle: 'italic', color: 'var(--color-text-tertiary)', fontSize: '13px', padding: '10px' }}>
-            No interests added yet. Add one below to kick off your quests!
-          </span>
-        )}
-      </div>
-
-      <hr className="divider" />
-
       {/* Add Form */}
-      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
         <input 
           type="text" 
           placeholder="Add a new interest..." 
@@ -108,6 +84,30 @@ export function InterestsCanvas() {
           + Add interest
         </button>
       </form>
+
+      <hr className="divider" />
+
+      {/* Interests list */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+        {interests.map((interest) => (
+          <div key={interest} className="interest-tag" style={{ display: 'flex', alignItems: 'center', padding: '6px 12px', margin: 0 }}>
+            <i className={`${getInterestIcon(interest)} interest-icon`} style={{ marginRight: '8px' }}></i>
+            <span style={{ fontSize: '13px', textTransform: 'capitalize' }}>{interest}</span>
+            <i 
+              className="ti ti-x remove-btn" 
+              style={{ fontSize: '13px', marginLeft: 'auto', opacity: 0.6 }} 
+              onClick={() => deleteInterest(interest)}
+              aria-hidden="true"
+            ></i>
+          </div>
+        ))}
+
+        {interests.length === 0 && (
+          <span style={{ fontStyle: 'italic', color: 'var(--color-text-tertiary)', fontSize: '13px', padding: '10px' }}>
+            No interests added yet. Add one above to begin.
+          </span>
+        )}
+      </div>
       
       <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '8px', textAlign: 'center' }}>
         Changes take effect on your next article generation

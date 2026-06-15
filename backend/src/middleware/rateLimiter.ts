@@ -173,4 +173,5 @@ export const checkTokenBalance = async (req: Request, res: Response, next: NextF
     next(err);
   }
 };
-
+// Exported for testing harness checks (test/setup.ts compatibility)
+export const activeGenerations = new Map<string, { timer: NodeJS.Timeout }>();

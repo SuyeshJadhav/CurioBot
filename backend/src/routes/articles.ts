@@ -11,6 +11,7 @@ import {
   recordArticleRead,
 } from "../lib/db";
 import { AppError } from "../lib/errors";
+import { validateLengthOnly } from "../lib/security";
 
 const router = Router();
 
@@ -38,7 +39,11 @@ router.get(
   "/articles/:id",
   authenticate,
   asyncHandler(async (req, res, next) => {
-    const article = await getArticleById(req.params.id as string);
+    const articleId = req.params.id;
+    if (typeof articleId !== "string" || !articleId.trim()) {
+      return next(new AppError(400, "Invalid article ID"));
+    }
+    const article = await getArticleById(articleId);
     if (!article) {
       return next(new AppError(404, "Article not found"));
     }
@@ -56,9 +61,12 @@ router.get(
 router.delete(
   "/articles/:id",
   authenticate,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const userId = (req as any).userId;
-    const articleId = req.params.id as string;
+    const articleId = req.params.id;
+    if (typeof articleId !== "string" || !articleId.trim()) {
+      return next(new AppError(400, "Invalid article ID"));
+    }
     await deleteArticle(userId, articleId);
     res.json({ success: true });
   }),
@@ -90,10 +98,16 @@ router.post(
   asyncHandler(async (req, res, next) => {
     const userId = (req as any).userId;
     const { articleId, notes } = req.body;
-    if (!articleId) {
-      return next(new AppError(400, "articleId is required"));
+    if (typeof articleId !== "string" || !articleId.trim()) {
+      return next(new AppError(400, "articleId must be a valid string"));
     }
-    await saveSketch(userId, articleId, notes);
+    let sanitizedNotes = "";
+    try {
+      sanitizedNotes = validateLengthOnly(notes, "notes", 2000);
+    } catch (err) {
+      return next(err);
+    }
+    await saveSketch(userId, articleId, sanitizedNotes);
     res.json({ success: true });
   }),
 );
@@ -106,10 +120,20 @@ router.post(
 router.put(
   "/saved/:articleId/notes",
   authenticate,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const userId = (req as any).userId;
+    const articleId = req.params.articleId;
+    if (typeof articleId !== "string" || !articleId.trim()) {
+      return next(new AppError(400, "Invalid article ID"));
+    }
     const { notes } = req.body;
-    await updateSketchNotes(userId, req.params.articleId as string, notes);
+    let sanitizedNotes = "";
+    try {
+      sanitizedNotes = validateLengthOnly(notes, "notes", 2000);
+    } catch (err) {
+      return next(err);
+    }
+    await updateSketchNotes(userId, articleId, sanitizedNotes);
     res.json({ success: true });
   }),
 );

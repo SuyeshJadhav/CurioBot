@@ -27,7 +27,7 @@ export function SettingsCanvas() {
 
     try {
       await saveSettings(payload);
-      setSaveStatus('Settings saved successfully! ✨');
+      setSaveStatus('Settings saved successfully.');
       setTimeout(() => setSaveStatus(null), 3000);
     } catch {
       setSaveStatus('Failed to save settings. Please try again.');
@@ -111,10 +111,10 @@ export function SettingsCanvas() {
         <div className="card" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <p className="card-title" style={{ fontSize: '13px', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              🪙 Token Balance
+              Token balance
             </p>
             <p className="card-body" style={{ fontSize: '12px', margin: 0, color: 'var(--color-text-secondary)' }}>
-              Remaining AI computation capacity for your curiosity quests
+              Remaining balance for generating articles
             </p>
           </div>
           <div style={{

@@ -7,6 +7,7 @@ export function AuthPage() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -218,17 +219,39 @@ export function AuthPage() {
             >
               {'Password'}
             </label>
-            <div className="chat-input-wrap">
+            <div className="chat-input-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
                 autoComplete={isRegister ? "new-password" : "current-password"}
+                style={{ paddingRight: '40px', width: '100%' }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--ink-wash)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
+                  {showPassword ? 'visibility' : 'visibility_off'}
+                </span>
+              </button>
             </div>
             {isRegister && (
               <div style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: 'var(--ink-wash)' }}>

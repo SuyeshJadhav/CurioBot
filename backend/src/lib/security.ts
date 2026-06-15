@@ -69,3 +69,31 @@ export function validateInterestsArray(interests: any): string[] {
     return validateAndSanitizePrompt(item, `interests[${idx}]`, 50);
   });
 }
+
+/**
+ * Validates only the length limit and basic sanitization for read-only system texts,
+ * entirely bypassing the prompt injection regex matches.
+ */
+export function validateLengthOnly(
+  input: any,
+  fieldName: string,
+  maxLength: number
+): string {
+  if (input === undefined || input === null) return "";
+  if (typeof input !== "string") {
+    throw new AppError(400, `Invalid input type for ${fieldName}. Expected a string.`);
+  }
+
+  const trimmed = input.trim();
+
+  // Enforce length limit only
+  if (trimmed.length > maxLength) {
+    throw new AppError(
+      400,
+      `Input ${fieldName} exceeds the maximum length of ${maxLength} characters.`
+    );
+  }
+
+  return trimmed;
+}
+

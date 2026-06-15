@@ -79,7 +79,7 @@ export function ArticleReaderCanvas() {
             letterSpacing: '0.06em' 
           }}
         >
-          {currentTopic ? 'Exploration' : 'Wonder'}
+          {savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain || 'Article'}
         </span>
       </div>
 
@@ -209,8 +209,8 @@ export function ArticleReaderCanvas() {
           style={{ padding: '8px 16px', borderRadius: 'var(--border-radius-md)', border: 'none', fontWeight: 600 }}
           onClick={() => igniteQuest()}
         >
-          <i className="ti ti-sparkles" style={{ marginRight: '6px' }}></i>
-          New Quest
+          <i className="ti ti-article" style={{ marginRight: '6px' }}></i>
+          New article
         </button>
 
         {/* Save/Bookmark Sketch */}
@@ -259,7 +259,7 @@ export function ArticleReaderCanvas() {
                 }
               }}
             >
-              <option value="" disabled>📁 Add to folder...</option>
+              <option value="" disabled>Add to folder...</option>
               {libraryCollections.map((col) => (
                 <option key={col.id} value={col.id}>
                   {col.name}

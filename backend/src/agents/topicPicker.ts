@@ -64,8 +64,25 @@ export async function topicPickerAgent(
 
   const requestedTitle = state.requestedTopic?.title;
   if (requestedTitle && (!state.dedupAttempts || state.dedupAttempts === 0)) {
-    console.log(`🔍 [Topic Picker Agent] Using requested topic: "${requestedTitle}"`);
-    const candidate: Topic = {
+    console.log(`🔍 [Topic Picker Agent] Using requested topic search: "${requestedTitle}"`);
+    const model = state.userSettings?.model || "gemini-3.1-flash-lite";
+
+    const prompt = `You are the editorial director of a general knowledge magazine (like Kurzgesagt or Wait But Why).
+The user wants to read a highly engaging, custom article about: "${requestedTitle}".
+
+Your task:
+1. Translate this search query/seed topic into a catchy, specific, and beautiful magazine-style headline.
+2. Provide a single-sentence intriguing summary.
+3. Categorize the topic's domain.
+
+Return valid JSON only, no markdown:
+{
+  "title": "A catchy, beautiful magazine headline representing the topic",
+  "domain": "The category (e.g. Science, History, Technology, etc.)",
+  "summary": "An intriguing one-sentence hook summary about the topic."
+}`;
+
+    let candidate: Topic = {
       id: requestedTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
       title: requestedTitle,
       domain: state.requestedTopic?.domain || interests[0] || "general",
@@ -73,13 +90,41 @@ export async function topicPickerAgent(
       connections: [],
       read: false
     };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    try {
+      const result = await ai.models.generateContent({
+        model: model,
+        contents: prompt,
+        config: {
+          safetySettings: safetySettings as any,
+        },
+      });
+
+      const text = result.text?.replace(/```json|```/g, "").trim();
+      if (text) {
+        const parsed = JSON.parse(text);
+        candidate.title = parsed.title?.trim() || candidate.title;
+        candidate.domain = parsed.domain?.trim() || candidate.domain;
+        candidate.summary = parsed.summary?.trim() || candidate.summary;
+      }
+      if (result.usageMetadata) {
+        inputTokens = result.usageMetadata.promptTokenCount || 0;
+        outputTokens = result.usageMetadata.candidatesTokenCount || 0;
+      }
+    } catch (err) {
+      console.warn("⚠️ [Topic Picker Agent] LLM refinement for custom topic failed, falling back to raw values:", err);
+    }
+
     const durationMs = Date.now() - startTime;
     const nodeMetric: NodeMetrics = {
       nodeName: "topic picker",
       durationMs,
       success: true,
-      inputTokens: 0,
-      outputTokens: 0,
+      inputTokens,
+      outputTokens,
     };
     return {
       currentTopic: candidate,

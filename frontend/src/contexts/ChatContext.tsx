@@ -22,7 +22,7 @@ const INIT_MSG: Message = {
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const { article, activeArticleId } = usePipeline();
 
   const [messages, setMessages] = useState<Message[]>([INIT_MSG]);
@@ -44,9 +44,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const { reply, tokenBalance } = await askTutor(content, currentMessages, article ?? '');
       const botMsg: Message = { id: `msg-${Date.now() + 1}`, role: 'bot', content: reply, timestamp: new Date() };
       setMessages((prev) => [...prev, botMsg]);
-      if (tokenBalance !== undefined) {
+      if (tokenBalance !== undefined && user) {
         // Propagate new token balance up to auth context so the sidebar updates
-        updateUser({ ...(null as any), token_balance: tokenBalance } as any);
+        updateUser({ ...user, token_balance: tokenBalance });
       }
     } catch (err: any) {
       const errMsg: Message = {
@@ -58,7 +58,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsGeneratingChat(false);
     }
-  }, [article, updateUser]);
+  }, [article, user, updateUser]);
 
   return (
     <ChatContext.Provider value={{ messages, isGeneratingChat, isTutorOpen, sendMessage, setTutorOpen }}>

@@ -23,68 +23,33 @@ export function DiscoverCanvas() {
       <p className="section-sub">Generate a new article or browse by topic area</p>
 
       {/* Start exploration form */}
-      <div className="card" style={{ padding: '24px', marginBottom: '20px', border: '1.5px solid var(--outline-variant)' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 650, color: 'var(--ink-charcoal)', margin: '0 0 8px', fontFamily: 'var(--font-headline)' }}>
-          ✨ Start a New Exploration
+      <div className="card" style={{ padding: '24px', marginBottom: '20px', border: '1.5px solid var(--outline-variant)', textAlign: 'center' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 650, color: 'var(--ink-charcoal)', margin: '0 0 8px', fontFamily: 'var(--font-headline)' }}>
+          I'm Feeling Lucky
         </h3>
-        <p className="card-body" style={{ marginBottom: '16px', fontSize: '12.5px', color: 'var(--ink-wash)' }}>
-          Type a topic or concept you're curious about, and our agent swarm will research and write a personalized article for you.
+        <p className="card-body" style={{ marginBottom: '20px', fontSize: '13px', color: 'var(--ink-wash)' }}>
+          Pick a random topic based on your interests and generate an article.
         </p>
         
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          const target = e.currentTarget;
-          const topicVal = (target.elements.namedItem('topic') as HTMLInputElement).value;
-          const hintVal = (target.elements.namedItem('hint') as HTMLInputElement).value;
-          const combinedHint = [topicVal.trim(), hintVal.trim()].filter(Boolean).join(' - ');
-          igniteQuest(topicVal.trim() || undefined, combinedHint || undefined);
-        }} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input 
-              name="topic"
-              type="text" 
-              placeholder="e.g. Quantum Computing (or leave blank for a random topic matching interests)..." 
-              style={{ 
-                flex: 1, 
-                fontSize: '13px',
-                padding: '8px 12px',
-                borderRadius: 'var(--border-radius-md)',
-                border: '1px solid var(--color-border-secondary)',
-                outline: 'none',
-                background: 'var(--color-background-secondary)'
-              }}
-            />
-            <button 
-              type="submit"
-              className="filter-btn on"
-              style={{ 
-                fontSize: '13px', 
-                padding: '8px 20px', 
-                borderRadius: 'var(--border-radius-md)', 
-                cursor: 'pointer',
-                border: 'none',
-                fontWeight: 600,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-              }}
-            >
-              ✦ Ignite
-            </button>
-          </div>
-          <input 
-            name="hint"
-            type="text" 
-            placeholder="Add an optional guide/hint (e.g. focus on history, explain to a beginner...)" 
-            style={{ 
-              fontSize: '12px',
-              padding: '6px 12px',
-              borderRadius: 'var(--border-radius-md)',
-              border: '1px solid var(--color-border-tertiary)',
-              outline: 'none',
-              background: 'var(--color-background-primary)',
-              opacity: 0.8
-            }}
-          />
-        </form>
+        <button
+          onClick={() => igniteQuest()}
+          className="filter-btn on"
+          style={{
+            fontSize: '14px',
+            padding: '10px 24px',
+            borderRadius: 'var(--border-radius-md)',
+            cursor: 'pointer',
+            border: 'none',
+            fontWeight: 600,
+            margin: '0 auto',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(127, 119, 221, 0.2)'
+          }}
+        >
+          <span>Surprise me</span>
+        </button>
       </div>
 
       <hr className="divider" />

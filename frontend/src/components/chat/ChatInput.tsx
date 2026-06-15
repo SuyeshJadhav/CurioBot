@@ -32,7 +32,7 @@ export function ChatInput({ onSend, disabled = false }: ChatInputProps) {
         <textarea
           id="chat-draft"
           rows={2}
-          placeholder="Jot down a thought…"
+          placeholder="Ask a question..."
           aria-label="Ask the tutor"
           value={draft}
           disabled={disabled}

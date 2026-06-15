@@ -4,7 +4,7 @@ import { getUserInterests } from "../lib/memory";
 import { getUserSettings, deductUserTokens, getUserTokenBalance } from "../lib/db";
 import { AppError } from "../lib/errors";
 import { checkTokenBalance } from "../middleware/rateLimiter";
-import { validateAndSanitizePrompt } from "../lib/security";
+import { validateAndSanitizePrompt, validateLengthOnly } from "../lib/security";
 
 const router = Router();
 
@@ -26,7 +26,7 @@ router.post(
     try {
       validatedMessage = validateAndSanitizePrompt(message, "message", 1000);
       if (!validatedMessage) throw new AppError(400, "message is required.");
-      validatedContext = validateAndSanitizePrompt(context, "context", 10000);
+      validatedContext = validateLengthOnly(context, "context", 10000);
     } catch (err) {
       return next(err);
     }

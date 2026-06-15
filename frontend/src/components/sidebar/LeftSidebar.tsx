@@ -16,7 +16,7 @@ export function LeftSidebar() {
   } = useAuth();
   const {
     history, loadArticle, deleteArticle, isGeneratingArticle, currentTopic,
-    activeArticleId, isLoadingHistory,
+    activeArticleId, isLoadingHistory, closeArticle,
   } = usePipeline();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
@@ -38,9 +38,11 @@ export function LeftSidebar() {
   const toggle = useCallback(() => setCollapsed(p => !p), []);
 
   const navigateTo = useCallback((tab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings') => {
+    // If user is reading an article, dismiss it so the tab's canvas actually renders
+    closeArticle();
     changeTab(tab);
     setMenuOpen(false);
-  }, [changeTab, setMenuOpen]);
+  }, [changeTab, closeArticle, setMenuOpen]);
 
   const selectArticle = useCallback((id: string) => {
     loadArticle(id);
@@ -265,12 +267,12 @@ export function LeftSidebar() {
           <div className="sidebar-user">
             <div className="sidebar-avatar">
               <div className="sidebar-avatar-inner">
-                {user.username.substring(0, 2).toUpperCase()}
+                {(user.username || 'UR').substring(0, 2).toUpperCase()}
               </div>
             </div>
             <div className="sidebar-user-info">
               <span className="sidebar-user-name">
-                {user.username}
+                {user.username || 'User'}
               </span>
             </div>
           </div>

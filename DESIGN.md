@@ -13,11 +13,11 @@
 - **Borders/Lines:** Irregular, slightly uneven hand-drawn borders and separator lines (like pencil or fine-liner pen).
 - **Semantic/Success:** Gentle pastel green with diffused light effects.
 
-## Typography (Handwritten Aesthetic)
-- **Global Font:** A custom, delightful handwritten-style font throughout the entire interface (headings, body, labels, inputs, etc.).
-- **Headings:** Slightly larger, more stylized handwritten script/caps.
-- **Body:** Legible, slightly varied handwritten print/script.
-- **Metadata/Tags:** Smaller, neat handwritten print/all-caps.
+## Typography
+- **Headings:** **Be Vietnam Pro** (`var(--font-headline)`) — semibold/bold (650–700), used for all section titles, card headers, and metric values. Clean, modern, highly readable.
+- **Body / UI text:** **Plus Jakarta Sans** (`var(--font-body)`) — regular/medium, used for descriptions, labels, input placeholders, and general UI copy.
+- **Decorative / Accent:** **DM Serif Display** (`var(--font-hand)`) — used sparingly for purely decorative elements (e.g., wax-seal motifs, pull-quotes) where a hand-crafted feel is needed without sacrificing readability.
+- **Metadata/Tags:** Plus Jakarta Sans, small/uppercase with letter-spacing, or Be Vietnam Pro at `font-size: 9–10px`.
 
 ## Core Layout Structure
 The application utilizes a **Whimsical Dual-Pane System** with a visible sketchpad feel.

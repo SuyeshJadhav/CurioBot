@@ -16,7 +16,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       {isBot ? (
         <div className="prose-chat">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message.content}
+            {message.content ?? ''}
           </ReactMarkdown>
         </div>
       ) : (
