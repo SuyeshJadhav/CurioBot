@@ -25,7 +25,7 @@ export function RecentNotes({
       background: 'var(--surface-cream)',
       border: '1px solid var(--outline-variant)',
       borderRadius: '14px',
-      padding: '20px 22px',
+      padding: '14px 18px',
       boxShadow: '0 2px 12px rgba(70,55,40,0.04)',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>

@@ -13,8 +13,8 @@ export function QuickQuestForm({ igniteQuest }: QuickQuestFormProps) {
       background: 'var(--surface-cream)',
       border: '1.5px solid var(--outline-variant)',
       borderRadius: '14px',
-      padding: '22px 24px 20px',
-      marginBottom: '24px',
+      padding: '14px 20px 12px',
+      marginBottom: '14px',
       position: 'relative',
       boxShadow: '0 2px 12px rgba(70,55,40,0.05)',
     }}>

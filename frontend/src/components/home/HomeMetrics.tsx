@@ -8,7 +8,7 @@ interface HomeMetricsProps {
 
 export function HomeMetrics({ isLoadingUserData, historyLength, savedSketchesLength }: HomeMetricsProps) {
   return (
-    <div style={{ display: 'flex', gap: '12px', marginBottom: '26px' }}>
+    <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
       {isLoadingUserData ? (
         <>
           <MetricSkeleton />
@@ -21,7 +21,7 @@ export function HomeMetrics({ isLoadingUserData, historyLength, savedSketchesLen
             background: 'var(--surface-cream)',
             border: '1px solid var(--outline-variant)',
             borderRadius: '12px',
-            padding: '14px 16px',
+            padding: '10px 14px',
             display: 'flex',
             flexDirection: 'column',
             gap: '4px',
@@ -34,7 +34,7 @@ export function HomeMetrics({ isLoadingUserData, historyLength, savedSketchesLen
             background: 'var(--surface-cream)',
             border: '1px solid var(--outline-variant)',
             borderRadius: '12px',
-            padding: '14px 16px',
+            padding: '10px 14px',
             display: 'flex',
             flexDirection: 'column',
             gap: '4px',

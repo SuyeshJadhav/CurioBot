@@ -66,8 +66,8 @@ export function SuggestedReads({ user, interests, igniteQuest }: SuggestedReadsP
   ];
 
   return (
-    <div style={{ marginBottom: '26px' }}>
-      <div style={{ marginBottom: '14px' }}>
+    <div style={{ marginBottom: '14px' }}>
+      <div style={{ marginBottom: '8px' }}>
         <h3 style={{
           fontFamily: 'var(--font-headline)',
           fontSize: '15px',
@@ -101,7 +101,7 @@ export function SuggestedReads({ user, interests, igniteQuest }: SuggestedReadsP
                 style={{
                   flex: '1 1 calc(33.333% - 10px)',
                   minWidth: '180px',
-                  padding: '16px',
+                  padding: '12px 14px',
                   borderRadius: '12px',
                   background: 'var(--surface-cream)',
                   border: '1px solid var(--outline-variant)',

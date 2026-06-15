@@ -20,11 +20,11 @@ export function HomeCanvas() {
   }, [loadSavedSketches]);
 
   return (
-    <div style={{ padding: '2.5rem 2rem 3rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+    <div style={{ padding: '1rem 2rem 1.5rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
       <div className="noise-overlay" />
 
       {/* Page header */}
-      <div style={{ marginBottom: '28px' }}>
+      <div style={{ marginBottom: '14px' }}>
         <h2 style={{
           fontFamily: 'var(--font-headline)',
           fontSize: '22px',
