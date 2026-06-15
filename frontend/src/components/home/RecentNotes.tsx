@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Skeleton } from '../common/Skeletons';
+import type { AuthContextType } from '../../contexts/AuthContext';
 
 interface RecentNotesProps {
   isLoadingUserData: boolean;
   savedSketches: any[];
   loadArticle: (id: string) => void;
   updateSketchNotes: (id: string, notes: string) => void;
-  changeTab: (tab: string) => void;
+  changeTab: (tab: AuthContextType['activeTab']) => void;
 }
 
 export function RecentNotes({

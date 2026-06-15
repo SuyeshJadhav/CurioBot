@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface HistoryTabProps {
   filter: 'all' | 'saved' | 'read' | 'topic';
   history: any[];

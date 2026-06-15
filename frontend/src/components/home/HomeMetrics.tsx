@@ -1,4 +1,3 @@
-import React from 'react';
 import { MetricSkeleton } from '../common/Skeletons';
 
 interface HomeMetricsProps {

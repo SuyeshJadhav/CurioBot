@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ShelfFolderViewProps {
   activeCollectionId: string | null;
   libraryCollections: any[];

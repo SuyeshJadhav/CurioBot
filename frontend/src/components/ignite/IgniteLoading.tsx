@@ -1,5 +1,3 @@
-import React from 'react';
-
 const PIPELINE_STEPS = [
   { icon: 'lightbulb', label: 'Choosing a topic' },
   { icon: 'travel_explore', label: 'Searching the web' },

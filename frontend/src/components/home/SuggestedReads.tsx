@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchRecommendations } from '../../actions/libraryActions';
 import { Skeleton } from '../common/Skeletons';
 
