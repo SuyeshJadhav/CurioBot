@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("observabilityAgent", () => {
   it("calculates researchFactCount, briefFactCount, outlineSectionCount, articleWordCount, and researchFactsUsed correctly", async () => {

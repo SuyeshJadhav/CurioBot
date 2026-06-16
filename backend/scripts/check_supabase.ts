@@ -18,7 +18,7 @@ async function checkDatabase() {
   
   for (const table of tables) {
     try {
-      const { data, error, count } = await supabase
+      const { error, count } = await supabase
         .from(table)
         .select("*", { count: "exact", head: true });
         

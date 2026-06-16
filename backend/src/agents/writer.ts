@@ -1,4 +1,4 @@
-import { ai, safetySettings } from "../lib/gemini";
+import { ai, safetySettings, withAbort } from "../lib/gemini";
 import { AgentStateType, NodeMetrics, WriterOutput } from "../types";
 
 async function generateContentWithAbort(
@@ -6,51 +6,40 @@ async function generateContentWithAbort(
 	contents: any[],
 	signal?: AbortSignal
 ): Promise<any> {
-	if (signal?.aborted) {
-		throw new DOMException("Aborted", "AbortError");
-	}
-
-	const abortPromise = new Promise<never>((_, reject) => {
-		if (signal) {
-			signal.addEventListener("abort", () => {
-				reject(new DOMException("Aborted", "AbortError"));
-			});
-		}
-	});
-
-	const apiCall = ai.models.generateContent({
-		model,
-		contents,
-		config: {
-			safetySettings: safetySettings as any,
-			responseMimeType: "application/json",
-			responseSchema: {
-				type: "object",
-				properties: {
-					title: { type: "string" },
-					article: { type: "string" },
-					tldr: { type: "string" },
-					rabbit_holes: {
-						type: "array",
-						minItems: 2,
-						maxItems: 2,
-						items: {
-							type: "object",
-							properties: {
-								title: { type: "string" },
-								domain: { type: "string" },
-								why: { type: "string" }
-							},
-							required: ["title", "domain", "why"]
+	return withAbort(
+		ai.models.generateContent({
+			model,
+			contents,
+			config: {
+				safetySettings: safetySettings as any,
+				responseMimeType: "application/json",
+				responseSchema: {
+					type: "object",
+					properties: {
+						title: { type: "string" },
+						article: { type: "string" },
+						tldr: { type: "string" },
+						rabbit_holes: {
+							type: "array",
+							minItems: 2,
+							maxItems: 2,
+							items: {
+								type: "object",
+								properties: {
+									title: { type: "string" },
+									domain: { type: "string" },
+									why: { type: "string" }
+								},
+								required: ["title", "domain", "why"]
+							}
 						}
-					}
-				},
-				required: ["title", "article", "tldr", "rabbit_holes"]
+					},
+					required: ["title", "article", "tldr", "rabbit_holes"]
+				}
 			}
-		}
-	});
-
-	return Promise.race([apiCall, abortPromise]);
+		}),
+		signal
+	);
 }
 
 function parseWriterResponse(text: string): WriterOutput {
@@ -101,9 +90,7 @@ export async function writerAgent(state: AgentStateType): Promise<Partial<AgentS
 				.join("\n\n---\n\n")
 			: "No Wikipedia research available.";
 
-	const researchSummarySection = state.researchSummary
-		? `=== RESEARCH SUMMARY ===\n${state.researchSummary}\n=== END RESEARCH SUMMARY ===\n\n`
-		: "";
+
 
 	const hasResearch = (state.research && state.research.length > 0) || (state.wikiResearch && state.wikiResearch.length > 0);
 	const researchInstruction = hasResearch
@@ -166,9 +153,7 @@ Forbidden Angles (Do NOT write about these): ${(state.researchBrief.forbiddenAng
 === END ARTICLE ANGLE GUIDELINES ===\n\n`
 		: "";
 
-	const outlineInstruction = state.outline
-		? "CRITICAL: You MUST write the article following the provided ARTICLE OUTLINE. Use the specified title (or a slight variation of it), open with the specified hook, and structure the article body EXACTLY with the section headings and purposes defined in the outline. Do NOT change the section headings or their logical order."
-		: "Use clear sections with headers, opening with a specific scene, surprising fact, or counterintuitive claim (no rhetorical questions).";
+
 
 	const model = state.userSettings?.model || "gemini-3.1-flash-lite";
 

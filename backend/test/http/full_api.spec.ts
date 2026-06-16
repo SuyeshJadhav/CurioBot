@@ -26,7 +26,7 @@ describe("HTTP API - Full Coverage", () => {
       const queueEvents = new EventEmitter();
       
       const generationQueue = {
-        add: vi.fn(async (name, data) => {
+        add: vi.fn(async (_name, _data) => {
           const jobId = "job-" + Date.now();
           // Simulate worker processing the job and emitting the event asynchronously
           setTimeout(() => {
@@ -274,7 +274,7 @@ describe("HTTP API - Full Coverage", () => {
       const queueEvents = new EventEmitter();
       
       const generationQueue = {
-        add: vi.fn(async (name, data) => {
+        add: vi.fn(async (_name, _data) => {
           callCount += 1;
           const jobId = "job-err-" + Date.now();
           

@@ -22,7 +22,7 @@ const redisSub = new Redis(
 // Map to keep track of active job abort controllers for cancellation dispatching
 const activeAbortControllers = new Map<string, AbortController>();
 
-redisSub.on("message", (channel, message) => {
+redisSub.on("message", (channel, _message) => {
   if (channel.startsWith("job-cancel:")) {
     const jobId = channel.split(":")[1];
     const controller = activeAbortControllers.get(jobId);

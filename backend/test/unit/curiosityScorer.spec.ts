@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("curiosityScorerAgent", () => {
   it("scores candidates, applies hybrid bonuses, and selects the winner", async () => {

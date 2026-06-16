@@ -23,7 +23,7 @@ const router = Router();
 router.get(
   "/recommendations",
   authenticate,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
     const userId = (req as any).userId;
     const dbInterests = await getUserInterests(userId);
     const resolvedInterests =

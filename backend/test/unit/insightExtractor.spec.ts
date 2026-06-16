@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("insightExtractorAgent", () => {
   it("synthesizes insights successfully matching the schema", async () => {
@@ -6,7 +6,7 @@ describe("insightExtractorAgent", () => {
 
     let callCount = 0;
     (gemini.ai.models.generateContent as any).mockImplementation(
-      async (args: any) => {
+      async (_args: any) => {
         callCount++;
         return {
           text: JSON.stringify({

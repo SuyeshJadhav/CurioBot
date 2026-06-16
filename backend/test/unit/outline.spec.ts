@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("outlineAgent", () => {
   it("extracts key facts and generates a structured outline (fallback mode when researchBrief is missing)", async () => {
@@ -6,7 +6,7 @@ describe("outlineAgent", () => {
 
     let callCount = 0;
     (gemini.ai.models.generateContent as any).mockImplementation(
-      async (args: any) => {
+      async (_args: any) => {
         callCount++;
         if (callCount === 1) {
           // Key facts extraction response
@@ -74,7 +74,7 @@ describe("outlineAgent", () => {
 
     let callCount = 0;
     (gemini.ai.models.generateContent as any).mockImplementation(
-      async (args: any) => {
+      async (_args: any) => {
         callCount++;
         // Outline generation response only (key facts should be bypassed!)
         return {

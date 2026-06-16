@@ -1,4 +1,4 @@
-import { ai, safetySettings } from "../lib/gemini";
+import { ai, safetySettings, withAbort } from "../lib/gemini";
 import { initWikiMcp, executeWikiTool } from "../lib/mcp";
 import { AgentStateType, NodeMetrics } from "../types";
 
@@ -8,25 +8,14 @@ async function generateContentWithAbort(
   config: any,
   signal?: AbortSignal,
 ): Promise<any> {
-  if (signal?.aborted) {
-    throw new DOMException("Aborted", "AbortError");
-  }
-
-  const abortPromise = new Promise<never>((_, reject) => {
-    if (signal) {
-      signal.addEventListener("abort", () => {
-        reject(new DOMException("Aborted", "AbortError"));
-      });
-    }
-  });
-
-  const apiCall = ai.models.generateContent({
-    model,
-    contents,
-    config,
-  });
-
-  return Promise.race([apiCall, abortPromise]);
+  return withAbort(
+    ai.models.generateContent({
+      model,
+      contents,
+      config,
+    }),
+    signal,
+  );
 }
 
 export const wikiResearcherAgent = async (

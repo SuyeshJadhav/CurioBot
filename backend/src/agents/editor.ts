@@ -1,4 +1,4 @@
-import { ai, safetySettings } from "../lib/gemini";
+import { ai, safetySettings, withAbort } from "../lib/gemini";
 import { AgentStateType, NodeMetrics } from "../types";
 
 export async function editorAgent(state: AgentStateType): Promise<Partial<AgentStateType>> {
@@ -24,7 +24,7 @@ export async function editorAgent(state: AgentStateType): Promise<Partial<AgentS
     : "No key facts available.";
 
   const sectionTargetsContext = state.outline?.sections && state.outline.sections.length > 0
-    ? `Outline Section Targets:\n${state.outline.sections.map((s, i) => `- Section "${s.heading}": Target ${s.targetWordCount || "unspecified"} words`).join("\n")}`
+    ? `Outline Section Targets:\n${state.outline.sections.map((s) => `- Section "${s.heading}": Target ${s.targetWordCount || "unspecified"} words`).join("\n")}`
     : "No outline section targets available.";
 
   const prompt = `You are a developmental editor, not a copy editor. Your job is to improve the narrative structure, curiosity, coherence, fact consistency, formatting/layout, and educational value of the draft article. You may rewrite sections substantially if necessary.
@@ -97,16 +97,7 @@ Return ONLY a JSON object matching this schema:
       }
     });
 
-    if (signal) {
-      const abortPromise = new Promise<never>((_, reject) => {
-        signal.addEventListener("abort", () => {
-          reject(new DOMException("Aborted", "AbortError"));
-        });
-      });
-      response = await Promise.race([apiCall, abortPromise]);
-    } else {
-      response = await apiCall;
-    }
+    response = await withAbort(apiCall, signal);
 
     if (response.usageMetadata) {
       inputTokens = response.usageMetadata.promptTokenCount || 0;

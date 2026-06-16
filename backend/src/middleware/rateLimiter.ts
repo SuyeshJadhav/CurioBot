@@ -75,7 +75,7 @@ function isRateLimited(
  * Middleware: Enforces IP/User general route rate limiting
  * Limit: 30 requests per 60 seconds
  */
-export const generalRateLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const generalRateLimiter = (req: Request, _res: Response, next: NextFunction) => {
   const userId = (req as any).userId;
   const key = userId || req.ip || req.socket.remoteAddress || 'unknown';
   
@@ -90,7 +90,7 @@ export const generalRateLimiter = (req: Request, res: Response, next: NextFuncti
  * Middleware: Enforces in-memory sliding window rate limits on the generation endpoint
  * Limit: 2 generations per 60 seconds
  */
-export const generateRateLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const generateRateLimiter = (req: Request, _res: Response, next: NextFunction) => {
   const userId = (req as any).userId;
   if (!userId) {
     return next(new AppError(401, 'Unauthorized: User context missing'));
@@ -106,7 +106,7 @@ export const generateRateLimiter = (req: Request, res: Response, next: NextFunct
  * Middleware: Checks daily article generation ceiling in Supabase
  * Ceiling: 20 articles per user per day (UTC calendar day)
  */
-export const checkDailyCeiling = async (req: Request, res: Response, next: NextFunction) => {
+export const checkDailyCeiling = async (req: Request, _res: Response, next: NextFunction) => {
   const userId = (req as any).userId;
   if (!userId) {
     return next(new AppError(401, 'Unauthorized: User context missing'));
@@ -147,7 +147,7 @@ export const checkDailyCeiling = async (req: Request, res: Response, next: NextF
  * Middleware: Checks user's token balance in Supabase
  * Rejects requests if balance <= 0 (except for system wonder user)
  */
-export const checkTokenBalance = async (req: Request, res: Response, next: NextFunction) => {
+export const checkTokenBalance = async (req: Request, _res: Response, next: NextFunction) => {
   const userId = (req as any).userId;
   if (!userId) {
     return next(new AppError(401, 'Unauthorized: User context missing'));

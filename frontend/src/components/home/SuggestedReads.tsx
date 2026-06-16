@@ -56,6 +56,40 @@ export function SuggestedReads({ user, interests, igniteQuest }: SuggestedReadsP
     return () => { active = false; };
   }, [interests, user]);
 
+  const handleIgnite = async (clickedSuggestion: { tag: string; topic: string }) => {
+    igniteQuest({ title: clickedSuggestion.topic, domain: clickedSuggestion.tag });
+
+    const updatedRecs = recommendations.filter(r => r.topic !== clickedSuggestion.topic);
+    setRecommendations(updatedRecs);
+
+    const sortedInterests = [...interests].sort().join(',');
+    const cacheKey = `curio_recs_${user.id}_${sortedInterests}`;
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(updatedRecs));
+    } catch (e) {
+      console.error('Failed to update recommendation cache:', e);
+    }
+
+    try {
+      const freshRecs = await fetchRecommendations();
+      const existingTopics = new Set(updatedRecs.map(r => r.topic.toLowerCase().trim()));
+      const replacement = freshRecs.find((r: any) => !existingTopics.has(r.topic.toLowerCase().trim()));
+      
+      let finalRecs = updatedRecs;
+      if (replacement) {
+        finalRecs = [...updatedRecs, replacement];
+      } else if (freshRecs && freshRecs.length > 0) {
+        finalRecs = [...updatedRecs, freshRecs[0]];
+      }
+      
+      setRecommendations(finalRecs);
+      localStorage.setItem(cacheKey, JSON.stringify(finalRecs));
+      localStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+    } catch (err) {
+      console.error('Failed to fetch replacement recommendation:', err);
+    }
+  };
+
   const capitalizeWord = (str: string) =>
     str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -97,7 +131,7 @@ export function SuggestedReads({ user, interests, igniteQuest }: SuggestedReadsP
             return (
               <div
                 key={idx}
-                onClick={() => igniteQuest({ title: suggestion.topic, domain: suggestion.tag })}
+                onClick={() => handleIgnite(suggestion)}
                 style={{
                   flex: '1 1 calc(33.333% - 10px)',
                   minWidth: '180px',

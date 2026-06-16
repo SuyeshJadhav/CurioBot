@@ -1,4 +1,4 @@
-import { ai, safetySettings } from "../lib/gemini";
+import { ai, safetySettings, withAbort } from "../lib/gemini";
 import { AgentStateType, NodeMetrics, ResearchBrief } from "../types";
 
 export async function researchBriefAgent(state: AgentStateType): Promise<Partial<AgentStateType>> {
@@ -138,17 +138,7 @@ Return ONLY a JSON object matching this schema:
       }
     });
 
-    let response: any;
-    if (signal) {
-      const abortPromise = new Promise<never>((_, reject) => {
-        signal.addEventListener("abort", () => {
-          reject(new DOMException("Aborted", "AbortError"));
-        });
-      });
-      response = await Promise.race([apiCall, abortPromise]);
-    } else {
-      response = await apiCall;
-    }
+    const response = await withAbort(apiCall, signal);
 
     if (response.usageMetadata) {
       totalInputTokens += response.usageMetadata.promptTokenCount || 0;

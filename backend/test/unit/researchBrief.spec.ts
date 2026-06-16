@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("researchBriefAgent", () => {
   it("compiles a structured research brief from state research content", async () => {

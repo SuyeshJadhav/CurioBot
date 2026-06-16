@@ -1,6 +1,6 @@
 import { ai, safetySettings } from "../lib/gemini";
 import { generateEmbedding } from "../lib/embeddings";
-import { AgentStateType, NodeMetrics, Topic, TopicCandidate } from "../types";
+import { AgentStateType, NodeMetrics, Topic } from "../types";
 
 interface ScoredCandidate {
   title: string;

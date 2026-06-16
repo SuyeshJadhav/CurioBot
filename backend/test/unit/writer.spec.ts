@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("writerAgent", () => {
   it("includes user preferences inside XML tags in the prompt", async () => {

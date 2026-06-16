@@ -1,7 +1,6 @@
 import { AgentStateType, NodeMetrics, TopicCandidate } from "../types";
 import { ai, safetySettings } from "../lib/gemini";
 import { pickRandomTemplate } from "../data/editorialTemplates";
-import { AppError } from "../lib/errors";
 
 const FALLBACK_CANDIDATE: TopicCandidate = {
   title: "The Strange History of Time Zones",
@@ -52,11 +51,8 @@ export async function topicPickerAgent(
   let candidates: TopicCandidate[] = [];
   let inputTokens = 0;
   let outputTokens = 0;
-  let isCustom = false;
-
   if (requestedTitle && (!state.dedupAttempts || state.dedupAttempts === 0)) {
     console.log(`🔍 [Topic Picker Agent] Generating candidates for requested topic: "${requestedTitle}"`);
-    isCustom = true;
     const model = state.userSettings?.model || "gemini-3.1-flash-lite";
 
     const prompt = `You are the editorial director of a general knowledge magazine (like Kurzgesagt or Wait But Why).

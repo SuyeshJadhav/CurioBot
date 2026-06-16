@@ -18,7 +18,7 @@ export const asyncHandler = (
  * Authentication middleware that verifies JWT bearer tokens.
  * Attaches the authenticated userId to the request object.
  */
-export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(new AppError(401, 'Unauthorized: Missing or invalid token'));

@@ -1,4 +1,5 @@
 import { tavily } from "@tavily/core";
+import { withAbort } from "./gemini";
 
 const client = tavily({ apiKey: process.env.TAVILY_API_KEY! })
 
@@ -26,21 +27,6 @@ export async function searchWeb(query: string, signal?: AbortSignal): Promise<Se
 		return cached.results;
 	}
 
-	if (signal?.aborted) {
-		throw new DOMException("Aborted", "AbortError");
-	}
-
-	const abortPromise = new Promise<never>((_, reject) => {
-		if (signal) {
-			if (signal.aborted) {
-				return reject(new DOMException("Aborted", "AbortError"));
-			}
-			signal.addEventListener("abort", () => {
-				reject(new DOMException("Aborted", "AbortError"));
-			});
-		}
-	});
-
 	const searchPromise = (async () => {
 		const response = await client.search(query, {
 			maxResults: 5,
@@ -58,5 +44,5 @@ export async function searchWeb(query: string, signal?: AbortSignal): Promise<Se
 		return results;
 	})();
 
-	return Promise.race([searchPromise, abortPromise]);
+	return withAbort(searchPromise, signal);
 }

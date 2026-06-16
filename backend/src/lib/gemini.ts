@@ -47,6 +47,25 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 5, delay = 2000): Pr
   }
 }
 
+export async function withAbort(promise: Promise<any>, signal?: AbortSignal): Promise<any> {
+  if (!signal) return promise;
+  if (signal.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+  let onAbort: (() => void) | undefined;
+  const abortPromise = new Promise<never>((_, reject) => {
+    onAbort = () => reject(new DOMException("Aborted", "AbortError"));
+    signal.addEventListener("abort", onAbort);
+  });
+  try {
+    return await Promise.race([promise, abortPromise]);
+  } finally {
+    if (onAbort) {
+      signal.removeEventListener("abort", onAbort);
+    }
+  }
+}
+
 export const ai = {
   models: {
     generateContent: (args: any) => withRetry(() => getAi().models.generateContent(args)),

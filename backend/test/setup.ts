@@ -234,9 +234,12 @@ beforeEach(async () => {
       embeddings: [{ values: [0.1, 0.2, 0.3] }],
     }));
 
+    const withAbort = vi.fn(async (promise: Promise<any>) => promise);
+
     return {
       ai: { models: { generateContent, embedContent } },
       safetySettings: [] as const,
+      withAbort,
     };
   });
 
@@ -252,12 +255,12 @@ beforeEach(async () => {
   }));
 
   vi.mock("../src/lib/memory", () => ({
-    getAllInterests: vi.fn(async (userId: string) => []),
+    getAllInterests: vi.fn(async (_userId: string) => []),
     matchSeenTopics: vi.fn(
       async (_queryEmbedding: any, _userId: string, _threshold?: number) => [],
     ),
     addSeenTopic: vi.fn(async () => {}),
-    getUserInterests: vi.fn(async (userId: string) => []),
+    getUserInterests: vi.fn(async (_userId: string) => []),
     addInterest: vi.fn(async () => {}),
     deleteInterest: vi.fn(async () => {}),
   }));

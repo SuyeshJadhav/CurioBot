@@ -1,4 +1,4 @@
-import { ai, safetySettings } from "../lib/gemini";
+import { ai, safetySettings, withAbort } from "../lib/gemini";
 import { AgentStateType } from "../types";
 
 export async function tutorAgent(
@@ -51,19 +51,11 @@ export async function tutorAgent(
     throw new DOMException("Aborted", "AbortError");
   }
 
-  const abortPromise = new Promise<never>((_, reject) => {
-    if (signal) {
-      signal.addEventListener("abort", () => {
-        reject(new DOMException("Aborted", "AbortError"));
-      });
-    }
-  });
-
   const messagePromise = chat.sendMessage({
     message: question,
   });
 
-  const result = await Promise.race([messagePromise, abortPromise]);
+  const result = await withAbort(messagePromise, signal);
   const reply = result.text || "";
   let inputTokens = 0;
   let outputTokens = 0;
