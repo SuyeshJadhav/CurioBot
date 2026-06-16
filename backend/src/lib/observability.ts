@@ -48,6 +48,11 @@ export interface PipelineMetrics {
   curiosityGap?: number;
   primaryQuestion?: string;
   winningCandidateReason?: string;
+  insightDensity?: number;
+  insightOriginality?: number;
+  factToInsightRatio?: number;
+  insightsGenerated?: number;
+  insightsUsed?: number;
 }
 
 // Gemini 1.5/3.1 flash input/output pricing per 1M tokens
@@ -127,6 +132,11 @@ export const pipelineLogger = {
           curiosity_gap: metrics.curiosityGap,
           primary_question: metrics.primaryQuestion,
           winning_candidate_reason: metrics.winningCandidateReason,
+          insight_density: metrics.insightDensity,
+          insight_originality: metrics.insightOriginality,
+          fact_to_insight_ratio: metrics.factToInsightRatio,
+          insights_generated: metrics.insightsGenerated,
+          insights_used: metrics.insightsUsed,
         });
 
       if (error) {
@@ -171,6 +181,11 @@ export const pipelineLogger = {
       `    - Information Density: ${metrics.informationDensity !== undefined ? metrics.informationDensity : 'N/A'}/10\n` +
       `    - Curiosity Gap: ${metrics.curiosityGap !== undefined ? metrics.curiosityGap : 'N/A'}/10\n` +
       `    - Unsupported Claims: ${metrics.unsupportedClaims !== undefined ? metrics.unsupportedClaims : 'N/A'}\n` +
+      `    - Insight Density: ${metrics.insightDensity !== undefined ? metrics.insightDensity : 'N/A'}/10\n` +
+      `    - Insight Originality: ${metrics.insightOriginality !== undefined ? metrics.insightOriginality : 'N/A'}/10\n` +
+      `    - Fact-to-Insight Ratio: ${metrics.factToInsightRatio !== undefined ? metrics.factToInsightRatio : 'N/A'}/10\n` +
+      `    - Insights Generated: ${metrics.insightsGenerated !== undefined ? metrics.insightsGenerated : 'N/A'}\n` +
+      `    - Insights Used: ${metrics.insightsUsed !== undefined ? metrics.insightsUsed : 'N/A'}\n` +
       `    - Primary Question: "${metrics.primaryQuestion || 'N/A'}"\n` +
       `    - Winning Reason: "${metrics.winningCandidateReason || 'N/A'}"\n` +
       `  • Editor Notes:\n` +

@@ -19,6 +19,11 @@ describe("writerAgent", () => {
       research: [],
       wikiResearch: [],
       researchSummary: undefined,
+      insightBrief: {
+        coreInsights: [
+          { insight: "Insight 1", whyInteresting: "Interesting 1", supportingEvidence: ["Evidence 1"], confidence: "high" }
+        ]
+      },
       userSettings: {
         knowledge_level: "intermediate",
         model: "m",
@@ -51,6 +56,11 @@ describe("writerAgent", () => {
     const state = {
       userId: "u1",
       currentTopic: { title: "Topic" },
+      insightBrief: {
+        coreInsights: [
+          { insight: "Insight 1", whyInteresting: "Interesting 1", supportingEvidence: ["Evidence 1"], confidence: "high" }
+        ]
+      },
       userSettings: {},
     } as any;
     const res = await writerAgent(state);

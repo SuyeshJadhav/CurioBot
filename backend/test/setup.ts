@@ -81,6 +81,29 @@ beforeEach(async () => {
         };
       }
 
+      if (props.coreInsights !== undefined) {
+        return {
+          text: JSON.stringify({
+            coreInsights: [
+              {
+                insight: "Civilization was built on excess calories before it was built on technology.",
+                whyInteresting: "It shifts the focus of human progress from tool-making to energy capture.",
+                whyCounterintuitive: "We usually think of technology as the driver of cities.",
+                supportingEvidence: ["[Source 1] Grain storage was the true origin of municipal bureaucracy"],
+                confidence: "high"
+              },
+              {
+                insight: "The hidden complexity behind early structures suggested standard assumptions may be incomplete.",
+                whyInteresting: "It forces the reader to look beyond surface level functionality.",
+                supportingEvidence: ["[Wikipedia Source 2] Initial structures had religious significance"],
+                confidence: "medium"
+              }
+            ]
+          }),
+          usageMetadata: { promptTokenCount: 15, candidatesTokenCount: 10 }
+        };
+      }
+
       if (props.coreConcepts !== undefined) {
         return {
           text: JSON.stringify({
@@ -172,7 +195,11 @@ beforeEach(async () => {
             conclusionQuality: 8,
             unsupportedClaims: 0,
             informationDensity: 9,
-            curiosityGap: 8
+            curiosityGap: 8,
+            insightDensity: 9,
+            insightOriginality: 8,
+            factToInsightRatio: 9,
+            insightsUsed: 2
           }),
           usageMetadata: {},
         };

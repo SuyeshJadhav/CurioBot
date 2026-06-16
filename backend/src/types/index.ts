@@ -66,6 +66,11 @@ export interface NodeMetrics {
   curiosityGap?: number;
   primaryQuestion?: string;
   winningCandidateReason?: string;
+  insightDensity?: number;
+  insightOriginality?: number;
+  factToInsightRatio?: number;
+  insightsGenerated?: number;
+  insightsUsed?: number;
 }
 
 export interface UserSettings {
@@ -96,6 +101,8 @@ export interface OutlineSection {
   example: string;
   transition: string;
   targetWordCount: number;
+  formattingHint?: string;
+  centralInsight?: string;
 }
 
 export interface ArticleOutline {
@@ -123,6 +130,18 @@ export interface ResearchBrief {
   winningCandidateReason?: string;
 }
 
+export interface Insight {
+  insight: string;
+  whyInteresting: string;
+  whyCounterintuitive?: string;
+  supportingEvidence: string[];
+  confidence: "high" | "medium" | "low";
+}
+
+export interface InsightBrief {
+  coreInsights: Insight[];
+}
+
 export const AgentState = Annotation.Root({
   userId: Annotation<string>(),
   interests: Annotation<string[]>(),
@@ -146,6 +165,7 @@ export const AgentState = Annotation.Root({
     default: () => []
   }),
   researchBrief: Annotation<ResearchBrief | undefined>(),
+  insightBrief: Annotation<InsightBrief | undefined>(),
   outline: Annotation<ArticleOutline | undefined>(),
   keyFacts: Annotation<string[] | undefined>(),
   article: Annotation<string | undefined>(),
@@ -169,7 +189,9 @@ export const AgentState = Annotation.Root({
   briefFactCount: Annotation<number | undefined>(),
   outlineSectionCount: Annotation<number | undefined>(),
   articleWordCount: Annotation<number | undefined>(),
-  researchFactsUsed: Annotation<number | undefined>()
+  researchFactsUsed: Annotation<number | undefined>(),
+  insightsGenerated: Annotation<number | undefined>(),
+  insightsUsed: Annotation<number | undefined>()
 })
 
 export type AgentStateType = typeof AgentState.State

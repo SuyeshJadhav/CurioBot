@@ -10,7 +10,7 @@ You can apply the database migrations either by running the Supabase CLI or by c
 
 Below are the SQL statements from the migrations in chronological order. Copy and run them in your Supabase SQL Editor:
 
-### Migration 0: Initial Schema creation
+### Migration 0: Initial Schema Creation
 ```sql
 -- Enable vector extension
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -81,17 +81,6 @@ CREATE TABLE IF NOT EXISTS saved_sketches (
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT unique_user_article_sketch UNIQUE (user_id, article_id)
 );
-
--- Create daily_wonders table
-CREATE TABLE IF NOT EXISTS daily_wonders (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  topic text NOT NULL,
-  summary text NOT NULL,
-  domain text NOT NULL,
-  publish_date date UNIQUE NOT NULL,
-  created_at timestamp with time zone DEFAULT now(),
-  article_id uuid REFERENCES articles(id) ON DELETE SET NULL
-);
 ```
 
 ### Migration 1: pgvector Similarity Search
@@ -126,27 +115,10 @@ $$;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS rabbit_holes jsonb;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS tldr text;
 
--- Create wonder_pool table for pre-generating articles
-CREATE TABLE IF NOT EXISTS wonder_pool (
-  id uuid primary key default gen_random_uuid(),
-  topic text not null,
-  summary text,
-  domain text,
-  article text,
-  rabbit_holes jsonb,
-  created_at timestamp with time zone default now(),
-  used_at timestamp with time zone
-);
-
 -- Ensure a default system wonder user exists in the users table
 INSERT INTO users (id, email, username, password_hash)
 VALUES ('00000000-0000-0000-0000-000000000000', 'system-wonder@curiobot.ai', 'system-wonder', 'system-generated-hash-disabled-login')
 ON CONFLICT (id) DO NOTHING;
-
--- Insert default settings for the system wonder user
-INSERT INTO library_collections (user_id, name, description)
-VALUES ('00000000-0000-0000-0000-000000000000', '__settings__', '{"reading_time":"5min","knowledge_level":"intermediate","topic_novelty":"wildcard","model":"gemini-3.1-flash-lite"}')
-ON CONFLICT DO NOTHING;
 ```
 
 ### Migration 3: User Settings Table
@@ -166,18 +138,6 @@ VALUES (
   '{"reading_time":"5min","knowledge_level":"intermediate","topic_novelty":"wildcard","model":"gemini-3.1-flash-lite"}'::jsonb
 )
 ON CONFLICT (user_id) DO NOTHING;
-
--- Migrate existing settings from library_collections to user_settings if any exist
-INSERT INTO user_settings (user_id, settings, created_at)
-SELECT user_id, description::jsonb, created_at
-FROM library_collections
-WHERE name = '__settings__'
-ON CONFLICT (user_id) DO UPDATE
-SET settings = EXCLUDED.settings;
-
--- Clean up settings records from library_collections
-DELETE FROM library_collections
-WHERE name = '__settings__';
 ```
 
 ### Migration 4: Article Reads (Streaks) Table
@@ -194,6 +154,25 @@ CREATE TABLE IF NOT EXISTS article_reads (
 CREATE INDEX IF NOT EXISTS idx_article_reads_user_id_read_at ON article_reads(user_id, read_at DESC);
 ```
 
+### Migration 5: Token Balance
+```sql
+-- Add token_balance column to the users table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER NOT NULL DEFAULT 100000;
+```
+
+### Migration 6: Remove Daily Wonders & Wonder Pool
+```sql
+-- Drop daily_wonders and wonder_pool tables (no longer used)
+DROP TABLE IF EXISTS daily_wonders CASCADE;
+DROP TABLE IF EXISTS wonder_pool CASCADE;
+```
+
+### Migration 7: Token Refresh Timestamp
+```sql
+-- Add last_token_refresh column to track 24-hour auto-refresh window
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_token_refresh TIMESTAMPTZ NOT NULL DEFAULT NOW();
+```
+
 ---
 
 ## 2. Production Environment Variables Configuration
@@ -207,20 +186,41 @@ Set these keys in your deployment platform dashboards.
 *   `TAVILY_API_KEY` (production key from Tavily dashboard)
 *   `SUPABASE_URL` (production database URL)
 *   `SUPABASE_SERVICE_ROLE_KEY` (production service role key for admin DB access)
+*   `REDIS_URL` (Redis connection string — e.g. from Railway Redis plugin or Upstash)
+*   `FRONTEND_URL` (production Vercel URL, e.g. `https://curio-bot.vercel.app` — used for CORS)
 
 ### Frontend (Vercel)
 *   `VITE_API_URL` (URL of your backend service on Railway, e.g., `https://your-backend-url.railway.app`)
 
 ---
 
-## 3. Deployments
+## 3. Redis Setup
+
+CurioBot requires **Redis** for:
+- **BullMQ job queue** (`curios-generation`) — offloads LangGraph pipeline execution from the HTTP request.
+- **Redis Pub/Sub** — broadcasts cancellation signals (`job-cancel:<jobId>`) from the API server to the BullMQ worker.
+
+### Railway (Recommended)
+1. In your Railway project, add a new **Redis** service (from the service catalog).
+2. Once provisioned, Railway automatically injects `REDIS_URL` as an environment variable into services within the same project.
+
+### Alternative: Upstash Redis
+1. Create a free Redis database at [upstash.com](https://upstash.com/).
+2. Copy the Redis connection string and set it as `REDIS_URL` in your backend environment.
+
+> **Note:** The backend server embeds the BullMQ worker directly via `import './src/worker'` in `server.ts`, so no separate worker deployment is required unless you need horizontal scaling.
+
+---
+
+## 4. Deployments
 
 ### Backend → Railway
 1. Go to your [Railway Dashboard](https://railway.app/).
 2. Create a new service from your GitHub repo.
 3. Configure the Root Directory to point to `/backend` (or set the build command to `npm run build` and start command to `npm run server` within the `backend` subdirectory).
-4. Add the **Backend Environment Variables** listed in Section 2.
-5. Deploy.
+4. Add a **Redis** service to the same project (see Section 3).
+5. Add the **Backend Environment Variables** listed in Section 2.
+6. Deploy.
 
 ### Frontend → Vercel
 1. Go to your [Vercel Dashboard](https://vercel.com/).
@@ -233,11 +233,13 @@ Set these keys in your deployment platform dashboards.
 
 ---
 
-## 4. Smoke Test Checklist
+## 5. Smoke Test Checklist
 Once both are deployed:
 1. Register a new user on your production Vercel frontend.
-2. Add a few seed interests (e.g., "quantum mechanics", "space exploration").
-3. Generate an article (this triggers the LangGraph backend and streams progress checks).
-4. Scroll to the bottom of the article (verify that rabbit holes reveal upon reaching 80% scroll height).
-5. Open the Tutor sidebar and ask a follow-up question.
-6. Verify today's **Daily Wonder** loads (verifying Supabase connectivity and pool operations).
+2. Complete the **onboarding flow** (select knowledge level, novelty, and seed interests).
+3. Generate an article (this triggers the BullMQ queue and streams LangGraph progress via SSE).
+4. Verify the pipeline progress steps appear: **Selecting Topic → Researching → Writing Article**.
+5. Scroll to the bottom of the article (verify that rabbit holes reveal upon reaching 80% scroll height).
+6. Open the Tutor sidebar and ask a follow-up question.
+7. Generate a second article to verify token deduction is working (check server logs for `[Token Deduction]`).
+8. Simulate a disconnect (close the tab mid-generation, then reopen within 8 seconds) to verify SSE reconnection replays buffered events.

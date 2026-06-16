@@ -27,7 +27,7 @@ export async function editorAgent(state: AgentStateType): Promise<Partial<AgentS
     ? `Outline Section Targets:\n${state.outline.sections.map((s, i) => `- Section "${s.heading}": Target ${s.targetWordCount || "unspecified"} words`).join("\n")}`
     : "No outline section targets available.";
 
-  const prompt = `You are a developmental editor, not a copy editor. Your job is to improve the narrative structure, curiosity, coherence, fact consistency, and educational value of the draft article. You may rewrite sections substantially if necessary.
+  const prompt = `You are a developmental editor, not a copy editor. Your job is to improve the narrative structure, curiosity, coherence, fact consistency, formatting/layout, and educational value of the draft article. You may rewrite sections substantially if necessary.
 
 Draft Article:
 ${draft}
@@ -36,15 +36,22 @@ Reference Information (for factual verification and specific details):
 ${keyFactsContext}
 Research Summary: ${state.researchSummary || "None"}
 Research Brief: ${state.researchBrief ? JSON.stringify(state.researchBrief) : "None"}
+Insight Brief: ${state.insightBrief ? JSON.stringify(state.insightBrief) : "None"}
 
 ${sectionTargetsContext}
 
 Priority Guidelines (If narrative quality conflicts with factual accuracy, factual accuracy always wins):
-1. Fact Consistency & Unsupported Claims Removal: Compare the Research Summary, Research Brief, and draft Article to align facts and eliminate contradictions. Identify if the article contains unsupported claims, contradicts the research summary, or supports a debunked premise, and revise the article to align with research. If the Research Summary disproves the topic premise, pivot the article toward explaining the misconception and presenting the corrected understanding.
+1. Fact Consistency & Unsupported Claims Removal: Compare the Research Summary, Research Brief, Insight Brief, and draft Article to align facts and eliminate contradictions. Identify if the article contains unsupported claims, contradicts the research summary, or supports a debunked premise, and revise the article to align with research. If the Research Summary disproves the topic premise, pivot the article toward explaining the misconception and presenting the corrected understanding.
 2. Narrative Flow Review: Ensure every article follows a coherent progression: Hook -> Core Concept -> Examples -> Implications -> Conclusion. Reorder paragraphs, rewrite transitions, merge repetitive passages, and strengthen weak section openings.
 3. Curiosity Optimization: Identify the strongest surprising fact, counterintuitive insight, and narrative hook from the Research Brief and ensure they appear prominently. Prefer surprise -> explanation over definition -> explanation.
 4. Section Balance: Expand underdeveloped sections and compress overly repetitive sections. Use targetWordCounts as guidance when determining whether a section is underdeveloped or overdeveloped.
 5. Conclusion Quality: Avoid generic endings. The conclusion should connect back to the hook, reveal a larger implication, or leave the reader with an interesting perspective.
+6. Formatting & Visual Pacing Review: Optimize the article's layout, pacing, and scannability:
+   - Ensure paragraph lengths are brief and readable (no paragraph should exceed 3-4 sentences; break up dense blocks of text).
+   - Ensure the first mention of core technical terms, dates, or key definitions is formatted in bold (**text**).
+   - Check that markdown formatting is clean, aligned, and properly uses bullet points (-), blockquotes (>), or tables (|) where suggested or appropriate.
+   - Verify that markdown tables are structured correctly with headers, separator rows, and aligned columns.
+7. Insight Integration & Synthesis Quality: Ensure that the insights from the Insight Brief are clearly explained and supported by evidence from the research. Ensure facts support the insights rather than dominating as a "fact dump". Check if facts are being mistaken for insights (an insight should reveal a larger principle or lesson, not just state what happened). Strengthen weak or shallow insights, eliminate redundant repetitions of insights, and remove or rewrite sections that merely restate facts without providing synthesis.
 
 Return ONLY a JSON object matching this schema:
 {

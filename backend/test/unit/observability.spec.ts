@@ -25,7 +25,11 @@ describe("observabilityAgent", () => {
           conclusionQuality: 8,
           unsupportedClaims: 0,
           informationDensity: 9,
-          curiosityGap: 8
+          curiosityGap: 8,
+          insightDensity: 9,
+          insightOriginality: 8,
+          factToInsightRatio: 9,
+          insightsUsed: 2
         }),
         usageMetadata: { promptTokenCount: 15, candidatesTokenCount: 10 }
       };
@@ -60,6 +64,12 @@ describe("observabilityAgent", () => {
         sections: [
           { heading: "Intro", purpose: "P1", keyFacts: [], example: "", transition: "", targetWordCount: 150 },
           { heading: "Body", purpose: "P2", keyFacts: [], example: "", transition: "", targetWordCount: 150 }
+        ]
+      },
+      insightBrief: {
+        coreInsights: [
+          { insight: "Insight 1", whyInteresting: "W1", supportingEvidence: ["Evidence 1"], confidence: "high" },
+          { insight: "Insight 2", whyInteresting: "W2", supportingEvidence: ["Evidence 2"], confidence: "medium" }
         ]
       },
       article: "This is a short polished article containing both Must Include Fact A and also Must Include Fact B.",
@@ -101,5 +111,12 @@ describe("observabilityAgent", () => {
     expect(res.nodeMetrics?.[0].unsupportedClaims).toBe(0);
     expect(res.nodeMetrics?.[0].informationDensity).toBe(9);
     expect(res.nodeMetrics?.[0].curiosityGap).toBe(8);
+    expect(res.nodeMetrics?.[0].insightDensity).toBe(9);
+    expect(res.nodeMetrics?.[0].insightOriginality).toBe(8);
+    expect(res.nodeMetrics?.[0].factToInsightRatio).toBe(9);
+    expect(res.nodeMetrics?.[0].insightsGenerated).toBe(2);
+    expect(res.nodeMetrics?.[0].insightsUsed).toBe(2);
+    expect(res.insightsGenerated).toBe(2);
+    expect(res.insightsUsed).toBe(2);
   });
 });

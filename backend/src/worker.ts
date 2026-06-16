@@ -130,6 +130,11 @@ const worker = new Worker(
         sectionsCompressed: editNode?.sectionsCompressed,
         transitionsImproved: editNode?.transitionsImproved,
         hookStrengthened: editNode?.hookStrengthened,
+        insightDensity: obsNode?.insightDensity,
+        insightOriginality: obsNode?.insightOriginality,
+        factToInsightRatio: obsNode?.factToInsightRatio,
+        insightsGenerated: obsNode?.insightsGenerated,
+        insightsUsed: obsNode?.insightsUsed,
       });
 
       return {

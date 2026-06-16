@@ -122,9 +122,13 @@ Return ONLY a JSON object matching this schema:
   let unsupportedClaims = 0;
   let informationDensity = 0;
   let curiosityGap = 0;
+  let insightDensity = 0;
+  let insightOriginality = 0;
+  let factToInsightRatio = 0;
+  let insightsUsed = 0;
 
   if (article) {
-    const evalPrompt = `You are an expert educational content evaluator. Assess the quality of the final article relative to the Research Summary and Research Brief.
+    const evalPrompt = `You are an expert educational content evaluator. Assess the quality of the final article relative to the Research Summary, Research Brief, and Insight Brief.
 
 Final Article:
 ${article}
@@ -135,6 +139,9 @@ ${state.researchSummary || "None"}
 Research Brief:
 ${state.researchBrief ? JSON.stringify(state.researchBrief) : "None"}
 
+Insight Brief:
+${state.insightBrief ? JSON.stringify(state.insightBrief) : "None"}
+
 Evaluation Criteria:
 1. factConsistency (0-10): How consistent is the article with the research summary and brief? (10 = no contradictions; 0 = complete contradiction/misleading)
 2. hookStrength (0-10): How engaging is the opening hook? Does it grab attention without cheap clickbait?
@@ -144,7 +151,11 @@ Evaluation Criteria:
 6. conclusionQuality (0-10): Does the conclusion connect back to the hook, reveal a larger implication, and avoid generic clichés?
 7. unsupportedClaims (integer count): The absolute count of claims in the article that are unsupported by, or directly contradict, the Research Summary and Research Brief.
 8. informationDensity (0-10): Rate how dense the information is. Does each paragraph introduce new, meaningful knowledge and insights? (10 = extremely high density, no fluff or filler; 0 = extremely verbose/empty or redundant paragraphs)
-9. curiosityGap (0-10): Rate the strength of the curiosity gap in the opening hook. Does the opening create a knowledge gap that the article later resolves, making the reader say "I need to read this"? (10 = powerful curiosity gap like "Scientists won a Nobel Prize using office supplies"; 0 = weak opening that simply defines terms like "Graphene is a carbon material")
+9. curiosityGap (0-10): Rate the strength of the curiosity gap in the opening hook. Does the opening create a knowledge gap that the article later resolves, making the reader say "I need to read this"? (10 = powerful curiosity gap; 0 = weak opening that simply defines terms)
+10. insightDensity (0-10): How often meaningful insights appear in the article.
+11. insightOriginality (0-10): How non-obvious and intellectually satisfying the insights are.
+12. factToInsightRatio (0-10): Rate whether facts support insights rather than dominate them as a "fact dump". (10 = facts perfectly support insights; 0 = article is just a list/dump of facts with no underlying insights).
+13. insightsUsed (integer count): The count of core insights from the Insight Brief (if available) that were actually integrated, explained, or referenced in the final article.
 
 Return ONLY a JSON object matching this schema:
 {
@@ -156,7 +167,11 @@ Return ONLY a JSON object matching this schema:
   "conclusionQuality": number,
   "unsupportedClaims": number,
   "informationDensity": number,
-  "curiosityGap": number
+  "curiosityGap": number,
+  "insightDensity": number,
+  "insightOriginality": number,
+  "factToInsightRatio": number,
+  "insightsUsed": number
 }`;
 
     try {
@@ -177,7 +192,11 @@ Return ONLY a JSON object matching this schema:
               conclusionQuality: { type: "integer" },
               unsupportedClaims: { type: "integer" },
               informationDensity: { type: "integer" },
-              curiosityGap: { type: "integer" }
+              curiosityGap: { type: "integer" },
+              insightDensity: { type: "integer" },
+              insightOriginality: { type: "integer" },
+              factToInsightRatio: { type: "integer" },
+              insightsUsed: { type: "integer" }
             },
             required: [
               "factConsistency",
@@ -188,7 +207,11 @@ Return ONLY a JSON object matching this schema:
               "conclusionQuality",
               "unsupportedClaims",
               "informationDensity",
-              "curiosityGap"
+              "curiosityGap",
+              "insightDensity",
+              "insightOriginality",
+              "factToInsightRatio",
+              "insightsUsed"
             ]
           }
         }
@@ -221,6 +244,10 @@ Return ONLY a JSON object matching this schema:
       unsupportedClaims = typeof parsed.unsupportedClaims === "number" ? parsed.unsupportedClaims : 0;
       informationDensity = typeof parsed.informationDensity === "number" ? parsed.informationDensity : 0;
       curiosityGap = typeof parsed.curiosityGap === "number" ? parsed.curiosityGap : 0;
+      insightDensity = typeof parsed.insightDensity === "number" ? parsed.insightDensity : 0;
+      insightOriginality = typeof parsed.insightOriginality === "number" ? parsed.insightOriginality : 0;
+      factToInsightRatio = typeof parsed.factToInsightRatio === "number" ? parsed.factToInsightRatio : 0;
+      insightsUsed = typeof parsed.insightsUsed === "number" ? parsed.insightsUsed : 0;
     } catch (err: any) {
       if (err.name === "AbortError" || err.message === "Aborted") {
         throw err;
@@ -238,6 +265,8 @@ Return ONLY a JSON object matching this schema:
   const outlineTargetWords = (state.outline?.sections || []).reduce((acc, s) => acc + (s.targetWordCount || 0), 0);
 
   const durationMs = Date.now() - startTime;
+  const insightsGenerated = state.insightBrief?.coreInsights?.length || 0;
+
   const nodeMetric: NodeMetrics = {
     nodeName: "observability",
     durationMs,
@@ -258,7 +287,12 @@ Return ONLY a JSON object matching this schema:
     informationDensity,
     curiosityGap,
     primaryQuestion: state.currentTopic?.primaryQuestion,
-    winningCandidateReason: state.currentTopic?.winningCandidateReason
+    winningCandidateReason: state.currentTopic?.winningCandidateReason,
+    insightDensity,
+    insightOriginality,
+    factToInsightRatio,
+    insightsGenerated,
+    insightsUsed
   };
 
   return {
@@ -267,6 +301,8 @@ Return ONLY a JSON object matching this schema:
     outlineSectionCount,
     articleWordCount,
     researchFactsUsed,
+    insightsGenerated,
+    insightsUsed,
     nodeMetrics: [nodeMetric]
   };
 }

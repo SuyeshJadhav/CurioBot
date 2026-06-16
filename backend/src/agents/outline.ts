@@ -126,6 +126,17 @@ ${(brief.sectionSuggestions || []).map(c => `  - ${c}`).join("\n")}${brief.premi
 ${keyFacts.map((f, i) => `- ${f}`).join("\n")}`;
   }
 
+  let insightsText = "";
+  if (state.insightBrief && state.insightBrief.coreInsights.length > 0) {
+    insightsText = `=== CORE INSIGHTS ===
+${state.insightBrief.coreInsights.map((ins, i) => `Insight ${i + 1}: ${ins.insight}
+- Why Interesting: ${ins.whyInteresting}
+- Why Counterintuitive: ${ins.whyCounterintuitive || "N/A"}
+- Supporting Evidence: ${(ins.supportingEvidence || []).join(", ")}
+- Confidence: ${ins.confidence}`).join("\n\n")}
+=== END CORE INSIGHTS ===`;
+  }
+
   // Step 2: Generate Outline
   const readingTime = state.userSettings?.reading_time || "5min";
   const targetTotalWords = { "2min": 300, "5min": 700, "10min": 1200 }[readingTime] ?? 700;
@@ -137,6 +148,7 @@ Inputs:
 - Research Summary: ${state.researchSummary || "No research summary available."}
 - ${state.researchBrief ? "Research Brief" : "Key Facts"}:
 ${briefText}
+${insightsText ? `- Insights Brief:\n${insightsText}` : ""}
 - Reading Time Target: ${readingTime} (Total target words for the entire article: ~${targetTotalWords} words)
 
 Requirements for the outline:
@@ -146,16 +158,20 @@ Requirements for the outline:
 4. Cover basic and fundamental concepts in the early sections before introducing advanced concepts.
 5. Include at least one section dedicated to examples and/or real-world applications.
 6. Include at least one section dedicated to limitations, challenges, or controversies.
-7. For each section, provide:
+7. CRITICAL: Every major section must teach or revolve around at least one specific "centralInsight" from the Insights Brief (if available).
+8. CRITICAL: Avoid creating sections that are only fact collections. Prefer explanation-driven sections over chronology-driven sections when appropriate, shaping section organization around insights.
+9. For each section, provide:
    - A clear section heading
    - The purpose / goal of the section
+   - The "centralInsight" this section teaches or explains
    - A list of specific key facts or points that must be covered in this section
    - A specific example or case study to illustrate the section's core idea
    - A smooth transition sentence connecting to the next section
    - A "targetWordCount" for the section. Distribute the total target words (~${targetTotalWords}) across all generated sections. Ensure each section gets a realistic portion (e.g. 50-300+ words per section depending on the reading time).
-8. CRITICAL: Enforce the Primary Angle. The entire outline, sections, hook, and facts must center on this angle: "${state.researchBrief?.primaryAngle || topic.angle || ''}". Do NOT deviate from it.
-9. CRITICAL: Strictly avoid the Forbidden Angles: "${(state.researchBrief?.forbiddenAngles || []).join(", ")}". Do not touch upon these topics in any section.
-10. CRITICAL: The outline must guide the article to directly answer the Primary Question: "${state.researchBrief?.primaryQuestion || topic.primaryQuestion || ''}".
+   - A "formattingHint" suggesting an optimal markdown element layout for this section (e.g., "Use a comparison table", "Use a bulleted list for key statistics", "Use a blockquote callout for the core surprising insight", "Standard paragraphs with bold key terms"). Make sure at least one section in the outline has a hint for a table, and at least one has a hint for a bulleted list or a blockquote callout.
+10. CRITICAL: Enforce the Primary Angle. The entire outline, sections, hook, and facts must center on this angle: "${state.researchBrief?.primaryAngle || topic.angle || ''}". Do NOT deviate from it.
+11. CRITICAL: Strictly avoid the Forbidden Angles: "${(state.researchBrief?.forbiddenAngles || []).join(", ")}". Do not touch upon these topics in any section.
+12. CRITICAL: The outline must guide the article to directly answer the Primary Question: "${state.researchBrief?.primaryQuestion || topic.primaryQuestion || ''}".
 
 Return ONLY a JSON object matching this schema:
 {
@@ -165,10 +181,12 @@ Return ONLY a JSON object matching this schema:
     {
       "heading": "Section Heading",
       "purpose": "Detailed purpose/goal of the section",
+      "centralInsight": "The specific central insight this section teaches/revolves around",
       "keyFacts": ["Fact 1 to include", "Fact 2 to include", ...],
       "example": "A specific example or case study for this section",
       "transition": "Transition sentence to the next section",
-      "targetWordCount": 150
+      "targetWordCount": 150,
+      "formattingHint": "A formatting suggestion for markdown elements"
     }
   ]
 }`;
@@ -195,15 +213,17 @@ Return ONLY a JSON object matching this schema:
                 properties: {
                   heading: { type: "string" },
                   purpose: { type: "string" },
+                  centralInsight: { type: "string" },
                   keyFacts: {
                     type: "array",
                     items: { type: "string" }
                   },
                   example: { type: "string" },
                   transition: { type: "string" },
-                  targetWordCount: { type: "integer" }
+                  targetWordCount: { type: "integer" },
+                  formattingHint: { type: "string" }
                 },
-                required: ["heading", "purpose", "keyFacts", "example", "transition", "targetWordCount"]
+                required: ["heading", "purpose", "centralInsight", "keyFacts", "example", "transition", "targetWordCount", "formattingHint"]
               }
             }
           },
@@ -247,34 +267,42 @@ Return ONLY a JSON object matching this schema:
         { 
           heading: `Introduction to ${topic.title}`, 
           purpose: "Define the core concept, its basic mechanism, and explain its significance.",
+          centralInsight: `The core principles of ${topic.title} have broader implications.`,
           keyFacts: [`Core concept definition of ${topic.title}.`],
           example: `An introduction example for ${topic.title}.`,
           transition: "Transition to the core mechanisms.",
-          targetWordCount: fallbackSectionTarget
+          targetWordCount: fallbackSectionTarget,
+          formattingHint: "Standard paragraphs with bold key terms"
         },
         { 
           heading: `Core Mechanisms and Key Facts`, 
           purpose: "Provide detailed scientific or factual details explaining how it works.",
+          centralInsight: `Understanding the specific mechanisms reveals deeper patterns in how ${topic.title} behaves.`,
           keyFacts: [`Factual details about ${topic.title}.`],
           example: `A mechanistic example of ${topic.title}.`,
           transition: "Transition to real-world applications.",
-          targetWordCount: fallbackSectionTarget
+          targetWordCount: fallbackSectionTarget,
+          formattingHint: "Use a bulleted list for key statistics"
         },
         { 
           heading: `Real-World Applications and Examples`, 
           purpose: "Illustrate the concept with specific real-world examples, use cases, or applications.",
+          centralInsight: `Practical applications of ${topic.title} demonstrate its impact on daily operations.`,
           keyFacts: [`Application facts for ${topic.title}.`],
           example: `A case study of ${topic.title}.`,
           transition: "Transition to limitations and challenges.",
-          targetWordCount: fallbackSectionTarget
+          targetWordCount: fallbackSectionTarget,
+          formattingHint: "Use a comparison table"
         },
         { 
           heading: `Limitations and Challenges`, 
           purpose: "Discuss the challenges, limitations, and future outlook or open questions.",
+          centralInsight: `Addressing structural challenges is necessary to fully leverage the benefits of ${topic.title}.`,
           keyFacts: [`Challenges associated with ${topic.title}.`],
           example: `An example illustrating a limitation of ${topic.title}.`,
           transition: "Concluding thoughts.",
-          targetWordCount: fallbackSectionTarget
+          targetWordCount: fallbackSectionTarget,
+          formattingHint: "Use a blockquote callout for the core surprising insight"
         }
       ]
     };

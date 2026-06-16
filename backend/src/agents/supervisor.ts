@@ -11,6 +11,7 @@ import { outlineAgent } from "./outline";
 import { editorAgent } from "./editor";
 import { researchBriefAgent } from "./researchBrief";
 import { observabilityAgent } from "./observability";
+import { insightExtractorAgent } from "./insightExtractor";
 import fs from "fs";
 import path from "path";
 
@@ -95,6 +96,7 @@ const graph = new StateGraph(AgentState)
   .addNode("researcher", wrapNode("researcher", researcherAgent))
   .addNode("wiki researcher", wrapNode("wiki researcher", wikiResearcherAgent))
   .addNode("research brief agent", wrapNode("research brief agent", researchBriefAgent))
+  .addNode("insight extractor", wrapNode("insight extractor", insightExtractorAgent))
   .addNode("outline agent", wrapNode("outline agent", outlineAgent))
   .addNode("writer", wrapNode("writer", writerAgent))
   .addNode("editor agent", wrapNode("editor agent", editorAgent))
@@ -121,7 +123,8 @@ const graph = new StateGraph(AgentState)
   .addEdge("use fallback", "wiki researcher")
   .addEdge("researcher", "research brief agent")
   .addEdge("wiki researcher", "research brief agent")
-  .addEdge("research brief agent", "outline agent")
+  .addEdge("research brief agent", "insight extractor")
+  .addEdge("insight extractor", "outline agent")
   .addEdge("outline agent", "writer")
   .addEdge("writer", "editor agent")
   .addEdge("editor agent", "observability agent")
