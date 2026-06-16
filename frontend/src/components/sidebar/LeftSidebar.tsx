@@ -236,14 +236,14 @@ export function LeftSidebar() {
           <div 
             className="sidebar-tokens nav-item"
             style={{ cursor: 'default', pointerEvents: 'auto', marginBottom: '8px' }}
-            title={`${(user.token_balance ?? 100000).toLocaleString()} / 100,000 tokens remaining`}
+            title={`${(user.token_balance ?? 200000).toLocaleString()} / 200,000 tokens remaining`}
           >
             <i className="ti ti-coins" style={{ color: 'var(--primary)' }} aria-hidden="true"></i>
             <div className="sidebar-tokens-inner">
               <div className="sidebar-tokens-header" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px', fontWeight: 500 }}>
                 <span style={{ color: 'var(--color-text-secondary)' }}>Remaining</span>
                 <span style={{ color: 'var(--color-text-primary)', fontFamily: 'monospace' }}>
-                  {Math.round((user.token_balance ?? 100000) / 1000).toLocaleString()}k
+                  {Math.round((user.token_balance ?? 200000) / 1000).toLocaleString()}k
                 </span>
               </div>
               <div className="sidebar-tokens-bar-bg" style={{ height: '6px', background: 'var(--surface-container-high, #e9e8e8)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -252,7 +252,7 @@ export function LeftSidebar() {
                   style={{ 
                     height: '100%', 
                     background: 'var(--primary)', 
-                    width: `${Math.min(100, Math.max(0, ((user.token_balance ?? 100000) / 100000) * 100))}%`,
+                    width: `${Math.min(100, Math.max(0, ((user.token_balance ?? 200000) / 200000) * 100))}%`,
                     borderRadius: '3px',
                     transition: 'width 0.3s ease'
                   }}
