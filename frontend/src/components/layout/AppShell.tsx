@@ -2,6 +2,7 @@
 // Composes LeftSidebar, TutorSidebar, and coordinates the active content panes.
 // If an activeArticleId is set, it renders the ArticleReaderCanvas in full focus mode.
 
+import { useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { usePreferences } from '../../contexts/UserPreferencesContext';
@@ -18,11 +19,28 @@ import { SearchCanvas } from '../canvas/SearchCanvas';
 import { InterestsCanvas } from '../canvas/InterestsCanvas';
 import { OnboardingModal } from '../onboarding/OnboardingModal';
 import { IgniteCanvas } from '../canvas/IgniteCanvas';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 export function AppShell() {
-  const { token, user, activeTab, isLoadingUserData } = useAuth();
-  const { activeArticleId, isGeneratingArticle, history } = usePipeline();
+  const { token, user, activeTab, changeTab, isLoadingUserData } = useAuth();
+  const { isGeneratingArticle, history } = usePipeline();
   const { userSettings } = usePreferences();
+  const location = useLocation();
+
+  useEffect(() => {
+    const tabMap: Record<string, typeof activeTab> = {
+      '/': 'home',
+      '/discover': 'discover',
+      '/search': 'search',
+      '/library': 'library',
+      '/interests': 'interests',
+      '/settings': 'settings'
+    };
+    const mappedTab = tabMap[location.pathname];
+    if (mappedTab && mappedTab !== activeTab) {
+      changeTab(mappedTab);
+    }
+  }, [location.pathname, activeTab, changeTab]);
 
   // If restoring session from local storage, display a journal loader
   if (isLoadingUserData) {
@@ -63,6 +81,10 @@ export function AppShell() {
   }
 
   const showOnboarding = userSettings && !userSettings.onboarding_complete && history.length === 0;
+  
+  const isArticlePath = location.pathname.startsWith('/article/');
+  const isIgnitePath = location.pathname === '/ignite';
+  const showTutorSidebar = isArticlePath || isIgnitePath || isGeneratingArticle;
 
   return (
     <>
@@ -73,23 +95,19 @@ export function AppShell() {
         <LeftSidebar />
 
         <main className="main-content">
-          {activeArticleId ? (
-            <ArticleReaderCanvas />
-          ) : isGeneratingArticle ? (
-            <IgniteCanvas />
-          ) : (
-            <>
-              {activeTab === 'home' && <HomeCanvas />}
-              {activeTab === 'discover' && <DiscoverCanvas />}
-              {activeTab === 'search' && <SearchCanvas />}
-              {activeTab === 'library' && <LibraryCanvas />}
-              {activeTab === 'interests' && <InterestsCanvas />}
-              {activeTab === 'settings' && <SettingsCanvas key={userSettings ? 'loaded' : 'loading'} />}
-            </>
-          )}
+          <Routes>
+            <Route path="/" element={<HomeCanvas />} />
+            <Route path="/discover" element={<DiscoverCanvas />} />
+            <Route path="/search" element={<SearchCanvas />} />
+            <Route path="/library" element={<LibraryCanvas />} />
+            <Route path="/interests" element={<InterestsCanvas />} />
+            <Route path="/settings" element={<SettingsCanvas key={userSettings ? 'loaded' : 'loading'} />} />
+            <Route path="/ignite" element={<IgniteCanvas />} />
+            <Route path="/article/:id" element={<ArticleReaderCanvas />} />
+          </Routes>
         </main>
 
-        {(activeArticleId || isGeneratingArticle) && <TutorSidebar />}
+        {showTutorSidebar && <TutorSidebar />}
       </div>
 
       {showOnboarding && <OnboardingModal />}

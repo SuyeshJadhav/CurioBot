@@ -5,6 +5,8 @@ import { runCurioPipeline, fetchHistory, fetchArticleById, deleteArticle as apiD
 import { useAuth } from './AuthContext';
 import { usePreferences } from './UserPreferencesContext';
 
+import { useNavigate } from 'react-router-dom';
+
 export interface PipelineContextType {
   currentTopic: string | null;
   article: string | null;
@@ -38,6 +40,7 @@ const PipelineContext = createContext<PipelineContextType | null>(null);
 export function PipelineProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   const { interests } = usePreferences();
+  const navigate = useNavigate();
 
   const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const [article, setArticle] = useState<string | null>(null);
@@ -87,6 +90,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     setActiveArticleId(null); setIsGeneratingArticle(true);
     setGenerationStatus('picking_topic'); setRabbitHoles(null); setTldr(null);
     setPipelineMessages([INIT_BOT_MSG]);
+    navigate('/ignite');
     try {
       const result = await runCurioPipeline(
         interests.length ? interests.slice(0, 15) : undefined,
@@ -99,26 +103,37 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       setRabbitHoles(result.rabbitHoles ?? null); setTldr(result.tldr ?? null);
       setSessionId(result.sessionId); setIsGeneratingArticle(false); setGenerationStatus(null);
       loadHistory();
+      if (result.articleId) {
+        navigate(`/article/${result.articleId}`);
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setIsGeneratingArticle(false); setGenerationStatus(null);
       setPipelineMessages((m) => [...m, { id: `err-${Date.now()}`, role: 'bot', content: `⚠️ ${err.message}`, timestamp: new Date() }]);
     }
-  }, [interests, loadHistory, isGeneratingArticle]);
+  }, [interests, loadHistory, isGeneratingArticle, navigate]);
 
   const loadArticle = useCallback(async (id: string) => {
     setIsGeneratingArticle(true); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setActiveArticleId(id);
     setPipelineMessages([INIT_BOT_MSG]);
+    navigate(`/article/${id}`);
     try {
       const art = await fetchArticleById(id);
       setCurrentTopic(art.title); setCurrentDomain(art.domain || art.category || null); setArticle(art.content); setCurrentArticleId(art.id);
       setActiveArticleId(art.id); setRabbitHoles(art.rabbit_holes ?? null); setTldr(art.tldr ?? null);
       setIsGeneratingArticle(false); loadHistory();
     } catch { setIsGeneratingArticle(false); }
-  }, [loadHistory]);
+  }, [loadHistory, navigate]);
 
   const closeArticle = useCallback(() => {
     setActiveArticleId(null); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setCurrentArticleId(null);
-  }, []);
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/library');
+    }
+  }, [navigate]);
 
   const clearSession = useCallback(() => {
     setCurrentTopic(null); setCurrentDomain(null); setArticle(null); setCurrentArticleId(null); setActiveArticleId(null);

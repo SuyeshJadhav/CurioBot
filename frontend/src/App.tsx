@@ -6,12 +6,15 @@
 
 import { CurioProvider } from './contexts/CurioContext';
 import { AppShell } from './components/layout/AppShell';
+import { BrowserRouter } from 'react-router-dom';
 
 function App() {
   return (
-    <CurioProvider>
-      <AppShell />
-    </CurioProvider>
+    <BrowserRouter>
+      <CurioProvider>
+        <AppShell />
+      </CurioProvider>
+    </BrowserRouter>
   );
 }
 

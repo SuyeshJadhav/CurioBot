@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { SidebarRecentSkeleton } from '../common/Skeletons';
+import { useNavigate } from 'react-router-dom';
 
 const EXPANDED_WIDTH = 220;
 const COLLAPSED_WIDTH = 56;
@@ -18,6 +19,7 @@ export function LeftSidebar() {
     history, loadArticle, deleteArticle, isGeneratingArticle, currentTopic,
     activeArticleId, isLoadingHistory, closeArticle,
   } = usePipeline();
+  const navigate = useNavigate();
 
   const [collapsed, setCollapsed] = useState<boolean>(() =>
     localStorage.getItem(COLLAPSED_KEY) === 'true'
@@ -42,7 +44,8 @@ export function LeftSidebar() {
     closeArticle();
     changeTab(tab);
     setMenuOpen(false);
-  }, [changeTab, closeArticle, setMenuOpen]);
+    navigate(tab === 'home' ? '/' : `/${tab}`);
+  }, [changeTab, closeArticle, setMenuOpen, navigate]);
 
   const selectArticle = useCallback((id: string) => {
     loadArticle(id);

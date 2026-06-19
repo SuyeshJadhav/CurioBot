@@ -3,12 +3,21 @@ import remarkGfm from 'remark-gfm';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { useLibrary } from '../../contexts/LibraryContext';
 import { ArticleSkeleton } from '../common/Skeletons';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 export function ArticleReaderCanvas() {
+  const { id } = useParams<{ id: string }>();
   const {
-    article, currentTopic, currentArticleId, closeArticle, igniteQuest, rabbitHoles, currentDomain,
+    article, currentTopic, currentArticleId, closeArticle, igniteQuest, rabbitHoles, currentDomain, loadArticle,
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
+
+  useEffect(() => {
+    if (id && id !== currentArticleId) {
+      loadArticle(id);
+    }
+  }, [id, currentArticleId, loadArticle]);
 
   const isSaved = savedSketches.some(s => s.article_id === currentArticleId);
 

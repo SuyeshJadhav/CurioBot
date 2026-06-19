@@ -2,11 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { useChat } from '../../contexts/ChatContext';
+import { useNavigate } from 'react-router-dom';
 
 export function MobileHeader() {
   const { changeTab, isMenuOpen, setMenuOpen, user, logout } = useAuth();
   const { activeArticleId, isGeneratingArticle, closeArticle } = usePipeline();
   const { isTutorOpen, setTutorOpen } = useChat();
+  const navigate = useNavigate();
   const showTutorToggle = !!(activeArticleId || isGeneratingArticle);
 
   const [isProfileOpen, setProfileOpen] = useState(false);
@@ -30,6 +32,7 @@ export function MobileHeader() {
     closeArticle();
     changeTab('home');
     setMenuOpen(false);
+    navigate('/');
   };
 
   return (
