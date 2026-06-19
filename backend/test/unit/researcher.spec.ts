@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 
 describe("researcherAgent", () => {
-  it("stops at the configured MAX_SEARCHES", async () => {
+  it("stops at 5 tool calls", async () => {
     const gemini = await import("../../src/lib/gemini");
-    const tavily = await import("../../src/lib/tavily");
+    const mcp = await import("../../src/lib/mcp");
 
-    // Make model always request a web_search function call
+    // Make model request a web_search tool call every time
     (gemini.ai.models.generateContent as any).mockImplementation(async () => ({
       candidates: [
         {
@@ -19,11 +19,11 @@ describe("researcherAgent", () => {
       usageMetadata: {},
     }));
 
-    const searchSpy = vi.spyOn(tavily, "searchWeb");
-    // Keep search resolving to a simple result
-    searchSpy.mockResolvedValue([
-      { title: "r", url: "u", content: "c", score: 0.9 },
-    ]);
+    const executeSpy = vi.spyOn(mcp, "executeResearchTool");
+    executeSpy.mockResolvedValue({
+      rawResult: {},
+      text: JSON.stringify([{ title: "Result", url: "https://example.com/result", description: "snippet" }])
+    });
 
     const { researcherAgent } = await import("../../src/agents/researcher");
     const state = {
@@ -34,16 +34,16 @@ describe("researcherAgent", () => {
 
     const res = await researcherAgent(state);
 
-    // MAX_SEARCHES in code is 2
-    expect(searchSpy).toHaveBeenCalledTimes(2);
+    // Limit is 5 total tool calls
+    expect(executeSpy).toHaveBeenCalledTimes(5);
     expect(res.research).toBeDefined();
   });
 
-  it("deduplicates URLs across multiple searches", async () => {
+  it("deduplicates URLs across multiple search/scrape results", async () => {
     const gemini = await import("../../src/lib/gemini");
-    const tavily = await import("../../src/lib/tavily");
+    const mcp = await import("../../src/lib/mcp");
 
-    // model asks for web_search twice
+    // model asks for web_search
     (gemini.ai.models.generateContent as any).mockImplementation(async () => ({
       candidates: [
         {
@@ -57,19 +57,25 @@ describe("researcherAgent", () => {
       usageMetadata: {},
     }));
 
-    // First call returns urls a,b; second call returns b,c
     let call = 0;
-    vi.spyOn(tavily, "searchWeb").mockImplementation(async () => {
+    vi.spyOn(mcp, "executeResearchTool").mockImplementation(async () => {
       call++;
-      if (call === 1)
-        return [
-          { title: "A", url: "https://a.test", content: "a", score: 0.9 },
-          { title: "B", url: "https://b.test", content: "b", score: 0.8 },
-        ];
-      return [
-        { title: "B2", url: "https://b.test", content: "b2", score: 0.7 },
-        { title: "C", url: "https://c.test", content: "c", score: 0.6 },
-      ];
+      if (call === 1) {
+        return {
+          rawResult: {},
+          text: JSON.stringify([
+            { title: "A", url: "https://a.test", description: "a" },
+            { title: "B", url: "https://b.test", description: "b" }
+          ])
+        };
+      }
+      return {
+        rawResult: {},
+        text: JSON.stringify([
+          { title: "B2", url: "https://b.test", description: "b2" },
+          { title: "C", url: "https://c.test", description: "c" }
+        ])
+      };
     });
 
     const { researcherAgent } = await import("../../src/agents/researcher");
@@ -85,9 +91,9 @@ describe("researcherAgent", () => {
     expect(new Set(urls).size).toBe(3);
   });
 
-  it("handles Tavily network errors without crashing", async () => {
+  it("handles tool errors without crashing", async () => {
     const gemini = await import("../../src/lib/gemini");
-    const tavily = await import("../../src/lib/tavily");
+    const mcp = await import("../../src/lib/mcp");
 
     (gemini.ai.models.generateContent as any).mockImplementation(async () => ({
       candidates: [
@@ -102,8 +108,8 @@ describe("researcherAgent", () => {
       usageMetadata: {},
     }));
 
-    vi.spyOn(tavily, "searchWeb").mockImplementation(async () => {
-      throw new Error("Network failure");
+    vi.spyOn(mcp, "executeResearchTool").mockImplementation(async () => {
+      throw new Error("Tool failure");
     });
 
     const { researcherAgent } = await import("../../src/agents/researcher");

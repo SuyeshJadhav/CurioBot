@@ -149,7 +149,13 @@ Return ONLY a JSON array of scored candidates matching this schema (do not inclu
     const titleLengthBonus = (titleWords >= 5 && titleWords <= 15) ? 1 : 0;
 
     // Hybrid Overall Score (capped at 50)
-    const overallScore = Math.min(50, baseScore + interestBonus + curiosityWordBonus + titleLengthBonus);
+    let overallScore = Math.min(50, baseScore + interestBonus + curiosityWordBonus + titleLengthBonus);
+
+    // Disqualify if novelty is strictly below 7
+    if (scored.novelty < 7) {
+      console.log(`🚫 [Curiosity Scorer] Disqualifying candidate "${candidate.title}" because novelty (${scored.novelty}) is below 7.`);
+      overallScore = 0;
+    }
 
     return {
       candidate,
@@ -158,13 +164,36 @@ Return ONLY a JSON array of scored candidates matching this schema (do not inclu
     };
   });
 
+  // Total Disqualification Recovery: If the maximum overall score in the array is 0, abort selection and retry
+  const maxOverallScore = processedCandidates.length > 0
+    ? Math.max(...processedCandidates.map(pc => pc.overallScore))
+    : 0;
+
+  if (maxOverallScore === 0) {
+    console.warn("❌ [Curiosity Scorer] All candidates scored 0. Aborting selection to trigger recursive topicPicker cycle.");
+    const durationMs = Date.now() - startTime;
+    const nodeMetric: NodeMetrics = {
+      nodeName: "curiosity scorer",
+      durationMs,
+      success: false,
+      inputTokens,
+      outputTokens
+    };
+    return {
+      currentTopic: undefined,
+      dedupPassed: false,
+      dedupAttempts: (state.dedupAttempts || 0) + 1,
+      nodeMetrics: [nodeMetric]
+    };
+  }
+
   // Filter candidates where overallScore >= 20
   let validCandidates = processedCandidates.filter(pc => pc.overallScore >= 20);
   let chosen = validCandidates.length > 0
     ? validCandidates.reduce((best, curr) => curr.overallScore > best.overallScore ? curr : best, validCandidates[0])
     : null;
 
-  // If all candidates are < 20
+  // If all candidates are < 20 (but at least some scored > 0)
   if (!chosen) {
     const bestOfAll = processedCandidates.reduce((best, curr) => curr.overallScore > best.overallScore ? curr : best, processedCandidates[0]);
     if (state.requestedTopic) {
@@ -185,7 +214,7 @@ Return ONLY a JSON array of scored candidates matching this schema (do not inclu
       return {
         currentTopic: undefined,
         dedupPassed: false,
-        dedupAttempts: state.dedupAttempts + 1,
+        dedupAttempts: (state.dedupAttempts || 0) + 1,
         nodeMetrics: [nodeMetric]
       };
     }

@@ -10,6 +10,7 @@ interface IgniteArticleProps {
   toggleSaveArticle: () => void;
   libraryCollections: any[];
   addArticleToCollection: (colId: string, articleId: string) => Promise<void>;
+  domain?: string | null;
 }
 
 export function IgniteArticle({
@@ -21,8 +22,46 @@ export function IgniteArticle({
   toggleSaveArticle,
   libraryCollections,
   addArticleToCollection,
+  domain,
 }: IgniteArticleProps) {
   const isSaved = currentArticleId ? savedSketches.some(s => s.article_id === currentArticleId) : false;
+
+  let renderedFirstP = false;
+  const MarkdownComponents = {
+    blockquote: ({ children, ...props }: any) => {
+      return (
+        <div className="curio-insight-callout" {...props}>
+          <div className="curio-insight-icon-wrapper">
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#ffffff', display: 'block' }}>
+              lightbulb
+            </span>
+          </div>
+          <div className="curio-insight-text">
+            {children}
+          </div>
+        </div>
+      );
+    },
+    h3: ({ children, ...props }: any) => {
+      return (
+        <h3 className="curio-pull-quote" {...props}>
+          <span className="curio-pull-quote-bar"></span>
+          {children}
+        </h3>
+      );
+    },
+    p: ({ children, ...props }: any) => {
+      if (!renderedFirstP) {
+        renderedFirstP = true;
+        return (
+          <p className="curio-drop-cap" {...props}>
+            {children}
+          </p>
+        );
+      }
+      return <p {...props}>{children}</p>;
+    }
+  };
 
   return (
     <article style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto' }}>
@@ -43,7 +82,7 @@ export function IgniteArticle({
         marginBottom: '1.25rem',
       }}>
         <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>bookmark</span>
-        {currentTopic ?? 'Article'}
+        <span>ARTICLE SKETCH</span>
       </div>
 
       {/* Article title */}
@@ -54,16 +93,35 @@ export function IgniteArticle({
           fontWeight: 700,
           color: 'var(--ink-charcoal)',
           lineHeight: 1.25,
-          marginBottom: '1.5rem',
+          marginBottom: domain ? '0.4rem' : '1.5rem',
           marginTop: 0,
         }}>
           {currentTopic}
         </h1>
       )}
 
+      {/* Domain Metadata tag below the title */}
+      {domain && (
+        <div style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '10px',
+          textTransform: 'uppercase',
+          fontWeight: 'bold',
+          letterSpacing: '0.08em',
+          color: 'var(--ink-wash, #57534E)',
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>folder</span>
+          <span>{domain}</span>
+        </div>
+      )}
+
       {/* Markdown article body */}
       <div className="prose-curio">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
           {article}
         </ReactMarkdown>
       </div>

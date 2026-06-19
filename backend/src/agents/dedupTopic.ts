@@ -27,10 +27,21 @@ export async function dedupTopicNode(
 		return { dedupPassed: true };
 	}
 
+	// Dynamic similarity threshold adjustment to prevent getting stuck in tight cluster retry loops (The 0.79 Trap)
+	let threshold = 0.79;
+	const attempts = state.dedupAttempts || 0;
+	if (attempts === 1) {
+		threshold = 0.81;
+	} else if (attempts >= 2) {
+		threshold = 0.82;
+	}
+
+	console.log(`🔍 [Dedup] Performing deduplication check with similarity threshold: ${threshold} (Attempt: ${attempts})`);
+
 	const similarSeen = await matchSeenTopics(
 		state.topicEmbedding,
 		state.userId,
-		0.85
+		threshold
 	);
 
 	const nodeMetric: NodeMetrics = {

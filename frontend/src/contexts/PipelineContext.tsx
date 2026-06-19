@@ -18,6 +18,7 @@ export interface PipelineContextType {
   history: HistoryEntry[];
   isLoadingHistory: boolean;
   pipelineMessages: Message[];  // error messages from pipeline runs
+  currentDomain: string | null;
   igniteQuest: (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => Promise<void>;
   loadArticle: (id: string) => Promise<void>;
   closeArticle: () => void;
@@ -50,6 +51,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [pipelineMessages, setPipelineMessages] = useState<Message[]>([INIT_BOT_MSG]);
+  const [currentDomain, setCurrentDomain] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     setIsLoadingHistory(true);
@@ -68,6 +70,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
 
     let topicObj: { title: string; domain?: string; summary?: string } | undefined = undefined;
     let displayTitle: string | null = null;
+    let displayDomain: string | null = null;
 
     if (topic) {
       if (typeof topic === 'string') {
@@ -76,21 +79,22 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       } else {
         topicObj = topic;
         displayTitle = topic.title;
+        displayDomain = topic.domain ?? null;
       }
     }
 
-    setCurrentTopic(displayTitle); setArticle(null); setCurrentArticleId(null);
+    setCurrentTopic(displayTitle); setCurrentDomain(displayDomain); setArticle(null); setCurrentArticleId(null);
     setActiveArticleId(null); setIsGeneratingArticle(true);
     setGenerationStatus('picking_topic'); setRabbitHoles(null); setTldr(null);
     setPipelineMessages([INIT_BOT_MSG]);
     try {
       const result = await runCurioPipeline(
         interests.length ? interests.slice(0, 15) : undefined,
-        (status, data) => { setGenerationStatus(status); if (status === 'researching' && data) setCurrentTopic(data.title); },
+        (status, data) => { setGenerationStatus(status); if (status === 'researching' && data) { setCurrentTopic(data.title); setCurrentDomain(data.domain || data.category || null); } },
         hint,
         topicObj,
       );
-      setCurrentTopic(result.topic.title); setArticle(result.article);
+      setCurrentTopic(result.topic.title); setCurrentDomain(result.topic.domain || null); setArticle(result.article);
       setCurrentArticleId(result.articleId ?? null); setActiveArticleId(result.articleId ?? null);
       setRabbitHoles(result.rabbitHoles ?? null); setTldr(result.tldr ?? null);
       setSessionId(result.sessionId); setIsGeneratingArticle(false); setGenerationStatus(null);
@@ -102,22 +106,22 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
   }, [interests, loadHistory, isGeneratingArticle]);
 
   const loadArticle = useCallback(async (id: string) => {
-    setIsGeneratingArticle(true); setArticle(null); setCurrentTopic(null); setActiveArticleId(id);
+    setIsGeneratingArticle(true); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setActiveArticleId(id);
     setPipelineMessages([INIT_BOT_MSG]);
     try {
       const art = await fetchArticleById(id);
-      setCurrentTopic(art.title); setArticle(art.content); setCurrentArticleId(art.id);
+      setCurrentTopic(art.title); setCurrentDomain(art.domain || art.category || null); setArticle(art.content); setCurrentArticleId(art.id);
       setActiveArticleId(art.id); setRabbitHoles(art.rabbit_holes ?? null); setTldr(art.tldr ?? null);
       setIsGeneratingArticle(false); loadHistory();
     } catch { setIsGeneratingArticle(false); }
   }, [loadHistory]);
 
   const closeArticle = useCallback(() => {
-    setActiveArticleId(null); setArticle(null); setCurrentTopic(null); setCurrentArticleId(null);
+    setActiveArticleId(null); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setCurrentArticleId(null);
   }, []);
 
   const clearSession = useCallback(() => {
-    setCurrentTopic(null); setArticle(null); setCurrentArticleId(null); setActiveArticleId(null);
+    setCurrentTopic(null); setCurrentDomain(null); setArticle(null); setCurrentArticleId(null); setActiveArticleId(null);
     setIsGeneratingArticle(false); setGenerationStatus(null); setRabbitHoles(null); setTldr(null);
     setSessionId(null); setPipelineMessages([INIT_BOT_MSG]);
   }, []);
@@ -135,6 +139,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       currentTopic, article, currentArticleId, activeArticleId, isGeneratingArticle,
       generationStatus, rabbitHoles, tldr, sessionId, history, isLoadingHistory,
       pipelineMessages, igniteQuest, loadArticle, closeArticle, clearSession, deleteArticle, loadHistory,
+      currentDomain,
     }}>
       {children}
     </PipelineContext.Provider>

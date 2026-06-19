@@ -6,11 +6,48 @@ import { ArticleSkeleton } from '../common/Skeletons';
 
 export function ArticleReaderCanvas() {
   const {
-    article, currentTopic, currentArticleId, closeArticle, igniteQuest, rabbitHoles,
+    article, currentTopic, currentArticleId, closeArticle, igniteQuest, rabbitHoles, currentDomain,
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
   const isSaved = savedSketches.some(s => s.article_id === currentArticleId);
+
+  let renderedFirstP = false;
+  const MarkdownComponents = {
+    blockquote: ({ children, ...props }: any) => {
+      return (
+        <div className="curio-insight-callout" {...props}>
+          <div className="curio-insight-icon-wrapper">
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#ffffff', display: 'block' }}>
+              lightbulb
+            </span>
+          </div>
+          <div className="curio-insight-text">
+            {children}
+          </div>
+        </div>
+      );
+    },
+    h3: ({ children, ...props }: any) => {
+      return (
+        <h3 className="curio-pull-quote" {...props}>
+          <span className="curio-pull-quote-bar"></span>
+          {children}
+        </h3>
+      );
+    },
+    p: ({ children, ...props }: any) => {
+      if (!renderedFirstP) {
+        renderedFirstP = true;
+        return (
+          <p className="curio-drop-cap" {...props}>
+            {children}
+          </p>
+        );
+      }
+      return <p {...props}>{children}</p>;
+    }
+  };
 
   if (!article) {
     return (
@@ -79,7 +116,7 @@ export function ArticleReaderCanvas() {
             letterSpacing: '0.06em' 
           }}
         >
-          {savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain || 'Article'}
+          READ STORY
         </span>
       </div>
 
@@ -91,16 +128,35 @@ export function ArticleReaderCanvas() {
           fontWeight: 700,
           color: 'var(--color-text-primary)',
           lineHeight: 1.25,
-          marginBottom: '1.5rem',
+          marginBottom: (currentDomain || savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain) ? '0.4rem' : '1.5rem',
           marginTop: 0,
         }}>
           {currentTopic}
         </h1>
       )}
 
+      {/* Domain Metadata tag below the title */}
+      {(currentDomain || savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain) && (
+        <div style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '10px',
+          textTransform: 'uppercase',
+          fontWeight: 'bold',
+          letterSpacing: '0.08em',
+          color: 'var(--ink-wash, #57534E)',
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>folder</span>
+          <span>{currentDomain || savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain}</span>
+        </div>
+      )}
+
       {/* Markdown article body */}
       <div className="prose-curio">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
           {article || ''}
         </ReactMarkdown>
       </div>

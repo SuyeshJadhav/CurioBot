@@ -5,7 +5,6 @@ import "dotenv/config";
 // Ensure environment variables are loaded
 const requiredEnvVars = [
   "GEMINI_API_KEY",
-  "TAVILY_API_KEY",
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY"
 ];
@@ -65,8 +64,7 @@ async function main() {
 
   // Import dependencies for further tests dynamically to ensure clean env check first
   const { ai } = await import("../src/lib/gemini");
-  const { searchWeb } = await import("../src/lib/tavily");
-  const { initWikiMcp, executeWikiTool } = await import("../src/lib/mcp");
+  const { initResearchMcp, executeResearchTool } = await import("../src/lib/mcp");
   const supabase = (await import("../src/lib/supabase")).default;
   const { supervisorAgent } = await import("../src/agents/supervisor");
 
@@ -86,55 +84,55 @@ async function main() {
     };
   });
 
-  // Step 3: Tavily API Integration
-  await runStep("Tavily API Integration", async () => {
-    const results = await searchWeb("Google DeepMind Agentic AI");
+  // Step 3: Research MCP - Web Search Integration
+  await runStep("Research MCP - Web Search Integration", async () => {
+    await initResearchMcp();
+    const result = await executeResearchTool("web_search", { query: "Google DeepMind Agentic AI", count: 2 });
+    if (!result || typeof result.text !== "string") {
+      throw new Error("Research MCP web_search execution returned invalid result or missing text");
+    }
+    const results = JSON.parse(result.text);
     if (!Array.isArray(results) || results.length === 0) {
-      throw new Error("No search results returned from Tavily API");
+      throw new Error("No search results returned from Research MCP web_search");
     }
     const firstResult = results[0];
-    if (!firstResult.title || !firstResult.url || !firstResult.content) {
-      throw new Error("Tavily search results missing expected properties (title, url, or content)");
+    if (!firstResult.title || !firstResult.url) {
+      throw new Error("Research MCP search results missing expected properties (title or url)");
     }
     return {
       resultsCount: results.length,
       firstResult: {
         title: firstResult.title,
         url: firstResult.url,
-        snippetLength: firstResult.content.length
+        snippetLength: firstResult.description?.length || 0
       }
     };
   });
 
-  // Step 4: Wikipedia MCP Server Connection
-  let wikiSearchToolName = "";
-  await runStep("Wikipedia MCP Server Connection", async () => {
-    const { geminiTools } = await initWikiMcp();
+  // Step 4: Research MCP - Wikipedia Lookup Integration
+  await runStep("Research MCP - Wikipedia Lookup Integration", async () => {
+    const { geminiTools } = await initResearchMcp();
     if (!Array.isArray(geminiTools) || geminiTools.length === 0) {
-      throw new Error("Wikipedia MCP initialization returned no tools");
+      throw new Error("Research MCP initialization returned no tools");
     }
-    const searchTool = geminiTools.find((t: any) =>
-      t.name.toLowerCase().includes("search") || t.name.toLowerCase().includes("find")
-    );
-    if (!searchTool) {
-      throw new Error("No tool containing 'search' or 'find' found in Wikipedia MCP tools");
+    const wikiResult = await executeResearchTool("wikipedia_lookup", { query: "Quantum computing" });
+    if (!wikiResult || typeof wikiResult.text !== "string" || wikiResult.text.length === 0) {
+      throw new Error("Research MCP wikipedia_lookup tool execution returned invalid result or missing text");
     }
-    wikiSearchToolName = searchTool.name;
     return {
       toolsCount: geminiTools.length,
       tools: geminiTools.map((t: any) => ({ name: t.name, description: t.description })),
-      searchToolName: wikiSearchToolName
+      hasText: wikiResult.text.length > 0,
+      textLength: wikiResult.text.length,
+      preview: wikiResult.text.slice(0, 100)
     };
   });
 
-  // Step 5: Wikipedia MCP Tool Execution
-  await runStep("Wikipedia MCP Tool Execution", async () => {
-    if (!wikiSearchToolName) {
-      throw new Error("Wikipedia search tool name was not resolved in previous step");
-    }
-    const result = await executeWikiTool(wikiSearchToolName, { query: "Quantum computing" });
-    if (!result || typeof result.text !== "string") {
-      throw new Error("Wikipedia tool execution returned invalid result or missing text");
+  // Step 5: Research MCP - Scrape Page Integration
+  await runStep("Research MCP - Scrape Page Integration", async () => {
+    const result = await executeResearchTool("scrape_page", { url: "https://example.com" });
+    if (!result || typeof result.text !== "string" || result.text.length === 0) {
+      throw new Error("Research MCP scrape_page tool execution returned invalid result or missing text");
     }
     return {
       hasText: result.text.length > 0,

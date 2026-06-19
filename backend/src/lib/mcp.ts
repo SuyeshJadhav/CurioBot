@@ -4,7 +4,7 @@ import { Type } from "@google/genai";
 
 export const transport = new StdioClientTransport({
   command: "npx",
-  args: ["tsx", "src/lib/wikipediaMcpServer.ts"],
+  args: ["tsx", "src/lib/researchMcpServer.ts"],
 });
 
 // Prevent subprocess from becoming orphaned on parent process exit/termination
@@ -25,19 +25,19 @@ process.on("SIGTERM", () => {
   }
 });
 
-const wikiMcp = new Client({
-  name: " Wikipedia-mcp",
+const researchMcp = new Client({
+  name: "curiobot-research-client",
   version: "1.0.0",
 });
 
-let connectionPromise: Promise<{ wikiMcp: Client; geminiTools: any }> | null =
+let connectionPromise: Promise<{ researchMcp: Client; geminiTools: any }> | null =
   null;
 
-export async function initWikiMcp() {
+export async function initResearchMcp() {
   if (!connectionPromise) {
     connectionPromise = (async () => {
-      await wikiMcp.connect(transport);
-      const mcpTools = await wikiMcp.listTools();
+      await researchMcp.connect(transport);
+      const mcpTools = await researchMcp.listTools();
 
       const geminiTools = mcpTools.tools.map((mcpTool) => ({
         name: mcpTool.name,
@@ -49,14 +49,14 @@ export async function initWikiMcp() {
         },
       }));
 
-      return { wikiMcp, geminiTools };
+      return { researchMcp, geminiTools };
     })();
   }
   return connectionPromise;
 }
 
-export async function executeWikiTool(name: string, args: Record<string, any>) {
-  const mcpResult = await wikiMcp.callTool({
+export async function executeResearchTool(name: string, args: Record<string, any>) {
+  const mcpResult = await researchMcp.callTool({
     name,
     arguments: args,
   });
@@ -71,3 +71,6 @@ export async function executeWikiTool(name: string, args: Record<string, any>) {
     text: textContents,
   };
 }
+
+// Backward-compatibility aliases for imports
+export { initResearchMcp as initWikiMcp, executeResearchTool as executeWikiTool };

@@ -120,4 +120,45 @@ describe("curiosityScorerAgent", () => {
     expect(res.dedupPassed).toBe(false);
     expect(res.dedupAttempts).toBe(2);
   });
+
+  it("disqualifies candidate (overallScore = 0) if novelty is strictly below 7", async () => {
+    const gemini = await import("../../src/lib/gemini");
+    (gemini.ai.models.generateContent as any).mockResolvedValueOnce({
+      text: JSON.stringify([
+        {
+          title: "High Quality But Familiar Topic",
+          novelty: 6, // strictly below 7
+          specificity: 10,
+          surprise: 10,
+          mechanism: 10,
+          rabbitHolePotential: 10,
+          primaryQuestion: "Why is it familiar?",
+          winningCandidateReason: "Reason"
+        }
+      ]),
+      usageMetadata: {},
+    });
+
+    const { curiosityScorerAgent } = await import("../../src/agents/curiosityScorer");
+    const state = {
+      userId: "user-1",
+      interests: ["cooking"],
+      userSettings: {},
+      candidates: [
+        {
+          title: "High Quality But Familiar Topic",
+          angle: "Familiar angle.",
+          category: "general",
+          hook: "Familiar hook.",
+          connections: []
+        }
+      ],
+      dedupAttempts: 0
+    } as any;
+
+    const res = await curiosityScorerAgent(state);
+    expect(res.currentTopic).toBeUndefined();
+    expect(res.dedupPassed).toBe(false);
+    expect(res.dedupAttempts).toBe(1);
+  });
 });

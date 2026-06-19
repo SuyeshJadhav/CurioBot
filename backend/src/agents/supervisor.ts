@@ -5,7 +5,6 @@ import { researcherAgent } from "./researcher";
 import { writerAgent } from "./writer";
 import { StateGraph, START, END } from '@langchain/langgraph'
 import { addSeenTopic } from "../lib/memory";
-import { wikiResearcherAgent } from "./wikiResearcher";
 import { dedupTopicNode } from "./dedupTopic";
 import { outlineAgent } from "./outline";
 import { editorAgent } from "./editor";
@@ -94,7 +93,6 @@ const graph = new StateGraph(AgentState)
   .addNode("start research", wrapNode("start research", startResearchNode))
   .addNode("use fallback", wrapNode("use fallback", (_state: AgentStateType) => ({ currentTopic: FALLBACK_TOPIC, dedupPassed: true })))
   .addNode("researcher", wrapNode("researcher", researcherAgent))
-  .addNode("wiki researcher", wrapNode("wiki researcher", wikiResearcherAgent))
   .addNode("research brief agent", wrapNode("research brief agent", researchBriefAgent))
   .addNode("insight extractor", wrapNode("insight extractor", insightExtractorAgent))
   .addNode("outline agent", wrapNode("outline agent", outlineAgent))
@@ -118,11 +116,8 @@ const graph = new StateGraph(AgentState)
   })
 
   .addEdge("start research", "researcher")
-  .addEdge("start research", "wiki researcher")
   .addEdge("use fallback", "researcher")
-  .addEdge("use fallback", "wiki researcher")
   .addEdge("researcher", "research brief agent")
-  .addEdge("wiki researcher", "research brief agent")
   .addEdge("research brief agent", "insight extractor")
   .addEdge("insight extractor", "outline agent")
   .addEdge("outline agent", "writer")
@@ -253,15 +248,7 @@ export async function runSupervisorStream(
     if (nodeName === 'curiosity scorer') {
       onUpdate({ status: 'researching', data: (chunk as any)[nodeName].currentTopic });
     } else if (nodeName === 'researcher') {
-      researcherDone = true;
-      if (wikiResearcherDone) {
-        onUpdate({ status: 'writing_article' });
-      }
-    } else if (nodeName === 'wiki researcher') {
-      wikiResearcherDone = true;
-      if (researcherDone) {
-        onUpdate({ status: 'writing_article' });
-      }
+      onUpdate({ status: 'writing_article' });
     }
   }
 

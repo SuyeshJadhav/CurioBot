@@ -1,6 +1,110 @@
 import { AgentStateType, NodeMetrics, TopicCandidate } from "../types";
 import { ai, safetySettings } from "../lib/gemini";
 import { pickRandomTemplate } from "../data/editorialTemplates";
+import { getRecentSeenTopics } from "../lib/memory";
+
+const CHAOS_CONCEPTS = [
+  "Mycology and fungal networks",
+  "Cold War Espionage and double agents",
+  "Deep-sea bioluminescence",
+  "Medieval alchemy",
+  "Quantum entanglement",
+  "Urban exploration of abandoned structures",
+  "Typography and font design",
+  "Ant colony optimization algorithms",
+  "Retro-futuristic architecture",
+  "The history of salt trade",
+  "Epigenetics and cellular memory",
+  "Acoustic ecology and natural sounds",
+  "Subterranean seed vaults",
+  "Automata and mechanical clocks",
+  "Victorian poison gardens",
+  "Game theory in animal behavior",
+  "Cybernetic feedback loops",
+  "The Bronze Age Collapse",
+  "Nomadic architecture",
+  "Obsolete storage media",
+  "Bioluminescent mushrooms",
+  "The geology of gemstones",
+  "Early ballooning and aviation",
+  "Philosophy of absurdism",
+  "Fractal geometry in nature",
+  "Micro-nations and self-proclaimed states",
+  "Symbiotic relationships in coral reefs",
+  "Synchronized fireflies",
+  "The physics of bubbles",
+  "Cryptography before computers",
+  "The search for extraterrestrial intelligence (SETI)",
+  "Miniature painting techniques",
+  "Dendrochronology and tree ring dating",
+  "Ice core science and climate history",
+  "The physics of sailing",
+  "Ancient navigation and Polynesian star paths",
+  "Historical cryptography and the Voynich manuscript",
+  "Volcano acoustics",
+  "Parasitic mind control in insects",
+  "Rare manuscript preservation",
+  "High-frequency trading algorithms",
+  "Kinetic sculptures",
+  "Extreme weather chasing",
+  "The sociology of subcultures",
+  "Marine archaeology and shipwrecks",
+  "The chemistry of fermentation",
+  "Sleep science and lucid dreaming",
+  "Synthetic biology",
+  "Cognitive biases in design",
+  "Space elevator engineering",
+  "The psychology of magic tricks",
+  "Traditional weaving patterns",
+  "The history of the calendar",
+  "Rare earth minerals and geopolitics",
+  "Biomimetic robots",
+  "Deep space probes and Voyager",
+  "Linguistic drift and dialect evolution",
+  "The mathematics of origami",
+  "Bioluminescent bay ecology",
+  "The history of maps and cartography",
+  "Animal architecture",
+  "Atmospheric optics, rainbows, and mirages",
+  "Memory palaces and mnemonics",
+  "Deep time geology",
+  "Solar sail propulsion",
+  "Historical glassblowing",
+  "Artificial general intelligence ethics",
+  "The history of tea ceremonies",
+  "Urban microclimates",
+  "The science of scent and olfaction",
+  "Ancient hydraulic engineering",
+  "High-altitude survival physiology",
+  "Phantom islands on old maps",
+  "The physics of musical instruments",
+  "Superconductors and levitation",
+  "The history of writing systems",
+  "Carnivorous plants",
+  "The mathematics of juggling",
+  "Hydrothermal vent ecosystems",
+  "Forensic science history",
+  "Non-Newtonian fluids",
+  "The evolution of eyes",
+  "Ancient board games",
+  "Glass frog camouflage",
+  "The physics of sand dunes",
+  "Deep cave exploration",
+  "The history of codebreaking",
+  "Cyber-physical systems",
+  "Architectural acoustics and whispering galleries",
+  "The physics of snow and avalanches",
+  "Seed dispersal mechanisms",
+  "The evolution of cooperation",
+  "Deep-sea trench exploration",
+  "The history of standard weights and measures",
+  "Animal camouflage and mimicry",
+  "The science of color perception",
+  "High-altitude balloon science",
+  "Extreme longevity organisms",
+  "The physics of boomerangs",
+  "Medieval siege engines"
+];
 
 const FALLBACK_CANDIDATE: TopicCandidate = {
   title: "The Strange History of Time Zones",
@@ -51,6 +155,14 @@ export async function topicPickerAgent(
   let candidates: TopicCandidate[] = [];
   let inputTokens = 0;
   let outputTokens = 0;
+
+  // Fetch recent seen topics from database for pre-emptive blacklisting
+  const recentTopics = await getRecentSeenTopics(state.userId, 20);
+  const unifiedBlacklist = Array.from(new Set([
+    ...(state.seenTopics || []),
+    ...recentTopics
+  ]));
+
   if (requestedTitle && (!state.dedupAttempts || state.dedupAttempts === 0)) {
     console.log(`🔍 [Topic Picker Agent] Generating candidates for requested topic: "${requestedTitle}"`);
     const model = state.userSettings?.model || "gemini-3.1-flash-lite";
@@ -123,14 +235,25 @@ Return ONLY a JSON array, no markdown fences:
       : "";
     const template = pickRandomTemplate();
 
+    // Probabilistic Chaos Injection
+    const shouldInjectChaos = Math.random() > 0.4;
+    let chaosSection = "";
+    if (shouldInjectChaos) {
+      const randomChaosConcept = CHAOS_CONCEPTS[Math.floor(Math.random() * CHAOS_CONCEPTS.length)];
+      chaosSection = `\n\nChaos Intersection Requirement: You MUST force a creative, surprising, and premium intersection of the reader's interests with the concept: "${randomChaosConcept}". Do not make it feel jarring; weave the two together into a coherent, high-quality narrative angle.`;
+      console.log(`🌀 [Topic Picker] Chaos injection triggered with concept: "${randomChaosConcept}"`);
+    } else {
+      console.log("🌀 [Topic Picker] Chaos injection skipped: deep exploration of stated interests selected.");
+    }
+
     const prompt = `You are the editorial director of a general knowledge magazine — think Kurzgesagt, Wait But Why, or a really good Wikipedia rabbit hole. Your job is to pick topic candidates that make a curious person stop scrolling and think "I need to read this."
 
 The reader is broadly curious about: ${interests.join(", ")}${hintSection}
 
 Editorial direction (follow this strictly):
-<topic_novelty_guide>${noveltyGuide}</topic_novelty_guide>
+<topic_novelty_guide>${noveltyGuide}</topic_novelty_guide>${chaosSection}
 
-Topics already covered (avoid these): ${state.seenTopics.join(", ") || "none yet"}
+Topics already covered (avoid these): ${unifiedBlacklist.join(", ") || "none yet"}
 
 The topic candidates should fit this editorial frame: "${template}"
 

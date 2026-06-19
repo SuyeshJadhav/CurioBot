@@ -256,6 +256,7 @@ beforeEach(async () => {
 
   vi.mock("../src/lib/memory", () => ({
     getAllInterests: vi.fn(async (_userId: string) => []),
+    getRecentSeenTopics: vi.fn(async (_userId: string, _limit?: number) => []),
     matchSeenTopics: vi.fn(
       async (_queryEmbedding: any, _userId: string, _threshold?: number) => [],
     ),
@@ -266,6 +267,25 @@ beforeEach(async () => {
   }));
 
   vi.mock("../src/lib/mcp", () => ({
+    initResearchMcp: vi.fn(async () => ({
+      geminiTools: [
+        { name: "web_search", description: "Search", parameters: { type: "object", properties: {}, required: [] } },
+        { name: "scrape_page", description: "Scrape", parameters: { type: "object", properties: {}, required: [] } },
+        { name: "wikipedia_lookup", description: "Wikipedia", parameters: { type: "object", properties: {}, required: [] } }
+      ]
+    })),
+    executeResearchTool: vi.fn(async (name: string, args: any) => {
+      if (name === "web_search") {
+        return { rawResult: {}, text: JSON.stringify([{ title: "Result", url: "https://example.com/result", description: "snippet" }]) };
+      }
+      if (name === "scrape_page") {
+        return { rawResult: {}, text: "scraped content" };
+      }
+      if (name === "wikipedia_lookup") {
+        return { rawResult: {}, text: "wiki content" };
+      }
+      return { rawResult: {}, text: "" };
+    }),
     initWikiMcp: vi.fn(async () => ({ geminiTools: [] })),
     executeWikiTool: vi.fn(async () => ({ rawResult: {}, text: "wiki text" })),
   }));

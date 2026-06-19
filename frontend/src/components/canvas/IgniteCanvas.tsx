@@ -7,7 +7,7 @@ import { IgniteArticle } from '../ignite/IgniteArticle';
 export function IgniteCanvas() {
   const {
     article, currentTopic, currentArticleId, isGeneratingArticle,
-    generationStatus, igniteQuest,
+    generationStatus, igniteQuest, currentDomain,
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
@@ -33,6 +33,7 @@ export function IgniteCanvas() {
         toggleSaveArticle={toggleSaveArticle}
         libraryCollections={libraryCollections}
         addArticleToCollection={addArticleToCollection}
+        domain={currentDomain}
       />
     );
   }

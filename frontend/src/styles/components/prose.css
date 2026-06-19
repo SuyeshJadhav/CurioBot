@@ -241,3 +241,82 @@
 .prose-chat tr:nth-child(even) td {
   background: rgba(174, 198, 207, 0.06);
 }
+
+/* Premium Magazine-Style Typography & Callout Rules */
+
+/* Premium Callout Box (Insights) */
+.curio-insight-callout {
+  position: relative;
+  margin: 2.25rem 0;
+  padding: 1.5rem 1.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(237, 233, 254, 0.4) 0%, rgba(219, 234, 254, 0.4) 100%);
+  border: 1px solid rgba(127, 119, 221, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+}
+
+.curio-insight-icon-wrapper {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  background: var(--primary, #7F77DD);
+  color: #ffffff;
+  padding: 6px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(127, 119, 221, 0.3);
+}
+
+.curio-insight-text {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  font-weight: 500;
+  color: #1e1b4b; /* deep indigo */
+  font-style: italic;
+  margin: 0;
+}
+
+.curio-insight-text p {
+  margin: 0;
+}
+
+/* Drop-cap paragraph introduction */
+.curio-drop-cap::first-letter {
+  font-family: var(--font-headline), serif;
+  font-size: 3.6rem;
+  font-weight: 700;
+  color: var(--ink-sepia, #704214);
+  float: left;
+  line-height: 0.82;
+  margin-right: 10px;
+  margin-top: 4px;
+}
+
+/* Pull-quote styling for subheadings (H3) */
+.curio-pull-quote {
+  font-family: var(--font-headline), serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink-sepia, #704214);
+  margin-top: 2.75rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.35;
+  border-bottom: 2px solid rgba(112, 66, 20, 0.1);
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.curio-pull-quote-bar {
+  width: 24px;
+  height: 4px;
+  background: var(--primary, #7F77DD);
+  border-radius: 99px;
+  display: inline-block;
+}

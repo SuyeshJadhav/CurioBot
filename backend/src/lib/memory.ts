@@ -36,6 +36,21 @@ export async function getAllInterests(userId: string): Promise<{ interest: strin
   return (data || []) as { interest: string }[];
 }
 
+export async function getRecentSeenTopics(userId: string, limit: number = 20): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('seen_topics')
+    .select('topic')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.warn('⚠️ getRecentSeenTopics failed:', error.message);
+    return [];
+  }
+  return (data || []).map((row: any) => row.topic);
+}
+
 export async function matchSeenTopics(
   queryEmbedding: number[],
   userId: string,
