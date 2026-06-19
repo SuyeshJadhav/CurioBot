@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm';
 import { usePipeline } from '../../contexts/PipelineContext';
 import { useLibrary } from '../../contexts/LibraryContext';
 import { ArticleSkeleton } from '../common/Skeletons';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 export function ArticleReaderCanvas() {
@@ -13,8 +13,11 @@ export function ArticleReaderCanvas() {
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
+  const lastRequestedId = useRef<string | null>(null);
+
   useEffect(() => {
-    if (id && id !== currentArticleId) {
+    if (id && id !== currentArticleId && id !== lastRequestedId.current) {
+      lastRequestedId.current = id;
       loadArticle(id);
     }
   }, [id, currentArticleId, loadArticle]);
@@ -53,7 +56,7 @@ export function ArticleReaderCanvas() {
 
         {/* Back button */}
         <button 
-          onClick={closeArticle}
+          onClick={() => closeArticle()}
           className="nav-item active"
           style={{ 
             display: 'inline-flex',
@@ -83,7 +86,7 @@ export function ArticleReaderCanvas() {
 
       {/* Back button */}
       <button 
-        onClick={closeArticle}
+        onClick={() => closeArticle()}
         className="nav-item active"
         style={{ 
           display: 'inline-flex',

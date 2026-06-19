@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function MobileHeader() {
   const { changeTab, isMenuOpen, setMenuOpen, user, logout } = useAuth();
-  const { activeArticleId, isGeneratingArticle, closeArticle } = usePipeline();
+  const { activeArticleId, isGeneratingArticle } = usePipeline();
   const { isTutorOpen, setTutorOpen } = useChat();
   const navigate = useNavigate();
   const showTutorToggle = !!(activeArticleId || isGeneratingArticle);
@@ -29,7 +29,6 @@ export function MobileHeader() {
   }, [isProfileOpen]);
 
   const handleLogoClick = () => {
-    closeArticle();
     changeTab('home');
     setMenuOpen(false);
     navigate('/');

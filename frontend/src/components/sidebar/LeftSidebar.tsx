@@ -16,8 +16,7 @@ export function LeftSidebar() {
     activeTab, changeTab, user, logout, isMenuOpen, setMenuOpen,
   } = useAuth();
   const {
-    history, loadArticle, deleteArticle, isGeneratingArticle, currentTopic,
-    activeArticleId, isLoadingHistory, closeArticle,
+    history, loadArticle, deleteArticle, activeArticleId, isLoadingHistory,
   } = usePipeline();
   const navigate = useNavigate();
 
@@ -40,12 +39,10 @@ export function LeftSidebar() {
   const toggle = useCallback(() => setCollapsed(p => !p), []);
 
   const navigateTo = useCallback((tab: 'home' | 'discover' | 'search' | 'library' | 'interests' | 'settings') => {
-    // If user is reading an article, dismiss it so the tab's canvas actually renders
-    closeArticle();
     changeTab(tab);
     setMenuOpen(false);
     navigate(tab === 'home' ? '/' : `/${tab}`);
-  }, [changeTab, closeArticle, setMenuOpen, navigate]);
+  }, [changeTab, setMenuOpen, navigate]);
 
   const selectArticle = useCallback((id: string) => {
     loadArticle(id);
@@ -162,37 +159,15 @@ export function LeftSidebar() {
 
         {/* Recent Quests Section */}
         <div className="sidebar-history-section">
-          {isLoadingHistory ? (
+          {isLoadingHistory && history.length === 0 ? (
             <>
               <div className="section-label" style={{ marginTop: '8px' }}>Recent</div>
               <SidebarRecentSkeleton count={3} />
             </>
-          ) : (history.length > 0 || isGeneratingArticle) && (
+          ) : history.length > 0 && (
             <>
               <div className="section-label" style={{ marginTop: '8px' }}>Recent</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                {isGeneratingArticle && (
-                  <div 
-                    className="recent-item" 
-                    style={{ 
-                      opacity: 0.85, 
-                      cursor: 'default',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '6px 8px',
-                      fontSize: '12px',
-                      borderRadius: '6px',
-                      color: 'var(--tertiary)',
-                      background: 'rgba(174,198,207,0.08)'
-                    }}
-                  >
-                    <i className="ti ti-loader" style={{ fontSize: '13px', flexShrink: 0, animation: 'spin 1.4s linear infinite' }} aria-hidden="true"></i>
-                    <span style={{ fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {currentTopic ? `${currentTopic}...` : 'Uncovering wonder...'}
-                    </span>
-                  </div>
-                )}
                 {history.map((entry) => {
                   const isActive = entry.id === activeArticleId;
                   return (

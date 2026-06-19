@@ -129,7 +129,7 @@ export interface CurioContextType extends CurioState {
   clearSession: () => void;
 
   loadArticle: (id: string) => Promise<void>;
-  closeArticle: () => void;
+  closeArticle: (options?: { skipNavigate?: boolean }) => void;
   toggleSaveArticle: (notes?: string) => Promise<void>;
   deleteSavedSketch: (articleId: string) => Promise<void>;
   updateSketchNotes: (articleId: string, notes: string) => Promise<void>;

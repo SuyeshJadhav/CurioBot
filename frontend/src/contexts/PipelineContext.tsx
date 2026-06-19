@@ -23,7 +23,7 @@ export interface PipelineContextType {
   currentDomain: string | null;
   igniteQuest: (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => Promise<void>;
   loadArticle: (id: string) => Promise<void>;
-  closeArticle: () => void;
+  closeArticle: (options?: { skipNavigate?: boolean }) => void;
   clearSession: () => void;
   deleteArticle: (id: string) => Promise<void>;
   loadHistory: () => Promise<void>;
@@ -115,6 +115,10 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
   }, [interests, loadHistory, isGeneratingArticle, navigate]);
 
   const loadArticle = useCallback(async (id: string) => {
+    if (id === currentArticleId || (id === activeArticleId && isGeneratingArticle)) {
+      navigate(`/article/${id}`);
+      return;
+    }
     setIsGeneratingArticle(true); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setActiveArticleId(id);
     setPipelineMessages([INIT_BOT_MSG]);
     navigate(`/article/${id}`);
@@ -122,12 +126,13 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       const art = await fetchArticleById(id);
       setCurrentTopic(art.title); setCurrentDomain(art.domain || art.category || null); setArticle(art.content); setCurrentArticleId(art.id);
       setActiveArticleId(art.id); setRabbitHoles(art.rabbit_holes ?? null); setTldr(art.tldr ?? null);
-      setIsGeneratingArticle(false); loadHistory();
+      setIsGeneratingArticle(false);
     } catch { setIsGeneratingArticle(false); }
-  }, [loadHistory, navigate]);
+  }, [navigate, currentArticleId, activeArticleId, isGeneratingArticle]);
 
-  const closeArticle = useCallback(() => {
+  const closeArticle = useCallback((options?: { skipNavigate?: boolean }) => {
     setActiveArticleId(null); setArticle(null); setCurrentTopic(null); setCurrentDomain(null); setCurrentArticleId(null);
+    if (options?.skipNavigate) return;
     if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
