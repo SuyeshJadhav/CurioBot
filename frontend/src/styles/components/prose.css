@@ -285,18 +285,6 @@
   margin: 0;
 }
 
-/* Drop-cap paragraph introduction */
-.curio-drop-cap::first-letter {
-  font-family: var(--font-headline), serif;
-  font-size: 3.6rem;
-  font-weight: 700;
-  color: var(--ink-sepia, #704214);
-  float: left;
-  line-height: 0.82;
-  margin-right: 10px;
-  margin-top: 4px;
-}
-
 /* Pull-quote styling for subheadings (H3) */
 .curio-pull-quote {
   font-family: var(--font-headline), serif;

@@ -12,7 +12,6 @@ export function ArticleReaderCanvas() {
 
   const isSaved = savedSketches.some(s => s.article_id === currentArticleId);
 
-  let renderedFirstP = false;
   const MarkdownComponents = {
     blockquote: ({ children, ...props }: any) => {
       return (
@@ -35,17 +34,6 @@ export function ArticleReaderCanvas() {
           {children}
         </h3>
       );
-    },
-    p: ({ children, ...props }: any) => {
-      if (!renderedFirstP) {
-        renderedFirstP = true;
-        return (
-          <p className="curio-drop-cap" {...props}>
-            {children}
-          </p>
-        );
-      }
-      return <p {...props}>{children}</p>;
     }
   };
 

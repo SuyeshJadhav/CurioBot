@@ -26,7 +26,6 @@ export function IgniteArticle({
 }: IgniteArticleProps) {
   const isSaved = currentArticleId ? savedSketches.some(s => s.article_id === currentArticleId) : false;
 
-  let renderedFirstP = false;
   const MarkdownComponents = {
     blockquote: ({ children, ...props }: any) => {
       return (
@@ -49,17 +48,6 @@ export function IgniteArticle({
           {children}
         </h3>
       );
-    },
-    p: ({ children, ...props }: any) => {
-      if (!renderedFirstP) {
-        renderedFirstP = true;
-        return (
-          <p className="curio-drop-cap" {...props}>
-            {children}
-          </p>
-        );
-      }
-      return <p {...props}>{children}</p>;
     }
   };
 
