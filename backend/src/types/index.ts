@@ -82,6 +82,7 @@ export interface UserSettings {
 }
 
 export interface WriterOutput {
+  reasoning?: string;
   title: string;
   article: string;
   tldr: string;
