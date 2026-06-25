@@ -1,19 +1,21 @@
 <div align="center">
   <!-- <img src="assets/logo.png" alt="CurioBot Logo" width="120" /> -->
-  <h1>🌟 CurioBot</h1>
+  <h1>🌟 Curios - AI Curiosity Engine</h1>
 
   <p><b>A multi-agent curiosity engine that dynamically researches and generates highly engaging articles based on your interests.</b></p>
 
-  [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](#)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](#)
-  [![Gemini](https://img.shields.io/badge/Gemini-2.5-8E75B2?logo=google&logoColor=white)](#)
-  [![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-1C3C3C?logo=langchain&logoColor=white)](#)
-  [![MCP](https://img.shields.io/badge/Protocol-MCP-4CAF50?logo=network&logoColor=white)](#)
-  [![BullMQ](https://img.shields.io/badge/Queue-BullMQ-E5342A?logo=redis&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](#)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5-8E75B2?logo=google&logoColor=white)](#)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-1C3C3C?logo=langchain&logoColor=white)](#)
+[![MCP](https://img.shields.io/badge/Protocol-MCP-4CAF50?logo=network&logoColor=white)](#)
+[![BullMQ](https://img.shields.io/badge/Queue-BullMQ-E5342A?logo=redis&logoColor=white)](#)
 
   <br />
   <br />
-  <img src="assets/image.png" alt="CurioBot Interface" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+  <img src="assets/image.png" alt="CurioBot Home Dashboard" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+  <br />
+  <img src="assets/article.png" alt="CurioBot Article View with Tutor" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
 </div>
 
 ---
@@ -153,11 +155,13 @@ START
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework:** React 19, Vite, TypeScript
 - **Styling:** Tailwind CSS v4, custom HSL color palette
 - **Markdown Rendering:** `react-markdown`, `remark-gfm`
 
 ### Backend
+
 - **Server:** Node.js, Express, TypeScript
 - **Orchestration:** LangGraph (`@langchain/langgraph`), `@langchain/core`
 - **AI Integrations:** Google GenAI SDK (`@google/genai`)
@@ -170,6 +174,7 @@ START
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) (v20+ recommended)
 - [Redis](https://redis.io/) (v7+ recommended, running locally or via a managed service)
 - API Keys:
@@ -182,12 +187,14 @@ START
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/SuyeshJadhav/CurioBot.git
    cd CurioBot
    ```
 
 2. **Setup Backend:**
+
    ```bash
    cd backend
    npm install
@@ -205,11 +212,13 @@ START
 ### Running Locally
 
 1. **Start Redis** (if not already running):
+
    ```bash
    redis-server
    ```
 
 2. **Start the backend server** (Express API + embedded BullMQ Worker):
+
    ```bash
    cd backend
    npm run dev
