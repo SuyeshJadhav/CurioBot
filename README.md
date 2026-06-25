@@ -6,7 +6,7 @@
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](#)
-[![Gemini](https://img.shields.io/badge/Gemini-2.5-8E75B2?logo=google&logoColor=white)](#)
+[![Gemini](https://img.shields.io/badge/Gemini-3.1-8E75B2?logo=google&logoColor=white)](#)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-1C3C3C?logo=langchain&logoColor=white)](#)
 [![MCP](https://img.shields.io/badge/Protocol-MCP-4CAF50?logo=network&logoColor=white)](#)
 [![BullMQ](https://img.shields.io/badge/Queue-BullMQ-E5342A?logo=redis&logoColor=white)](#)
