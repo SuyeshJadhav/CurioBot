@@ -125,7 +125,7 @@ export async function writerAgent(state: AgentStateType): Promise<Partial<AgentS
 Title: ${state.outline.title}
 Hook: ${state.outline.hook}
 Sections:
-${state.outline.sections.map((s, i) => `Section ${i + 1}: ${s.heading}
+${state.outline.sections.map((s, i) => `${i + 1}. ${s.heading}
 Purpose: ${s.purpose}
 Central Insight: ${s.centralInsight || "None"}
 Target Word Count: ${s.targetWordCount || "None"} words
@@ -213,6 +213,7 @@ Formatting & Pacing Best Practices:
 - Takeaway Callouts: Every section MUST contain exactly one core takeaway or surprising insight. You MUST format this insight as a markdown blockquote starting exactly with the bolded word "Insight:" (e.g., > Insight: The mantis shrimp...). Do not use blockquotes for any other purpose.
 - High scannability: Bold (**text**) the first occurrence of key terms, historical dates, or core jargon. Do not overdo it, but use it to guide the eye.
 - Use \`### \` for section headings (H3) to maintain consistent nesting.
+- CRITICAL: Section headings must be clean and concise. Do NOT prefix headings with "Section", "Section 1:", "Part", or any numbering. Do NOT use dashes (-), em-dashes (—), or colons (:) as separators within headings. Write short, descriptive headings only (e.g., \`### The Hidden Cost of Speed\`, not \`### Section 1 - The Hidden Cost of Speed\`).
 - Ensure all markdown formatting is clean, well-aligned, and strictly adheres to standard GitHub Flavored Markdown (GFM) rules.
 
 THE PROPER NOUN MANDATE:

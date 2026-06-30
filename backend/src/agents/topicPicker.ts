@@ -76,7 +76,7 @@ const CHAOS_CONCEPTS = [
   "The science of scent and olfaction",
   "Ancient hydraulic engineering",
   "High-altitude survival physiology",
-  "Phantom islands on old maps",
+  "Fictional cartography and imagined geographies",
   "The physics of musical instruments",
   "Superconductors and levitation",
   "The history of writing systems",
@@ -169,6 +169,8 @@ export async function topicPickerAgent(
 
     const prompt = `You are the editorial director of a general knowledge magazine (like Kurzgesagt or Wait But Why).
 The user wants to read a highly engaging, custom article about: "${requestedTitle}".
+
+IMPORTANT — Banned/Overused Words: Do NOT use any of the following words in titles, hooks, or angles: "ghost", "ghosts", "ghostly", "haunted", "haunting", "phantom", "spectral", "supernatural", "paranormal", "eerie", "spooky". These have been massively overused. Find fresher, more specific vocabulary.
 
 Your task:
 Generate 4-6 distinct candidate angles/hooks for this topic. Each candidate should present a different, catchier magazine-style headline, and a specific narrative hook or angle.
@@ -263,6 +265,8 @@ A great topic candidate:
 - Could be explained to a curious 20-year-old without jargon
 - Tells a story, not just facts
 - Has a narrative hook and rabbit-hole potential
+
+IMPORTANT — Banned/Overused Words: Do NOT use any of the following words in titles, hooks, or angles: "ghost", "ghosts", "ghostly", "haunted", "haunting", "phantom", "spectral", "supernatural", "paranormal", "eerie", "spooky". These have been massively overused. Find fresher, more specific vocabulary.
 
 Your task:
 Generate 4-6 distinct candidate topics.

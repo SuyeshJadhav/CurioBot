@@ -1,18 +1,11 @@
 import { usePipeline } from '../../contexts/PipelineContext';
+import { usePreferences } from '../../contexts/UserPreferencesContext';
 
-const BROWSE_TOPICS = [
-  { label: 'Human behavior', class: 'tag-teal' },
-  { label: 'Science', class: 'tag-purple' },
-  { label: 'History', class: 'tag-amber' },
-  { label: 'How things work', class: 'tag-teal' },
-  { label: 'Food & culture', class: 'tag-purple' },
-  { label: 'Money & power', class: 'tag-amber' },
-];
+const TAG_CLASSES = ['tag-teal', 'tag-purple', 'tag-amber'];
 
 export function DiscoverCanvas() {
-  const {
-    igniteQuest,
-  } = usePipeline();
+  const { igniteQuest } = usePipeline();
+  const { interests } = usePreferences();
 
   return (
     <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
@@ -54,17 +47,17 @@ export function DiscoverCanvas() {
 
       <hr className="divider" />
 
-      {/* Browse Topics */}
+      {/* Browse Topics — uses the user's actual interests */}
       <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        Browse by topic
+        Your interests
       </p>
       
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        {BROWSE_TOPICS.map((topic) => (
+        {interests.map((interest, i) => (
           <span 
-            key={topic.label}
-            className={`tag ${topic.class}`}
-            onClick={() => igniteQuest(topic.label)}
+            key={interest}
+            className={`tag ${TAG_CLASSES[i % TAG_CLASSES.length]}`}
+            onClick={() => igniteQuest(interest)}
             style={{ 
               cursor: 'pointer', 
               padding: '6px 14px', 
@@ -72,7 +65,8 @@ export function DiscoverCanvas() {
               borderRadius: '16px',
               border: '0.5px solid var(--color-border-tertiary)',
               transition: 'transform 0.15s, opacity 0.15s',
-              marginTop: '4px'
+              marginTop: '4px',
+              textTransform: 'capitalize',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-1.5px)';
@@ -83,7 +77,7 @@ export function DiscoverCanvas() {
               e.currentTarget.style.opacity = '1';
             }}
           >
-            {topic.label}
+            {interest}
           </span>
         ))}
       </div>

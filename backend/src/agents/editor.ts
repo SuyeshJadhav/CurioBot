@@ -50,6 +50,7 @@ Priority Guidelines (If narrative quality conflicts with factual accuracy, factu
    - Ensure paragraph lengths are brief and readable (no paragraph should exceed 3-4 sentences; break up dense blocks of text).
    - Ensure the first mention of core technical terms, dates, or key definitions is formatted in bold (**text**).
    - Check that markdown formatting is clean, aligned, and properly uses bullet points (-), blockquotes (>), or tables (|) where suggested or appropriate.
+   - CRITICAL: Section headings (### ) must be clean and concise. Strip any "Section", "Section 1:", "Part", or numbering prefixes. Remove dashes (-), em-dashes (—), or colons (:) used as separators within headings. Headings should read like short, descriptive phrases (e.g., "### The Hidden Cost of Speed", not "### Section 1 - The Hidden Cost of Speed").
    - Verify that markdown tables are structured correctly with headers, separator rows, and aligned columns.
 7. Insight Integration & Synthesis Quality: Ensure that the insights from the Insight Brief are clearly explained and supported by evidence from the research. Ensure facts support the insights rather than dominating as a "fact dump". Check if facts are being mistaken for insights (an insight should reveal a larger principle or lesson, not just state what happened). Strengthen weak or shallow insights, eliminate redundant repetitions of insights, and remove or rewrite sections that merely restate facts without providing synthesis.
 

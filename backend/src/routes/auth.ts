@@ -3,6 +3,8 @@ import { hashPassword, verifyPassword, generateToken } from "../lib/auth";
 import supabase from "../lib/supabase";
 import { asyncHandler, authenticate } from "../middleware/auth";
 import { AppError } from "../lib/errors";
+import { getUserSettings, getArticleHistory, getSavedSketches, getLibraryCollections } from "../lib/db";
+import { getUserInterests } from "../lib/memory";
 
 const router = Router();
 
@@ -162,6 +164,47 @@ router.get(
     }
 
     res.json(user);
+  }),
+);
+
+/**
+ * @route   GET /api/auth/bootstrap
+ * @desc    Fetch all user session data in a single parallel request:
+ *          user profile, settings, interests, library, saved sketches, history
+ * @access  Private
+ */
+router.get(
+  "/bootstrap",
+  authenticate,
+  asyncHandler(async (req, res, next) => {
+    const userId = (req as any).userId;
+
+    const [userResult, settings, interests, library, saved, history] =
+      await Promise.all([
+        supabase
+          .from("users")
+          .select("id, email, username, token_balance")
+          .eq("id", userId)
+          .single(),
+        getUserSettings(userId),
+        getUserInterests(userId),
+        getLibraryCollections(userId),
+        getSavedSketches(userId),
+        getArticleHistory(userId),
+      ]);
+
+    if (userResult.error || !userResult.data) {
+      return next(new AppError(404, "User profile not found"));
+    }
+
+    res.json({
+      user: userResult.data,
+      settings,
+      interests,
+      library,
+      saved,
+      history,
+    });
   }),
 );
 

@@ -1,6 +1,20 @@
 import type { User } from '../types/curio';
 import { API_BASE, getHeaders, handleResponse } from './apiClient';
 
+export interface BootstrapData {
+  user: User;
+  settings: any;
+  interests: string[];
+  library: any[];
+  saved: any[];
+  history: any[];
+}
+
+export async function fetchBootstrap(): Promise<BootstrapData> {
+  const res = await fetch(`${API_BASE}/api/auth/bootstrap`, { method: 'GET', headers: getHeaders() });
+  return handleResponse<BootstrapData>(res, 'Failed to load session data');
+}
+
 export interface AuthResult {
   token: string;
   user: User;

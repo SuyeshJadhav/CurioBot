@@ -42,16 +42,24 @@ export function ArticleReaderCanvas() {
     h3: ({ children, ...props }: any) => {
       return (
         <h3 className="curio-pull-quote" {...props}>
-          <span className="curio-pull-quote-bar"></span>
           {children}
         </h3>
+      );
+    },
+    table: ({ children, ...props }: any) => {
+      return (
+        <div className="prose-curio-table-wrapper">
+          <table {...props}>
+            {children}
+          </table>
+        </div>
       );
     }
   };
 
   if (!article) {
     return (
-      <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+      <div className="article-reader-container">
         <div className="noise-overlay" />
 
         {/* Back button */}
@@ -81,7 +89,7 @@ export function ArticleReaderCanvas() {
   }
 
   return (
-    <div style={{ padding: '2.5rem 2rem', maxWidth: '740px', margin: '0 auto', position: 'relative' }}>
+    <div className="article-reader-container">
       <div className="noise-overlay" />
 
       {/* Back button */}
@@ -122,15 +130,12 @@ export function ArticleReaderCanvas() {
 
       {/* Article title */}
       {currentTopic && (
-        <h1 style={{
-          fontFamily: 'var(--font-headline)',
-          fontSize: '2rem',
-          fontWeight: 700,
-          color: 'var(--color-text-primary)',
-          lineHeight: 1.25,
-          marginBottom: (currentDomain || savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain) ? '0.4rem' : '1.5rem',
-          marginTop: 0,
-        }}>
+        <h1 
+          className="article-title" 
+          style={{
+            marginBottom: (currentDomain || savedSketches.find(s => s.article_id === currentArticleId)?.articles.domain) ? '0.4rem' : '1.5rem',
+          }}
+        >
           {currentTopic}
         </h1>
       )}

@@ -3,6 +3,7 @@
  *
  * The monolithic state has been split into focused domain contexts:
  *   AuthContext           → session, auth actions, activeTab, isMenuOpen
+ *   BootstrapContext      → single /api/auth/bootstrap fetch; seeds all other contexts
  *   UserPreferencesContext→ userSettings, interests
  *   PipelineContext       → article generation, history, active article
  *   LibraryContext        → sketches, collections, daily wonder
@@ -14,6 +15,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { ReactNode } from 'react';
 import { AuthProvider } from './AuthContext';
+import { BootstrapProvider } from './BootstrapContext';
 import { UserPreferencesProvider } from './UserPreferencesContext';
 import { PipelineProvider } from './PipelineContext';
 import { LibraryProvider } from './LibraryContext';
@@ -21,24 +23,30 @@ import { ChatProvider } from './ChatContext';
 
 // Re-export all domain hooks for convenience
 export { useAuth } from './AuthContext';
+export { useBootstrap } from './BootstrapContext';
 export { usePreferences } from './UserPreferencesContext';
 export { usePipeline } from './PipelineContext';
 export { useLibrary } from './LibraryContext';
 export { useChat } from './ChatContext';
 
-/** Top-level provider tree — nest order matters (Auth wraps everything). */
+/**
+ * Top-level provider tree — nest order matters:
+ *   Auth → Bootstrap (reads token from Auth, seeds user back) → child contexts
+ */
 export function CurioProvider({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <UserPreferencesProvider>
-        <PipelineProvider>
-          <LibraryProvider>
-            <ChatProvider>
-              {children}
-            </ChatProvider>
-          </LibraryProvider>
-        </PipelineProvider>
-      </UserPreferencesProvider>
+      <BootstrapProvider>
+        <UserPreferencesProvider>
+          <PipelineProvider>
+            <LibraryProvider>
+              <ChatProvider>
+                {children}
+              </ChatProvider>
+            </LibraryProvider>
+          </PipelineProvider>
+        </UserPreferencesProvider>
+      </BootstrapProvider>
     </AuthProvider>
   );
 }

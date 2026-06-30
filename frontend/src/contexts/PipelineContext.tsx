@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { HistoryEntry, Message } from '../types/curio';
 import { runCurioPipeline, fetchHistory, fetchArticleById, deleteArticle as apiDeleteArticle, clearActiveJobId } from '../actions/pipelineActions';
-import { useAuth } from './AuthContext';
+import { useBootstrap } from './BootstrapContext';
 import { usePreferences } from './UserPreferencesContext';
 
 import { useNavigate } from 'react-router-dom';
@@ -31,14 +31,14 @@ export interface PipelineContextType {
 
 const INIT_BOT_MSG: Message = {
   id: 'init-1', role: 'bot',
-  content: "Hello! I'm Curios — your curiosity guide. Tap the ✨ Ignite button to begin, or ask me anything!",
+  content: "Welcome to your reading companion. I can explain tricky concepts, dig deeper into any section, or help you connect ideas across topics. Just ask.",
   timestamp: new Date(),
 };
 
 const PipelineContext = createContext<PipelineContextType | null>(null);
 
 export function PipelineProvider({ children }: { children: ReactNode }) {
-  const { token } = useAuth();
+  const { bootstrap } = useBootstrap();
   const { interests } = usePreferences();
   const navigate = useNavigate();
 
@@ -65,7 +65,13 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     finally { setIsLoadingHistory(false); }
   }, []);
 
-  useEffect(() => { if (token) loadHistory(); }, [token, loadHistory]);
+  // Seed history from bootstrap payload — avoids individual fetch-on-mount
+  useEffect(() => {
+    if (!bootstrap?.history) return;
+    setHistory(
+      bootstrap.history.map((e: any) => ({ id: e.id, topic: e.title, createdAt: new Date(e.created_at) }))
+    );
+  }, [bootstrap]);
 
   const igniteQuest = useCallback(async (topic?: string | { title: string; domain?: string; summary?: string }, hint?: string) => {
     if (isGeneratingArticle) return;

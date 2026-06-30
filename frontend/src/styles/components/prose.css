@@ -308,3 +308,77 @@
   border-radius: 99px;
   display: inline-block;
 }
+
+/* ---- Responsive Article Container ---- */
+.article-reader-container {
+  padding: 2.5rem 2rem;
+  max-width: 740px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.article-title {
+  font-family: var(--font-headline);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.25;
+  margin-top: 0;
+}
+
+/* Always wrap tables in a scrollable wrapper */
+.prose-curio-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.8rem 0;
+  border-radius: 8px;
+  border: 1px solid var(--outline-variant, #E2E8F0);
+  background: var(--surface-container, #F8FAFC);
+}
+
+.prose-curio-table-wrapper table {
+  margin: 0 !important;
+}
+
+/* ---- Mobile Responsive Styles (max-width: 768px) ---- */
+@media (max-width: 768px) {
+  .article-reader-container {
+    padding: 1.5rem 1rem !important; /* reduce horizontal padding on mobile */
+  }
+
+  .article-title {
+    font-size: 1.75rem !important; /* shrink main title size */
+  }
+
+  .prose-curio {
+    font-size: 0.96rem !important; /* slightly smaller body text for mobile */
+    line-height: 1.7 !important; /* reduce line-height for mobile density */
+  }
+
+  .prose-curio h1 {
+    font-size: 1.6rem !important;
+  }
+
+  .prose-curio h2 {
+    font-size: 1.35rem !important;
+  }
+
+  .prose-curio h3, 
+  .curio-pull-quote {
+    font-size: 1.2rem !important; /* shrink section title sizes */
+    margin-top: 2rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+
+  .prose-curio table {
+    min-width: 500px; /* prevent column squishing on very narrow screens */
+    font-size: 0.85rem !important;
+  }
+  
+  .prose-curio th,
+  .prose-curio td {
+    padding: 0.5rem 0.6rem !important; /* tighter table padding */
+  }
+}
+

@@ -151,7 +151,7 @@ Requirements for the outline:
 7. CRITICAL: Every major section must teach or revolve around at least one specific "centralInsight" from the Insights Brief (if available).
 8. CRITICAL: Avoid creating sections that are only fact collections. Prefer explanation-driven sections over chronology-driven sections when appropriate, shaping section organization around insights.
 9. For each section, provide:
-   - A clear section heading
+   - A clear, concise section heading (e.g., "The Hidden Cost of Speed", "Why Coral Reefs Glow"). Do NOT prefix headings with "Section", "Section 1:", "Part", or any numbering. Do NOT use dashes (-), em-dashes (—), or colons (:) as separators within headings.
    - The purpose / goal of the section
    - The "centralInsight" this section teaches or explains
    - A list of specific key facts or points that must be covered in this section
@@ -169,7 +169,7 @@ Return ONLY a JSON object matching this schema:
   "hook": "An engaging hook for the introduction",
   "sections": [
     {
-      "heading": "Section Heading",
+      "heading": "A concise, descriptive heading without numbering, dashes, or the word Section",
       "purpose": "Detailed purpose/goal of the section",
       "centralInsight": "The specific central insight this section teaches/revolves around",
       "keyFacts": ["Fact 1 to include", "Fact 2 to include", ...],

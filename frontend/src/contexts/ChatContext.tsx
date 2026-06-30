@@ -15,7 +15,7 @@ export interface ChatContextType {
 
 const INIT_MSG: Message = {
   id: 'init-1', role: 'bot',
-  content: "Hello! I'm Curios — your curiosity guide. Tap the ✨ Ignite button to begin, or ask me anything!",
+  content: "Welcome to your reading companion. I can explain tricky concepts, dig deeper into any section, or help you connect ideas across topics. Just ask.",
   timestamp: new Date(),
 };
 

@@ -218,16 +218,17 @@ export function TutorSidebar() {
                 fontSize: '0.9rem',
                 color: 'var(--ink-wash)',
                 textAlign: 'center',
-                padding: '2rem 1rem',
+                padding: '2rem 1.25rem',
                 marginTop: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.75rem',
               }}
             >
-              <i className="ti ti-message" style={{ fontSize: '24px', color: 'var(--primary)' }} />
-              <span>Select or generate an article to ask questions.</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--primary)', fontVariationSettings: "'FILL' 1" }}>auto_stories</span>
+              <span style={{ fontFamily: 'var(--font-headline)', fontWeight: 600, fontSize: '0.95rem', color: 'var(--ink-charcoal)' }}>No article open</span>
+              <span style={{ lineHeight: 1.5 }}>Generate or open an article from your history to start a conversation here.</span>
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { User } from '../types/curio';
-import { loginUser, loginWithOAuthToken, registerUser, fetchCurrentUser } from '../actions/authActions';
+import { loginUser, loginWithOAuthToken, registerUser } from '../actions/authActions';
 
 export interface AuthContextType {
   user: User | null;
@@ -17,6 +17,7 @@ export interface AuthContextType {
   setMenuOpen: (open: boolean) => void;
   updateUser: (u: User) => void;
   setLoadingUserData: (v: boolean) => void;
+  setUser: (u: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -39,21 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       activeTab: 'home',
       isMenuOpen: false,
+      // Mark as loading if we have a token — BootstrapContext will clear this
       isLoadingUserData: !!token,
     };
   });
 
-  // Restore session from localStorage on mount
+  // Clear stale tokens on mount if the token is invalid
+  // (BootstrapContext will handle the actual /bootstrap fetch)
   useEffect(() => {
-    const storedToken = localStorage.getItem('curio_token');
-    if (!storedToken) return;
-    fetchCurrentUser()
-      .then((user) => setState((p) => ({ ...p, user, isLoadingUserData: false })))
-      .catch(() => {
-        localStorage.removeItem('curio_token');
-        setState((p) => ({ ...p, token: null, user: null, isLoadingUserData: false }));
-      });
-  }, []);
+    if (!state.token) {
+      setState((p) => ({ ...p, isLoadingUserData: false }));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (username: string, password: string) => {
     const result = await loginUser(username, password);
@@ -84,10 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setMenuOpen = useCallback((open: boolean) => setState((p) => ({ ...p, isMenuOpen: open })), []);
   const updateUser = useCallback((u: User) => setState((p) => ({ ...p, user: u })), []);
+  const setUser = useCallback((u: User | null) => setState((p) => ({ ...p, user: u })), []);
   const setLoadingUserData = useCallback((v: boolean) => setState((p) => ({ ...p, isLoadingUserData: v })), []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, loginWithOAuth, register, logout, changeTab, setMenuOpen, updateUser, setLoadingUserData }}>
+    <AuthContext.Provider value={{ ...state, login, loginWithOAuth, register, logout, changeTab, setMenuOpen, updateUser, setLoadingUserData, setUser }}>
       {children}
     </AuthContext.Provider>
   );
