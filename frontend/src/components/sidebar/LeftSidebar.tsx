@@ -203,11 +203,29 @@ export function LeftSidebar() {
           href="#"
           onClick={(e) => { e.preventDefault(); navigateTo('settings'); }}
           title="Settings"
-          style={{ marginBottom: '8px' }}
+          style={{ marginBottom: '4px' }}
         >
           <i className="ti ti-settings"></i>
           <span className="nav-label">Settings</span>
         </a>
+
+        {/* Admin Metrics Link (Only visible to admin users) */}
+        {(user?.role === 'admin' || import.meta.env.DEV) && (
+          <a 
+            className="nav-item"
+            href="/admin/metrics"
+            onClick={(e) => {
+              e.preventDefault();
+              setMenuOpen(false);
+              navigate('/admin/metrics');
+            }}
+            title="Admin Metrics"
+            style={{ marginBottom: '8px' }}
+          >
+            <i className="ti ti-activity"></i>
+            <span className="nav-label">Metrics</span>
+          </a>
+        )}
 
         {/* Token Balance with Progress Bar */}
         {user && (

@@ -13,6 +13,7 @@ import aiRouter from './src/routes/ai';
 import articlesRouter from './src/routes/articles';
 import libraryRouter from './src/routes/library';
 import settingsRouter from './src/routes/settings';
+import telemetryRouter from './src/routes/telemetry';
 
 // Initialize the BullMQ Worker process
 import './src/worker';
@@ -36,6 +37,7 @@ app.use(cors({
       callback(new Error('Blocked by CORS policy'));
     }
   },
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-telemetry-secret'],
   credentials: true
 }));
 
@@ -55,6 +57,7 @@ app.use('/api', aiRouter);
 app.use('/api', articlesRouter);
 app.use('/api', libraryRouter);
 app.use('/api', settingsRouter);
+app.use('/api/v1/internal', telemetryRouter);
 
 // Centralized Error Handling Middleware (must be registered last)
 app.use(errorHandler);

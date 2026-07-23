@@ -39,15 +39,15 @@ router.post(
     const passwordHash = hashPassword(password);
     const { data: newUser, error: insertError } = await supabase
       .from("users")
-      .insert({ email, username, password_hash: passwordHash })
-      .select("id, email, username, token_balance")
+      .insert({ email, username, password_hash: passwordHash, role: 'user' })
+      .select("id, email, username, role, token_balance")
       .single();
 
     if (insertError) {
       throw insertError;
     }
 
-    const token = generateToken(newUser.id);
+    const token = generateToken(newUser.id, newUser.role || 'user');
     res.json({ token, user: newUser });
   }),
 );
@@ -70,7 +70,7 @@ router.post(
     // Lookup by username or email
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, email, username, password_hash, token_balance")
+      .select("id, email, username, password_hash, role, token_balance")
       .or(`email.eq.${username},username.eq.${username}`)
       .maybeSingle();
 
@@ -79,13 +79,15 @@ router.post(
       return next(new AppError(400, "Invalid username/email or password"));
     }
 
-    const token = generateToken(user.id);
+    const userRole = user.role || 'user';
+    const token = generateToken(user.id, userRole);
     res.json({
       token,
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
+        role: userRole,
         token_balance: user.token_balance,
       },
     });
@@ -115,7 +117,7 @@ router.post(
     // Check if user exists in our custom users table
     let { data: existingUser } = await supabase
       .from("users")
-      .select("id, email, username, token_balance")
+      .select("id, email, username, role, token_balance")
       .eq("email", user.email)
       .maybeSingle();
 
@@ -129,16 +131,18 @@ router.post(
         .insert({ 
           email: user.email, 
           username: defaultUsername, 
-          password_hash: dummyHash 
+          password_hash: dummyHash,
+          role: 'user'
         })
-        .select("id, email, username, token_balance")
+        .select("id, email, username, role, token_balance")
         .single();
 
       if (insertError) throw insertError;
       existingUser = newUser;
     }
 
-    const token = generateToken(existingUser.id);
+    const userRole = existingUser.role || 'user';
+    const token = generateToken(existingUser.id, userRole);
     res.json({ token, user: existingUser });
   })
 );
@@ -155,7 +159,7 @@ router.get(
     const userId = (req as any).userId;
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, email, username, token_balance")
+      .select("id, email, username, role, token_balance")
       .eq("id", userId)
       .single();
 
@@ -183,7 +187,7 @@ router.get(
       await Promise.all([
         supabase
           .from("users")
-          .select("id, email, username, token_balance")
+          .select("id, email, username, role, token_balance")
           .eq("id", userId)
           .single(),
         getUserSettings(userId),

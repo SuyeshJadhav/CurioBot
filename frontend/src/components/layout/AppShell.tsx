@@ -19,6 +19,8 @@ import { SearchCanvas } from '../canvas/SearchCanvas';
 import { InterestsCanvas } from '../canvas/InterestsCanvas';
 import { OnboardingModal } from '../onboarding/OnboardingModal';
 import { IgniteCanvas } from '../canvas/IgniteCanvas';
+import { AdminMetricsCanvas } from '../canvas/AdminMetricsCanvas';
+import { AdminProtectedRoute } from '../auth/AdminProtectedRoute';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 export function AppShell() {
@@ -104,6 +106,14 @@ export function AppShell() {
             <Route path="/settings" element={<SettingsCanvas key={userSettings ? 'loaded' : 'loading'} />} />
             <Route path="/ignite" element={<IgniteCanvas />} />
             <Route path="/article/:id" element={<ArticleReaderCanvas />} />
+            <Route 
+              path="/admin/metrics" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminMetricsCanvas />
+                </AdminProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
 

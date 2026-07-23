@@ -35,18 +35,23 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 }
 
 /**
- * Generates a lightweight, secure token containing the userId.
+ * Generates a lightweight, secure token containing the userId and role.
  */
-export function generateToken(userId: string): string {
-  const payload = JSON.stringify({ userId, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }); // 7 days expiration
+export function generateToken(userId: string, role: string = 'user'): string {
+  const payload = JSON.stringify({ userId, role, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }); // 7 days expiration
   const signature = crypto.createHmac("sha256", JWT_SECRET).update(payload).digest("hex");
   return `${Buffer.from(payload).toString("base64")}.${signature}`;
 }
 
+export interface TokenPayload {
+  userId: string;
+  role: string;
+}
+
 /**
- * Verifies a token and extracts the userId if valid.
+ * Verifies a token and extracts payload if valid.
  */
-export function verifyToken(token: string): string | null {
+export function verifyTokenPayload(token: string): TokenPayload | null {
   try {
     const [payloadB64, signature] = token.split(".");
     if (!payloadB64 || !signature) return null;
@@ -58,8 +63,19 @@ export function verifyToken(token: string): string | null {
     const payload = JSON.parse(payloadStr);
     if (payload.exp < Date.now()) return null;
 
-    return payload.userId as string;
+    return {
+      userId: payload.userId as string,
+      role: (payload.role as string) || 'user',
+    };
   } catch {
     return null;
   }
+}
+
+/**
+ * Verifies a token and extracts the userId if valid.
+ */
+export function verifyToken(token: string): string | null {
+  const payload = verifyTokenPayload(token);
+  return payload ? payload.userId : null;
 }

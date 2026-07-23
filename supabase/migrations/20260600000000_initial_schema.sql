@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   email text UNIQUE NOT NULL,
   username text UNIQUE NOT NULL,
   password_hash text NOT NULL,
+  role text NOT NULL DEFAULT 'user',
   created_at timestamp with time zone DEFAULT now()
 );
 
