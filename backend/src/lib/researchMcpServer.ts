@@ -3,10 +3,11 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import wikiImport from "wikipedia";
 import { parse } from "node-html-parser";
+import { gotScraping } from 'got-scraping';
 
 // Resolve ESM/CommonJS default export wrapping mismatch
-const wiki = typeof (wikiImport as any).default === "function" 
-  ? (wikiImport as any).default 
+const wiki = typeof (wikiImport as any).default === "function"
+  ? (wikiImport as any).default
   : wikiImport;
 
 const server = new McpServer({
@@ -29,17 +30,16 @@ server.registerTool(
   },
   async ({ query, count }) => {
     try {
-      const { gotScraping } = await import("got-scraping");
       const response = await gotScraping({
         url: `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`,
         timeout: { request: 5000 },
         headerGeneratorOptions: {
-          browsers: ["chrome"],
+          browsers: [{ name: "chrome" }],
           devices: ["desktop"],
           operatingSystems: ["windows", "macos"],
         },
-      });
-
+      } as any);
+      
       const root = parse(response.body);
       const results: any[] = [];
       const resultElements = root.querySelectorAll(".result__body");
@@ -106,17 +106,16 @@ server.registerTool(
   },
   async ({ url }) => {
     try {
-      const { gotScraping } = await import("got-scraping");
       const response = await gotScraping({
         url,
         timeout: { request: 8000 },
         maxRedirects: 3,
         headerGeneratorOptions: {
-          browsers: ["chrome"],
+          browsers: [{ name: "chrome" }],
           devices: ["desktop"],
           operatingSystems: ["windows", "macos"],
         },
-      });
+      } as any);
 
       // Verify content-type to fail-fast on binary/PDF documents
       const contentType = response.headers["content-type"] || "";
