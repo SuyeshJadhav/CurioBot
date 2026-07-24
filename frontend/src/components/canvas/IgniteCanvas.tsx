@@ -11,16 +11,6 @@ export function IgniteCanvas() {
   } = usePipeline();
   const { savedSketches, toggleSaveArticle, libraryCollections, addArticleToCollection } = useLibrary();
 
-  // Loading state
-  if (isGeneratingArticle) {
-    return (
-      <IgniteLoading
-        currentTopic={currentTopic}
-        generationStatus={generationStatus}
-      />
-    );
-  }
-
   // Article state
   if (article) {
     return (
@@ -34,6 +24,16 @@ export function IgniteCanvas() {
         libraryCollections={libraryCollections}
         addArticleToCollection={addArticleToCollection}
         domain={currentDomain}
+      />
+    );
+  }
+
+  // Loading state
+  if (isGeneratingArticle) {
+    return (
+      <IgniteLoading
+        currentTopic={currentTopic}
+        generationStatus={generationStatus}
       />
     );
   }

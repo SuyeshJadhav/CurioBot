@@ -156,6 +156,7 @@ export const AgentState = Annotation.Root({
   topicEmbedding: Annotation<number[] | undefined>(),
   candidates: Annotation<TopicCandidate[] | undefined>(),
   signal: Annotation<AbortSignal | undefined>(),
+  onWriterWord: Annotation<((word: string) => void | Promise<void>) | undefined>(),
   hint: Annotation<string | undefined>(),
   research: Annotation<SearchResult[]>({
     reducer: (currentState, incomingState) => currentState.concat(incomingState),

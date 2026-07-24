@@ -69,6 +69,7 @@ export async function withAbort(promise: Promise<any>, signal?: AbortSignal): Pr
 export const ai = {
   models: {
     generateContent: (args: any) => withRetry(() => getAi().models.generateContent(args)),
+    generateContentStream: (args: any) => withRetry(() => getAi().models.generateContentStream(args)),
     embedContent: (args: any) => withRetry(() => getAi().models.embedContent(args)),
   },
   chats: {

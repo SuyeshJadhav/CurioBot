@@ -100,7 +100,20 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     try {
       const result = await runCurioPipeline(
         interests.length ? interests.slice(0, 15) : undefined,
-        (status, data) => { setGenerationStatus(status); if (status === 'researching' && data) { setCurrentTopic(data.title); setCurrentDomain(data.domain || data.category || null); } },
+        (status, data) => {
+          if (status === 'writing_word') {
+            const word = data?.word;
+            if (typeof word === 'string' && word.length > 0) {
+              setArticle((prev) => (prev ?? '') + word);
+            }
+            return;
+          }
+          setGenerationStatus(status);
+          if (status === 'researching' && data) {
+            setCurrentTopic(data.title);
+            setCurrentDomain(data.domain || data.category || null);
+          }
+        },
         hint,
         topicObj,
       );

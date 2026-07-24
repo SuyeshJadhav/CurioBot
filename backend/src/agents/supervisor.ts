@@ -216,7 +216,17 @@ export async function runSupervisorStream(
   onUpdate({ status: 'picking_topic' });
 
   const stream = await app.stream(
-    { interests, userId, userSettings: settings, signal, hint, requestedTopic: topic },
+    {
+      interests,
+      userId,
+      userSettings: settings,
+      signal,
+      hint,
+      requestedTopic: topic,
+      onWriterWord: async (word: string) => {
+        onUpdate({ status: 'writing_word', data: { word } });
+      }
+    },
     { streamMode: "updates" }
   );
 
