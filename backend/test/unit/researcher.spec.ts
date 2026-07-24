@@ -21,7 +21,7 @@ describe("researcherAgent", () => {
 
     const executeSpy = vi.spyOn(mcp, "executeResearchTool");
     executeSpy.mockResolvedValue({
-      rawResult: {},
+      rawResult: { content: [] } as any,
       text: JSON.stringify([{ title: "Result", url: "https://example.com/result", description: "snippet" }])
     });
 
@@ -62,7 +62,7 @@ describe("researcherAgent", () => {
       call++;
       if (call === 1) {
         return {
-          rawResult: {},
+          rawResult: { content: [] } as any,
           text: JSON.stringify([
             { title: "A", url: "https://a.test", description: "a" },
             { title: "B", url: "https://b.test", description: "b" }

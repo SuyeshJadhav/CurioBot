@@ -39,7 +39,7 @@ export async function initResearchMcp() {
       await researchMcp.connect(transport);
       const mcpTools = await researchMcp.listTools();
 
-      const geminiTools = mcpTools.tools.map((mcpTool) => ({
+      const geminiTools = mcpTools.tools.map((mcpTool: any) => ({
         name: mcpTool.name,
         description: mcpTool.description,
         parameters: {
