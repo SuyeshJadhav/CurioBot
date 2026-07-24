@@ -4,7 +4,7 @@ import { AgentStateType, NodeMetrics, WriterOutput } from "../types";
 async function emitTokenizedWords(
   textChunk: string,
   carry: string,
-  onWord?: (word: string) => void | Promise<void>
+  onWord?: (word: string) => void | Promise<void>,
 ): Promise<string> {
   if (!onWord || !textChunk) {
     return carry + textChunk;
@@ -57,18 +57,21 @@ async function generateContentStreamWithAbort(
               properties: {
                 title: { type: "string" },
                 domain: { type: "string" },
-                why: { type: "string" }
+                why: { type: "string" },
               },
-              required: ["title", "domain", "why"]
-            }
-          }
+              required: ["title", "domain", "why"],
+            },
+          },
         },
-        required: ["reasoning", "title", "article", "tldr", "rabbit_holes"]
-      }
-    }
+        required: ["reasoning", "title", "article", "tldr", "rabbit_holes"],
+      },
+    },
   };
 
-  const streamResult = await withAbort(ai.models.generateContentStream(request), signal);
+  const streamResult = await withAbort(
+    ai.models.generateContentStream(request),
+    signal,
+  );
   let rawText = "";
   let usageMetadata = streamResult?.usageMetadata;
   let carry = "";
@@ -97,7 +100,7 @@ async function generateContentStreamWithAbort(
 
   return {
     text: finalResponse?.text || rawText,
-    usageMetadata: finalResponse?.usageMetadata || usageMetadata
+    usageMetadata: finalResponse?.usageMetadata || usageMetadata,
   };
 }
 

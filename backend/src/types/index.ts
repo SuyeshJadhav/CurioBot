@@ -1,4 +1,4 @@
-import { Annotation } from '@langchain/langgraph'
+import { Annotation } from "@langchain/langgraph";
 
 export interface SearchResult {
   title: string;
@@ -148,23 +148,28 @@ export const AgentState = Annotation.Root({
   interests: Annotation<string[]>(),
   userSettings: Annotation<UserSettings | undefined>(),
   seenTopics: Annotation<string[]>({
-    reducer: (currentState, incomingState) => currentState.concat(incomingState),
-    default: () => []
+    reducer: (currentState, incomingState) =>
+      currentState.concat(incomingState),
+    default: () => [],
   }),
   requestedTopic: Annotation<Partial<Topic> | undefined>(),
   currentTopic: Annotation<Topic | undefined>(),
   topicEmbedding: Annotation<number[] | undefined>(),
   candidates: Annotation<TopicCandidate[] | undefined>(),
   signal: Annotation<AbortSignal | undefined>(),
-  onWriterWord: Annotation<((word: string) => void | Promise<void>) | undefined>(),
+  onWriterWord: Annotation<
+    ((word: string) => void | Promise<void>) | undefined
+  >(),
   hint: Annotation<string | undefined>(),
   research: Annotation<SearchResult[]>({
-    reducer: (currentState, incomingState) => currentState.concat(incomingState),
-    default: () => []
+    reducer: (currentState, incomingState) =>
+      currentState.concat(incomingState),
+    default: () => [],
   }),
   wikiResearch: Annotation<string[]>({
-    reducer: (currentState, incomingState) => currentState.concat(incomingState),
-    default: () => []
+    reducer: (currentState, incomingState) =>
+      currentState.concat(incomingState),
+    default: () => [],
   }),
   researchBrief: Annotation<ResearchBrief | undefined>(),
   insightBrief: Annotation<InsightBrief | undefined>(),
@@ -176,16 +181,18 @@ export const AgentState = Annotation.Root({
   researchSummary: Annotation<string | undefined>(),
   dedupPassed: Annotation<boolean | undefined>(),
   dedupAttempts: Annotation<number>({
-    reducer: (current, incoming) => (incoming ?? current ?? 0),
-    default: () => 0
+    reducer: (current, incoming) => incoming ?? current ?? 0,
+    default: () => 0,
   }),
   conversationHistory: Annotation<Message[]>({
-    reducer: (currentState, incomingState) => currentState.concat(incomingState),
-    default: () => []
+    reducer: (currentState, incomingState) =>
+      currentState.concat(incomingState),
+    default: () => [],
   }),
   nodeMetrics: Annotation<NodeMetrics[]>({
-    reducer: (currentState, incomingState) => currentState.concat(incomingState),
-    default: () => []
+    reducer: (currentState, incomingState) =>
+      currentState.concat(incomingState),
+    default: () => [],
   }),
   researchFactCount: Annotation<number | undefined>(),
   briefFactCount: Annotation<number | undefined>(),
@@ -193,7 +200,7 @@ export const AgentState = Annotation.Root({
   articleWordCount: Annotation<number | undefined>(),
   researchFactsUsed: Annotation<number | undefined>(),
   insightsGenerated: Annotation<number | undefined>(),
-  insightsUsed: Annotation<number | undefined>()
-})
+  insightsUsed: Annotation<number | undefined>(),
+});
 
-export type AgentStateType = typeof AgentState.State
+export type AgentStateType = typeof AgentState.State;
