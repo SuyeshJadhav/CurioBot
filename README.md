@@ -34,7 +34,7 @@ CurioBot doesn't just give you an article to read; it provides an **Interactive 
 - 🎯 **Curiosity Scoring System:** The Topic Picker generates 4–6 candidate topics, which are evaluated by a dedicated **Curiosity Scorer** agent on five axes: novelty, specificity, surprise, mechanism, and rabbit-hole potential. The highest-scoring candidate (with interest match, curiosity trigger word, and title-length bonuses) is selected.
 - 🔄 **Topic Deduplication:** An embedding-based similarity check matching newly picked topics against seen topics in Supabase. Too-similar topics are discarded and retried up to 3 times before using a fallback.
 - 📚 **Parallel Research (Web + Wiki MCP):** The Researcher agent queries the Tavily API while the Wiki Researcher queries Wikipedia via the Model Context Protocol (MCP) in parallel, featuring API query caching, timeouts, and cancellation.
-- ⚡ **BullMQ Queue + Realtime SSE Streaming:** Generation is offloaded to a persistent **BullMQ** worker (backed by Redis). The Express server emits SSE progress events via Redis Pub/Sub (`picking_topic`, `researching`, `writing_article`). Clients receive a `jobId` in the initial `queued` event and can reconnect seamlessly.
+- ⚡ **BullMQ Queue + Realtime SSE Streaming:** Generation is offloaded to a persistent **BullMQ** worker (backed by Redis). The Express server emits SSE progress events via Redis Pub/Sub (`picking_topic`, `researching`, `writing_article`). Clients receive a `jobId` in the initial `queued` event and can reconnect seamlessly. The writer now streams partial content progressively, so the article view updates as the draft is assembled instead of waiting for the entire response at once.
 - 🔌 **SSE Reconnection Guard:** Clients that disconnect transiently can reconnect within an 8-second grace period and replay all buffered events without re-triggering generation.
 - ⏳ **Timeout & Cancellation Protection:** Integrated `AbortController` and Redis Pub/Sub-based cancellation flows that cleanly terminate running tasks in the worker when a client disconnects or times out.
 - 💎 **Token Balance System:** Each user has a `token_balance` column (default 100,000 tokens). Tokens are deducted per run based on actual LLM token usage. Balances auto-refresh to 200,000 tokens every 24 hours. A `checkTokenBalance` middleware gate blocks generation if the balance reaches zero.
@@ -144,7 +144,7 @@ START
 4. **Researcher & Wiki Researcher:** Runs parallel web search (Tavily) and Wikipedia (MCP Server subprocess) tool-calling loops.
 5. **Research Brief Agent:** Aggregates raw research into a structured brief (core concepts, facts, controversies, hooks, narrative suggestions).
 6. **Outline Agent:** Designs a structured article layout with section headings, purposes, key facts, and transitions.
-7. **Writer:** Synthesizes the outline into a markdown article, TLDR, and adjacent rabbit holes.
+7. **Writer:** Synthesizes the outline into a markdown article, TLDR, and adjacent rabbit holes while streaming partial output progressively through the pipeline for a live, progressively rendered article experience.
 8. **Editor Agent:** Polishes style, removes AI clichés, fixes transitions, and verifies factual consistency.
 9. **Observability Agent:** Computes pipeline quality metrics (word count, fact counts, hook strength, etc.).
 10. **Database Sync:** Persists the generated topic embedding and article metadata to Supabase.
