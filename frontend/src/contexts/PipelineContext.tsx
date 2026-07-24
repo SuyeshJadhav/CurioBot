@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { parse } from 'best-effort-json-parser';
 import type { HistoryEntry, Message } from '../types/curio';
 import { runCurioPipeline, fetchHistory, fetchArticleById, deleteArticle as apiDeleteArticle, clearActiveJobId } from '../actions/pipelineActions';
 import { useBootstrap } from './BootstrapContext';
@@ -98,13 +99,29 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     setPipelineMessages([INIT_BOT_MSG]);
     navigate('/ignite');
     try {
+      let streamedJsonBuffer = '';
+
       const result = await runCurioPipeline(
         interests.length ? interests.slice(0, 15) : undefined,
         (status, data) => {
           if (status === 'writing_word') {
             const word = data?.word;
             if (typeof word === 'string' && word.length > 0) {
-              setArticle((prev) => (prev ?? '') + word);
+              streamedJsonBuffer += word;
+
+              try {
+                const parsed = parse(streamedJsonBuffer);
+                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                  if (typeof parsed.article === 'string' && parsed.article.length > 0) {
+                    setArticle(parsed.article);
+                  }
+                  if (typeof parsed.title === 'string' && parsed.title.length > 0) {
+                    setCurrentTopic(parsed.title);
+                  }
+                }
+              } catch {
+                // Ignore partial/incomplete JSON while the stream is still forming.
+              }
             }
             return;
           }
